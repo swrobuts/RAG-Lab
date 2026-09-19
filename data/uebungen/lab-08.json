@@ -1,93 +1,421 @@
 [
-  {
-    "id": "R08-01", "typ": "experiment", "werkzeug": "metrik", "parameter": { "variante": "vektor" },
-    "titel": { "de": "Vier Zahlen selbst rechnen", "en": "Compute four numbers yourself" },
-    "aufgabe": { "de": "<p>Die Tabelle zeigt für die Variante „Vektor allein“ je Frage den Rang des ersten Treffers und die gefundenen Stichwörter. Berechnen Sie Hit@5, Hit@1, MRR und Abdeckung, tragen Sie sie ein und drücken Sie „Prüfen“. Erst danach „Aufdecken“. Wiederholen Sie das für „Hybrid mit Reranker“.</p>", "en": "<p>For the variant “vector only”, the table shows per question the rank of the first hit and the keywords found. Compute hit@5, hit@1, MRR and coverage, enter them and press “Check”. Only then “Reveal”. Repeat for “hybrid with reranker”.</p>" },
-    "fragen": [
-      { "frage": { "de": "Welche beiden Fragen finden bei „Vektor allein“ kein erwartetes Stichwort in den ersten fünf Kandidaten?", "en": "Which two questions find no expected keyword among the first five candidates with “vector only”?" },
-        "optionen": [ { "de": "Die Frage nach E:18 und die Frage nach fehlendem Wassereinlauf.", "en": "The question about E:18 and the question about missing water intake." }, { "de": "Die Frage nach der Kindersicherung und die nach der Trommelreinigung.", "en": "The question about the child lock and the one about drum cleaning." }, { "de": "Keine; alle zehn finden etwas.", "en": "None; all ten find something." } ], "richtig": [0],
-        "erklaerung": { "de": "E:18 ist eine seltene Zeichenfolge (Lab 05), und „Es läuft kein Wasser in die Maschine ein“ trifft erst mit dem Reranker die Zeile zum verstopften Sieb. Beide sind die 20 Prozent, die der Vektorsuche fehlen.", "en": "E:18 is a rare string (lab 05), and “Es läuft kein Wasser in die Maschine ein” only hits the row about the blocked strainer with the reranker. Both are the 20 percent that vector search lacks." } },
-      { "frage": { "de": "Was misst Hit@1 im Unterschied zu Hit@5?", "en": "What does hit@1 measure as opposed to hit@5?" },
-        "optionen": [ { "de": "Ob schon der erste Kandidat ein erwartetes Stichwort enthält; Hit@5 ist zufrieden, wenn einer der ersten fünf es tut.", "en": "Whether already the first candidate contains an expected keyword; hit@5 is satisfied if one of the first five does." }, { "de": "Ob genau ein Stichwort gefunden wurde.", "en": "Whether exactly one keyword was found." }, { "de": "Ob die Antwort einen Satz lang ist.", "en": "Whether the answer is one sentence long." } ], "richtig": [0],
-        "erklaerung": { "de": "Hit@1 ist streng und für das Fallbeispiel wichtig: Der relative Boden (Lab 06) hängt am besten Kandidaten. Steht der falsche vorn, bestimmt er den Boden.", "en": "Hit@1 is strict and matters for the case study: the relative floor (lab 06) hangs on the best candidate. If the wrong one is in front, it sets the floor." } }
-    ],
-    "rueckmeldung": { "de": "Wer die vier Zahlen einmal von Hand gerechnet hat, liest jede Ablationstabelle anders.", "en": "Whoever has computed the four numbers by hand once reads every ablation table differently." }
+ {
+  "id": "R08-01",
+  "typ": "experiment",
+  "werkzeug": "metrik",
+  "parameter": {
+   "variante": "vektor"
   },
-  {
-    "id": "R08-02", "typ": "rechnen",
-    "titel": { "de": "MRR aus fünf Rängen", "en": "MRR from five ranks" },
-    "aufgabe": { "de": "<p>Fünf Fragen, erster Treffer auf Rang 1, 2, 1, keiner, 3. Berechnen Sie MRR, Hit@5 und Hit@1 (als Dezimalzahl).</p>", "en": "<p>Five questions, first hit at rank 1, 2, 1, none, 3. Compute MRR, hit@5 and hit@1 (as decimals).</p>" },
-    "felder": [
-      { "name": { "de": "MRR", "en": "MRR" }, "loesung": 0.5667, "toleranz": 0.002, "einheit": "" },
-      { "name": { "de": "Hit@5", "en": "Hit@5" }, "loesung": 0.8, "toleranz": 0.001, "einheit": "" },
-      { "name": { "de": "Hit@1", "en": "Hit@1" }, "loesung": 0.4, "toleranz": 0.001, "einheit": "" }
-    ],
-    "loesungsweg": { "de": "Kehrwerte der Ränge: 1, 1/2, 1, 0, 1/3. Summe 2,833, geteilt durch 5 Fragen: MRR = 0,567. Vier von fünf Fragen haben einen Treffer: Hit@5 = 0,8. Zwei stehen auf Rang 1: Hit@1 = 0,4. Ein verfehlter Treffer zählt in der MRR als 0, nicht als kleiner Wert; deshalb drückt eine einzige Fehlsuche den Mittelwert stark.", "en": "Reciprocals of the ranks: 1, 1/2, 1, 0, 1/3. Sum 2.833, divided by 5 questions: MRR = 0.567. Four of five questions have a hit: hit@5 = 0.8. Two are at rank 1: hit@1 = 0.4. A missed hit counts as 0 in the MRR, not as a small value; hence a single failed search pulls the mean down strongly." },
-    "hinweis": { "de": "MRR = Mittelwert von 1 ÷ Rang, wobei „kein Treffer“ 0 beiträgt.", "en": "MRR = mean of 1 ÷ rank, where “no hit” contributes 0." },
-    "rueckmeldung": { "de": "MRR belohnt frühe Treffer und bestraft Fehlsuchen; deshalb steht sie neben der Trefferquote.", "en": "MRR rewards early hits and punishes failed searches; that is why it stands next to the hit rate." }
+  "titel": {
+   "de": "Vier Zahlen selbst rechnen",
+   "en": "Compute four numbers yourself"
   },
-  {
-    "id": "R08-03", "typ": "experiment", "werkzeug": "schwelle", "parameter": { "schwelle": 0.15 },
-    "titel": { "de": "Die Schwelle verschieben", "en": "Moving the threshold" },
-    "aufgabe": { "de": "<p>Der Regler steht auf 0,15, dem Wert des Fallbeispiels. Lesen Sie die Zähler. Schieben Sie die Schwelle auf 0,10, dann auf 0,05, dann auf 0,02, und beobachten Sie, welche Punkte die Farbe wechseln.</p>", "en": "<p>The slider is at 0.15, the case study's value. Read the counters. Move the threshold to 0.10, then to 0.05, then to 0.02, and watch which points change colour.</p>" },
-    "fragen": [
-      { "frage": { "de": "Bei 0,15 wird eine der zehn Handbuchfragen abgelehnt. Welche, und mit welchem Score?", "en": "At 0.15 one of the ten manual questions is rejected. Which one, and with which score?" },
-        "optionen": [ { "de": "„Es läuft kein Wasser in die Maschine ein“ mit 0,119: Der Reranker findet zwar die richtige Zeile (Sieb verstopft), traut ihr aber wenig.", "en": "“Es läuft kein Wasser in die Maschine ein” at 0.119: the reranker does find the right row (strainer blocked) but has little trust in it." }, { "de": "„Was bedeutet E:18?“ mit 0,562.", "en": "“Was bedeutet E:18?” at 0.562." }, { "de": "Keine; alle zehn liegen über 0,15.", "en": "None; all ten lie above 0.15." } ], "richtig": [0],
-        "erklaerung": { "de": "Die Retrieval-Messung zählt diese Frage als Treffer (Rang 1), der Guardrail lehnt sie trotzdem ab: Die Evaluation misst vor der Schwelle. Das ist der Preis der Sicherheit, eine falsche Ablehnung.", "en": "The retrieval measurement counts this question as a hit (rank 1), yet the guardrail rejects it: the evaluation measures before the threshold. That is the price of safety, a false rejection." } },
-      { "frage": { "de": "Bei 0,05 werden alle zehn Handbuchfragen angenommen. Wie viele Fremdfragen werden dann ebenfalls angenommen?", "en": "At 0.05 all ten manual questions are accepted. How many off-topic questions are then accepted as well?" },
-        "optionen": [ { "de": "Keine: Die höchste Fremdfrage (Bosch-Spülmaschine) hat 0,0274. Zwischen 0,0274 und 0,119 liegt ein Fenster, in dem alle 14 Fälle richtig behandelt werden.", "en": "None: the highest off-topic question (Bosch dishwasher) has 0.0274. Between 0.0274 and 0.119 lies a window in which all 14 cases are handled correctly." }, { "de": "Alle vier.", "en": "All four." }, { "de": "Zwei.", "en": "Two." } ], "richtig": [0],
-        "erklaerung": { "de": "Warum steht die Schwelle trotzdem auf 0,15? Weil 14 Fälle wenig sind. Das Fenster kann bei der nächsten Fremdfrage verschwinden; der Prüfbericht nennt vier Negativbeispiele „keine allgemeine Garantie“, und der Code nennt die Schwelle einen Projektparameter, der einen größeren Testbestand braucht.", "en": "Why is the threshold still at 0.15? Because 14 cases are few. The window may disappear with the next off-topic question; the audit report calls four negative examples “no general guarantee”, and the code calls the threshold a project parameter that needs a larger test set." } }
-    ],
-    "rueckmeldung": { "de": "Eine Schwelle ist eine Abwägung zwischen falscher Ablehnung und Halluzinationsrisiko. Sie wird an Daten eingestellt und mit neuen Daten überprüft.", "en": "A threshold is a trade-off between false rejection and hallucination risk. It is set on data and re-checked with new data." }
+  "aufgabe": {
+   "de": "<p>Für die Variante „Vektor allein“ stehen in der Tabelle je Frage der Rang des ersten Treffers und die gefundenen Stichwörter. Berechnen Sie daraus Hit@5, Hit@1, MRR und Abdeckung, tragen Sie sie ein und drücken Sie „Prüfen“. Erst danach „Aufdecken“. Wiederholen Sie das für „Hybrid mit Reranker“.</p>",
+   "en": "<p>For the variant “vector only” the table lists per question the rank of the first hit and the keywords found. From these compute hit@5, hit@1, MRR and coverage, enter them and press “Check”. Only then “Reveal”. Repeat for “hybrid with reranker”.</p>"
   },
-  {
-    "id": "R08-04", "typ": "quiz",
-    "titel": { "de": "Was der Stichwort-Proxy nicht misst", "en": "What the keyword proxy does not measure" },
-    "aufgabe": { "de": "<p>Das Fallbeispiel misst Treffer als „mindestens ein erwartetes Stichwort steht im Kandidaten“. Welche Aussagen über die Grenzen dieses Maßes treffen zu?</p>", "en": "<p>The case study measures hits as “at least one expected keyword appears in the candidate”. Which statements about the limits of this measure are true?</p>" },
-    "fragen": [
-      { "frage": { "de": "Wählen Sie alle zutreffenden Aussagen.", "en": "Select all statements that apply." }, "mehrfach": true,
-        "optionen": [
-          { "de": "Es sagt nichts darüber, ob die generierte Antwort richtig oder vollständig ist; gemessen wird nur die Suche.", "en": "It says nothing about whether the generated answer is correct or complete; only retrieval is measured." },
-          { "de": "Ein Kandidat kann das Stichwort enthalten und trotzdem die falsche Stelle sein (etwa das Inhaltsverzeichnis mit dem Wort „Laugenpumpe“).", "en": "A candidate can contain the keyword and still be the wrong place (such as the table of contents with the word “Laugenpumpe”)." },
-          { "de": "Zehn Fragen sind zu wenige, um Unterschiede von zehn Prozentpunkten sicher zu deuten; eine Frage ist zehn Prozentpunkte.", "en": "Ten questions are too few to interpret differences of ten percentage points safely; one question is ten percentage points." },
-          { "de": "Das Maß ist wertlos und sollte nicht berichtet werden.", "en": "The measure is worthless and should not be reported." }
-        ], "richtig": [0, 1, 2],
-        "erklaerung": { "de": "Das Protokoll des Fallbeispiels sagt es selbst im Feld metric_note: „Keyword-based retrieval proxy, not answer correctness or judged document recall.“ Ein billiger Proxy, der bei jeder Änderung in Sekunden läuft, ist wertvoll, solange man weiß, was er nicht misst.", "en": "The case study's log says so itself in the field metric_note: “Keyword-based retrieval proxy, not answer correctness or judged document recall.” A cheap proxy that runs in seconds after every change is valuable as long as you know what it does not measure." } }
+  "fragen": [
+   {
+    "frage": {
+     "de": "Welche beiden Fragen finden bei „Vektor allein“ kein erwartetes Stichwort in den ersten fünf Kandidaten?",
+     "en": "Which two questions find no expected keyword among the first five candidates with “vector only”?"
+    },
+    "optionen": [
+     {
+      "de": "Die Frage nach E:18 und die Frage nach fehlendem Wassereinlauf.",
+      "en": "The question about E:18 and the question about missing water intake."
+     },
+     {
+      "de": "Die Frage nach der Kindersicherung und die nach der Trommelreinigung.",
+      "en": "The question about the child lock and the one about drum cleaning."
+     },
+     {
+      "de": "Keine; alle zehn finden etwas.",
+      "en": "None; all ten find something."
+     }
     ],
-    "rueckmeldung": { "de": "Jedes Maß hat einen Zweck und eine Grenze. Beides gehört in den Bericht, so wie im Fallbeispiel.", "en": "Every measure has a purpose and a limit. Both belong in the report, as in the case study." }
-  },
-  {
-    "id": "R08-05", "typ": "zuordnen",
-    "titel": { "de": "Die vier RAGAS-Maße", "en": "The four RAGAS measures" },
-    "aufgabe": { "de": "<p>RAGAS (Es et al. 2023) bewertet RAG-Antworten ohne handannotierte Musterantworten, mit einem Sprachmodell als Richter. Ordnen Sie jede Beschreibung dem Maß zu.</p>", "en": "<p>RAGAS (Es et al. 2023) evaluates RAG answers without hand-annotated reference answers, using a language model as judge. Assign every description to the measure.</p>" },
-    "kategorien": [
-      { "id": "faith", "name": { "de": "Faithfulness", "en": "Faithfulness" } },
-      { "id": "relev", "name": { "de": "Answer Relevance", "en": "Answer relevance" } },
-      { "id": "cprec", "name": { "de": "Context Precision", "en": "Context precision" } },
-      { "id": "crec", "name": { "de": "Context Recall", "en": "Context recall" } }
+    "richtig": [
+     0
     ],
-    "elemente": [
-      { "text": { "de": "Sind alle Behauptungen der Antwort durch den übergebenen Kontext gedeckt? (Übung R07-02 von Hand)", "en": "Are all claims of the answer covered by the passed context? (exercise R07-02 by hand)" }, "ziel": "faith" },
-      { "text": { "de": "Beantwortet die Antwort die gestellte Frage, ohne abzuschweifen oder Wichtiges auszulassen?", "en": "Does the answer address the question asked, without digressing or leaving out essentials?" }, "ziel": "relev" },
-      { "text": { "de": "Sind die gefundenen Passagen relevant, und stehen die relevanten oben?", "en": "Are the retrieved passages relevant, and are the relevant ones at the top?" }, "ziel": "cprec" },
-      { "text": { "de": "Wurden alle Passagen gefunden, die für eine vollständige Antwort nötig wären?", "en": "Were all passages found that a complete answer would need?" }, "ziel": "crec" },
-      { "text": { "de": "Bricht ein, wenn das Modell Schutzhandschuhe empfiehlt, die im Handbuch nicht stehen", "en": "Drops when the model recommends protective gloves that are not in the manual" }, "ziel": "faith" },
-      { "text": { "de": "Bricht ein, wenn nur eine der beiden Ursachen von E:18 im Kontext steht", "en": "Drops when only one of the two causes of E:18 is in the context" }, "ziel": "crec" }
+    "erklaerung": {
+     "de": "E:18 ist eine seltene Zeichenfolge (Lab 05), und „Es läuft kein Wasser in die Maschine ein“ trifft erst mit dem Reranker die Zeile zum verstopften Sieb. Beide sind die 20 Prozent, die der Vektorsuche fehlen.",
+     "en": "E:18 is a rare string (lab 05), and “Es läuft kein Wasser in die Maschine ein” only hits the row about the blocked strainer with the reranker. Both are the 20 percent that vector search lacks."
+    }
+   },
+   {
+    "frage": {
+     "de": "Was misst Hit@1 im Unterschied zu Hit@5?",
+     "en": "What does hit@1 measure as opposed to hit@5?"
+    },
+    "optionen": [
+     {
+      "de": "Ob schon der erste Kandidat ein erwartetes Stichwort enthält; Hit@5 ist zufrieden, wenn einer der ersten fünf es tut.",
+      "en": "Whether already the first candidate contains an expected keyword; hit@5 is satisfied if one of the first five does."
+     },
+     {
+      "de": "Ob genau ein Stichwort gefunden wurde.",
+      "en": "Whether exactly one keyword was found."
+     },
+     {
+      "de": "Ob die Antwort einen Satz lang ist.",
+      "en": "Whether the answer is one sentence long."
+     }
     ],
-    "rueckmeldung": { "de": "Zwei Maße für die Suche, zwei für die Antwort. Das Fallbeispiel misst bisher nur die Suche und sagt das.", "en": "Two measures for retrieval, two for the answer. The case study so far measures only retrieval and says so." }
-  },
-  {
-    "id": "R08-06", "typ": "quiz",
-    "titel": { "de": "Die Ablation lesen", "en": "Reading the ablation" },
-    "aufgabe": { "de": "<p>Vektor allein: 80 % Hit@5, 64,5 % Abdeckung. Hybrid: 90 % und 82,0 %. Mit Reranker: 100 % und 93,5 %. Welche Komponente hat welcher Frage geholfen?</p>", "en": "<p>Vector only: 80 % hit@5, 64.5 % coverage. Hybrid: 90 % and 82.0 %. With reranker: 100 % and 93.5 %. Which component helped which question?</p>" },
-    "fragen": [
-      { "frage": { "de": "Welche Komponente hebt die Frage nach E:18 von 0 auf 100 Prozent Abdeckung?", "en": "Which component lifts the E:18 question from 0 to 100 percent coverage?" },
-        "optionen": [ { "de": "Der Fehlercode-Zuschlag der Hybridstufe: Die Vektorsuche hatte den Chunk nicht, die Regex liefert ihn exakt.", "en": "The error-code boost of the hybrid stage: vector search did not have the chunk, the regex delivers it exactly." }, { "de": "Der Reranker, weil er den Chunk aus den zwölf Kandidaten hochzieht.", "en": "The reranker, because it pulls the chunk up from the twelve candidates." }, { "de": "Ein größeres Embedding-Modell.", "en": "A larger embedding model." } ], "richtig": [0],
-        "erklaerung": { "de": "Im Protokoll „Hybrid ohne Reranker“ hat fehler-e18 bereits Abdeckung 1,0 und Rang 1; der Reranker ändert daran nichts mehr.", "en": "In the log “hybrid without reranker”, fehler-e18 already has coverage 1.0 and rank 1; the reranker changes nothing more." } },
-      { "frage": { "de": "Welche Komponente hebt „Wasser läuft unter meiner Waschmaschine aus“ von Rang 2 auf Rang 1 und die Abdeckung von 20 auf 60 Prozent?", "en": "Which component lifts “Wasser läuft unter meiner Waschmaschine aus” from rank 2 to rank 1 and coverage from 20 to 60 percent?" },
-        "optionen": [ { "de": "Der Reranker: Er stellt die Störungszeile „Wasser läuft aus.“ mit Ablaufschlauch und Verschraubung nach vorn, die in Vektor- und Hybridstufe auf Rang 2 stand.", "en": "The reranker: it puts the fault row “Wasser läuft aus.” with drain hose and screw connection in front, which stood at rank 2 in the vector and hybrid stages." }, { "de": "Der Fehlercode-Zuschlag.", "en": "The error-code boost." }, { "de": "Die Tabellen-Explosion aus Lab 04.", "en": "The table explosion from lab 04." } ], "richtig": [0],
-        "erklaerung": { "de": "Die Frage enthält keinen Fehlercode, der Zuschlag greift nicht. Der Cross-Encoder liest Frage und Zeile zusammen und erkennt die Übereinstimmung, die der Kosinus nur auf Rang 2 sah.", "en": "The question contains no error code, the boost does not apply. The cross-encoder reads question and row together and recognises the match that the cosine only saw at rank 2." } }
+    "richtig": [
+     0
     ],
-    "rueckmeldung": { "de": "Ablation heißt: eine Komponente weglassen und messen, was fehlt. Das ist die einzige Art, den Beitrag einer Komponente zu kennen.", "en": "Ablation means: leave one component out and measure what is missing. That is the only way to know a component's contribution." }
+    "erklaerung": {
+     "de": "Hit@1 ist streng und für das Fallbeispiel wichtig: Der relative Boden (Lab 06) hängt am besten Kandidaten. Steht der falsche vorn, bestimmt er den Boden.",
+     "en": "Hit@1 is strict and matters for the case study: the relative floor (lab 06) hangs on the best candidate. If the wrong one is in front, it sets the floor."
+    }
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Wer die vier Zahlen einmal von Hand gerechnet hat, liest jede Ablationstabelle anders.",
+   "en": "Whoever has computed the four numbers by hand once reads every ablation table differently."
   }
+ },
+ {
+  "id": "R08-02",
+  "typ": "rechnen",
+  "titel": {
+   "de": "MRR aus fünf Rängen",
+   "en": "MRR from five ranks"
+  },
+  "aufgabe": {
+   "de": "<p>Fünf Fragen, erster Treffer auf Rang 1, 2, 1, keiner, 3. Berechnen Sie MRR, Hit@5 und Hit@1 (als Dezimalzahl).</p>",
+   "en": "<p>Five questions, first hit at rank 1, 2, 1, none, 3. Compute MRR, hit@5 and hit@1 (as decimals).</p>"
+  },
+  "felder": [
+   {
+    "name": {
+     "de": "MRR",
+     "en": "MRR"
+    },
+    "loesung": 0.5667,
+    "toleranz": 0.002,
+    "einheit": ""
+   },
+   {
+    "name": {
+     "de": "Hit@5",
+     "en": "Hit@5"
+    },
+    "loesung": 0.8,
+    "toleranz": 0.001,
+    "einheit": ""
+   },
+   {
+    "name": {
+     "de": "Hit@1",
+     "en": "Hit@1"
+    },
+    "loesung": 0.4,
+    "toleranz": 0.001,
+    "einheit": ""
+   }
+  ],
+  "loesungsweg": {
+   "de": "Kehrwerte der Ränge: 1, 1/2, 1, 0, 1/3. Summe 2,833, geteilt durch 5 Fragen: MRR = 0,567. Vier von fünf Fragen haben einen Treffer: Hit@5 = 0,8. Zwei stehen auf Rang 1: Hit@1 = 0,4. Ein verfehlter Treffer zählt in der MRR als 0, nicht als kleiner Wert; deshalb drückt eine einzige Fehlsuche den Mittelwert stark.",
+   "en": "Reciprocals of the ranks: 1, 1/2, 1, 0, 1/3. Sum 2.833, divided by 5 questions: MRR = 0.567. Four of five questions have a hit: hit@5 = 0.8. Two are at rank 1: hit@1 = 0.4. A missed hit counts as 0 in the MRR, not as a small value; hence a single failed search pulls the mean down strongly."
+  },
+  "hinweis": {
+   "de": "MRR = Mittelwert von 1 ÷ Rang, wobei „kein Treffer“ 0 beiträgt.",
+   "en": "MRR = mean of 1 ÷ rank, where “no hit” contributes 0."
+  },
+  "rueckmeldung": {
+   "de": "MRR belohnt frühe Treffer und bestraft Fehlsuchen; deshalb steht sie neben der Trefferquote.",
+   "en": "MRR rewards early hits and punishes failed searches; that is why it stands next to the hit rate."
+  }
+ },
+ {
+  "id": "R08-03",
+  "typ": "experiment",
+  "werkzeug": "schwelle",
+  "parameter": {
+   "schwelle": 0.15
+  },
+  "titel": {
+   "de": "Die Schwelle verschieben",
+   "en": "Moving the threshold"
+  },
+  "aufgabe": {
+   "de": "<p>Der Regler steht auf 0,15, dem Wert des Fallbeispiels. Lesen Sie die Zähler. Schieben Sie die Schwelle auf 0,10, dann auf 0,05, dann auf 0,02, und beobachten Sie, welche Punkte die Farbe wechseln.</p>",
+   "en": "<p>The slider is at 0.15, the case study's value. Read the counters. Move the threshold to 0.10, then to 0.05, then to 0.02, and watch which points change colour.</p>"
+  },
+  "fragen": [
+   {
+    "frage": {
+     "de": "Bei 0,15 wird eine der zehn Handbuchfragen abgelehnt. Welche, und mit welchem Score?",
+     "en": "At 0.15 one of the ten manual questions is rejected. Which one, and with which score?"
+    },
+    "optionen": [
+     {
+      "de": "„Es läuft kein Wasser in die Maschine ein“ mit 0,119: Der Reranker findet zwar die richtige Zeile (Sieb verstopft), traut ihr aber wenig.",
+      "en": "“Es läuft kein Wasser in die Maschine ein” at 0.119: the reranker does find the right row (strainer blocked) but has little trust in it."
+     },
+     {
+      "de": "„Was bedeutet E:18?“ mit 0,562.",
+      "en": "“Was bedeutet E:18?” at 0.562."
+     },
+     {
+      "de": "Keine; alle zehn liegen über 0,15.",
+      "en": "None; all ten lie above 0.15."
+     }
+    ],
+    "richtig": [
+     0
+    ],
+    "erklaerung": {
+     "de": "Die Retrieval-Messung zählt diese Frage als Treffer (Rang 1), der Guardrail lehnt sie trotzdem ab: Die Evaluation misst vor der Schwelle. Das ist der Preis der Sicherheit, eine falsche Ablehnung.",
+     "en": "The retrieval measurement counts this question as a hit (rank 1), yet the guardrail rejects it: the evaluation measures before the threshold. That is the price of safety, a false rejection."
+    }
+   },
+   {
+    "frage": {
+     "de": "Bei 0,05 werden alle zehn Handbuchfragen angenommen. Wie viele Fremdfragen werden dann ebenfalls angenommen?",
+     "en": "At 0.05 all ten manual questions are accepted. How many off-topic questions are then accepted as well?"
+    },
+    "optionen": [
+     {
+      "de": "Keine: Die höchste Fremdfrage (Bosch-Spülmaschine) hat 0,0274. Zwischen 0,0274 und 0,119 liegt ein Fenster, in dem alle 14 Fälle richtig behandelt werden.",
+      "en": "None: the highest off-topic question (Bosch dishwasher) has 0.0274. Between 0.0274 and 0.119 lies a window in which all 14 cases are handled correctly."
+     },
+     {
+      "de": "Alle vier.",
+      "en": "All four."
+     },
+     {
+      "de": "Zwei.",
+      "en": "Two."
+     }
+    ],
+    "richtig": [
+     0
+    ],
+    "erklaerung": {
+     "de": "Warum steht die Schwelle trotzdem auf 0,15? Weil 14 Fälle wenig sind. Das Fenster kann bei der nächsten Fremdfrage verschwinden; der Prüfbericht nennt vier Negativbeispiele „keine allgemeine Garantie“, und der Code nennt die Schwelle einen Projektparameter, der einen größeren Testbestand braucht.",
+     "en": "Why is the threshold still at 0.15? Because 14 cases are few. The window may disappear with the next off-topic question; the audit report calls four negative examples “no general guarantee”, and the code calls the threshold a project parameter that needs a larger test set."
+    }
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Eine Schwelle ist eine Abwägung zwischen falscher Ablehnung und Halluzinationsrisiko. Sie wird an Daten eingestellt und mit neuen Daten überprüft.",
+   "en": "A threshold is a trade-off between false rejection and hallucination risk. It is set on data and re-checked with new data."
+  }
+ },
+ {
+  "id": "R08-04",
+  "typ": "quiz",
+  "titel": {
+   "de": "Was der Stichwort-Proxy nicht misst",
+   "en": "What the keyword proxy does not measure"
+  },
+  "aufgabe": {
+   "de": "<p>Das Fallbeispiel misst Treffer als „mindestens ein erwartetes Stichwort steht im Kandidaten“. Welche Aussagen über die Grenzen dieses Maßes treffen zu?</p>",
+   "en": "<p>The case study measures hits as “at least one expected keyword appears in the candidate”. Which statements about the limits of this measure are true?</p>"
+  },
+  "fragen": [
+   {
+    "frage": {
+     "de": "Wählen Sie alle zutreffenden Aussagen.",
+     "en": "Select all statements that apply."
+    },
+    "mehrfach": true,
+    "optionen": [
+     {
+      "de": "Es sagt nichts darüber, ob die generierte Antwort richtig oder vollständig ist; gemessen wird nur die Suche.",
+      "en": "It says nothing about whether the generated answer is correct or complete; only retrieval is measured."
+     },
+     {
+      "de": "Ein Kandidat kann das Stichwort enthalten und trotzdem die falsche Stelle sein (etwa das Inhaltsverzeichnis mit dem Wort „Laugenpumpe“).",
+      "en": "A candidate can contain the keyword and still be the wrong place (such as the table of contents with the word “Laugenpumpe”)."
+     },
+     {
+      "de": "Zehn Fragen sind zu wenige, um Unterschiede von zehn Prozentpunkten sicher zu deuten; eine Frage ist zehn Prozentpunkte.",
+      "en": "Ten questions are too few to interpret differences of ten percentage points safely; one question is ten percentage points."
+     },
+     {
+      "de": "Das Maß ist wertlos und sollte nicht berichtet werden.",
+      "en": "The measure is worthless and should not be reported."
+     }
+    ],
+    "richtig": [
+     0,
+     1,
+     2
+    ],
+    "erklaerung": {
+     "de": "Das Protokoll des Fallbeispiels sagt es selbst im Feld metric_note: „Keyword-based retrieval proxy, not answer correctness or judged document recall.“ Ein billiger Proxy, der bei jeder Änderung in Sekunden läuft, ist wertvoll, solange man weiß, was er nicht misst.",
+     "en": "The case study's log says so itself in the field metric_note: “Keyword-based retrieval proxy, not answer correctness or judged document recall.” A cheap proxy that runs in seconds after every change is valuable as long as you know what it does not measure."
+    }
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Jedes Maß hat einen Zweck und eine Grenze. Beides gehört in den Bericht, so wie im Fallbeispiel.",
+   "en": "Every measure has a purpose and a limit. Both belong in the report, as in the case study."
+  }
+ },
+ {
+  "id": "R08-05",
+  "typ": "zuordnen",
+  "titel": {
+   "de": "Die vier RAGAS-Maße",
+   "en": "The four RAGAS measures"
+  },
+  "aufgabe": {
+   "de": "<p>RAGAS (Es et al. 2023) bewertet RAG-Antworten ohne handannotierte Musterantworten, mit einem Sprachmodell als Richter. Ordnen Sie jede Beschreibung dem Maß zu.</p>",
+   "en": "<p>RAGAS (Es et al. 2023) evaluates RAG answers without hand-annotated reference answers, using a language model as judge. Assign every description to the measure.</p>"
+  },
+  "kategorien": [
+   {
+    "id": "faith",
+    "name": {
+     "de": "Faithfulness",
+     "en": "Faithfulness"
+    }
+   },
+   {
+    "id": "relev",
+    "name": {
+     "de": "Answer Relevance",
+     "en": "Answer relevance"
+    }
+   },
+   {
+    "id": "cprec",
+    "name": {
+     "de": "Context Precision",
+     "en": "Context precision"
+    }
+   },
+   {
+    "id": "crec",
+    "name": {
+     "de": "Context Recall",
+     "en": "Context recall"
+    }
+   }
+  ],
+  "elemente": [
+   {
+    "text": {
+     "de": "Sind alle Behauptungen der Antwort durch den übergebenen Kontext gedeckt? (Übung R07-02 von Hand)",
+     "en": "Are all claims of the answer covered by the passed context? (exercise R07-02 by hand)"
+    },
+    "ziel": "faith"
+   },
+   {
+    "text": {
+     "de": "Beantwortet die Antwort die gestellte Frage, ohne abzuschweifen oder Wichtiges auszulassen?",
+     "en": "Does the answer address the question asked, without digressing or leaving out essentials?"
+    },
+    "ziel": "relev"
+   },
+   {
+    "text": {
+     "de": "Sind die gefundenen Passagen relevant, und stehen die relevanten oben?",
+     "en": "Are the retrieved passages relevant, and are the relevant ones at the top?"
+    },
+    "ziel": "cprec"
+   },
+   {
+    "text": {
+     "de": "Wurden alle Passagen gefunden, die für eine vollständige Antwort nötig wären?",
+     "en": "Were all passages found that a complete answer would need?"
+    },
+    "ziel": "crec"
+   },
+   {
+    "text": {
+     "de": "Bricht ein, wenn das Modell Schutzhandschuhe empfiehlt, die im Handbuch nicht stehen",
+     "en": "Drops when the model recommends protective gloves that are not in the manual"
+    },
+    "ziel": "faith"
+   },
+   {
+    "text": {
+     "de": "Bricht ein, wenn nur eine der beiden Ursachen von E:18 im Kontext steht",
+     "en": "Drops when only one of the two causes of E:18 is in the context"
+    },
+    "ziel": "crec"
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Zwei Maße für die Suche, zwei für die Antwort. Das Fallbeispiel misst bisher nur die Suche und sagt das.",
+   "en": "Two measures for retrieval, two for the answer. The case study so far measures only retrieval and says so."
+  }
+ },
+ {
+  "id": "R08-06",
+  "typ": "quiz",
+  "titel": {
+   "de": "Die Ablation lesen",
+   "en": "Reading the ablation"
+  },
+  "aufgabe": {
+   "de": "<p>Vektor allein: 80 % Hit@5, 64,5 % Abdeckung. Hybrid: 90 % und 82,0 %. Mit Reranker: 100 % und 93,5 %. Welche Komponente hat welcher Frage geholfen?</p>",
+   "en": "<p>Vector only: 80 % hit@5, 64.5 % coverage. Hybrid: 90 % and 82.0 %. With reranker: 100 % and 93.5 %. Which component helped which question?</p>"
+  },
+  "fragen": [
+   {
+    "frage": {
+     "de": "Welche Komponente hebt die Frage nach E:18 von 0 auf 100 Prozent Abdeckung?",
+     "en": "Which component lifts the E:18 question from 0 to 100 percent coverage?"
+    },
+    "optionen": [
+     {
+      "de": "Der Fehlercode-Zuschlag der Hybridstufe: Die Vektorsuche hatte den Chunk nicht, die Regex liefert ihn exakt.",
+      "en": "The error-code boost of the hybrid stage: vector search did not have the chunk, the regex delivers it exactly."
+     },
+     {
+      "de": "Der Reranker, weil er den Chunk aus den zwölf Kandidaten hochzieht.",
+      "en": "The reranker, because it pulls the chunk up from the twelve candidates."
+     },
+     {
+      "de": "Ein größeres Embedding-Modell.",
+      "en": "A larger embedding model."
+     }
+    ],
+    "richtig": [
+     0
+    ],
+    "erklaerung": {
+     "de": "Im Protokoll „Hybrid ohne Reranker“ hat fehler-e18 bereits Abdeckung 1,0 und Rang 1; der Reranker ändert daran nichts mehr.",
+     "en": "In the log “hybrid without reranker”, fehler-e18 already has coverage 1.0 and rank 1; the reranker changes nothing more."
+    }
+   },
+   {
+    "frage": {
+     "de": "Welche Komponente hebt „Wasser läuft unter meiner Waschmaschine aus“ von Rang 2 auf Rang 1 und die Abdeckung von 20 auf 60 Prozent?",
+     "en": "Which component lifts “Wasser läuft unter meiner Waschmaschine aus” from rank 2 to rank 1 and coverage from 20 to 60 percent?"
+    },
+    "optionen": [
+     {
+      "de": "Der Reranker: Er stellt die Störungszeile „Wasser läuft aus.“ mit Ablaufschlauch und Verschraubung nach vorn, die in Vektor- und Hybridstufe auf Rang 2 stand.",
+      "en": "The reranker: it puts the fault row “Wasser läuft aus.” with drain hose and screw connection in front, which stood at rank 2 in the vector and hybrid stages."
+     },
+     {
+      "de": "Der Fehlercode-Zuschlag.",
+      "en": "The error-code boost."
+     },
+     {
+      "de": "Die Tabellen-Explosion aus Lab 04.",
+      "en": "The table explosion from lab 04."
+     }
+    ],
+    "richtig": [
+     0
+    ],
+    "erklaerung": {
+     "de": "Die Frage enthält keinen Fehlercode, der Zuschlag greift nicht. Der Cross-Encoder liest Frage und Zeile zusammen und erkennt die Übereinstimmung, die der Kosinus nur auf Rang 2 sah.",
+     "en": "The question contains no error code, the boost does not apply. The cross-encoder reads question and row together and recognises the match that the cosine only saw at rank 2."
+    }
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Ablation heißt: eine Komponente weglassen und messen, was fehlt. Das ist die einzige Art, den Beitrag einer Komponente zu kennen.",
+   "en": "Ablation means: leave one component out and measure what is missing. That is the only way to know a component's contribution."
+  }
+ }
 ]
