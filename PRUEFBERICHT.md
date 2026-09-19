@@ -9,7 +9,7 @@ Lauf: `node tools/pruefung/texte.mjs` sammelt 1 632 Texte (821 DE, 811 EN) aus `
 dem ersten Absatz jedes Abschnitts, den Kästen, Bildunterschriften, Begriffskarten,
 Zusammenfassungen, allen Feldern der Übungsdateien und den Wörterbüchern der Werkzeuge; zwei
 Mustersuchen (Floskeln, Meta und Metaphern, je DE und EN) und ein Vergleich aller
-Einleitungstexte auf Wortgleichheit. Dazu wurden alle 110 Einleitungstexte einzeln gelesen und
+Einleitungstexte auf Wortgleichheit. Dazu wurden alle 87 deutschen Einleitungstexte einzeln gelesen und
 die Zahlwörter gegen die Seiten gezählt.
 
 Ergebnis: 14 Mustertreffer, davon 6 geändert und 8 als Ausnahme vermerkt; 0 doppelte
