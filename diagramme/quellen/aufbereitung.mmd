@@ -1,0 +1,8 @@
+flowchart TB
+  A["[[Gebrauchsanleitung als PDF|User manual as PDF]]<br/>48 [[Seiten, Layout mit Symbolschrift und Tabellen|pages, layout with symbol font and tables]]"] --> B["<b>Docling</b><br/>[[Layoutmodell (DocLayNet) + Tabellenmodell (TableFormer)|layout model (DocLayNet) + table model (TableFormer)]]"]
+  B --> C["[[Markdown je Seite mit Marker|Markdown per page with marker]]<br/><code>&lt;!-- pdf-page: 33 --&gt;</code>"]
+  C --> D{"[[Prüfung gegen das PDF:<br/>Tabellen, Warnhinweise, Symbole|Check against the PDF:<br/>tables, warnings, symbols]]"}
+  D -- "[[in Ordnung|fine]]" --> E["[[aktive Wissensdatei|active knowledge file]]<br/>siemens_wissen.md"]
+  D -- "[[Artefakte|artefacts]]" --> F["[[nachbessern oder<br/>kuratierte Gruppen (manual_context.py)|fix or<br/>curated groups (manual_context.py)]]"]
+  F --> E
+  E --> G["[[Fingerprint ändert sich → Index wird neu gebaut|fingerprint changes → index is rebuilt]]"]

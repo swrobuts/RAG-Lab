@@ -755,7 +755,7 @@ ul.checkliste li { border: 0; padding: 0.25rem 0; }
 .fuellstand { display: flex; height: 22px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg-soft); margin: 0.6rem 0; }
 .fuellstand i { display: block; height: 100%; }
 .seite img { width: 100%; border: 1px solid var(--line); border-radius: 6px; }
-.markdown { max-height: 560px; overflow: auto; white-space: pre-wrap; font-size: 0.78rem; }
+.markdown { max-height: 620px; overflow: auto; white-space: pre; font-size: 0.78rem; }
 .markdown mark { background: var(--signal-l); border-bottom: 2px solid var(--signal); cursor: pointer; }
 .chunk-liste { max-height: 560px; overflow: auto; }
 .chunk { border: 1px solid var(--line); border-radius: 6px; margin: 0.4rem 0; padding: 0.4rem 0.6rem; }

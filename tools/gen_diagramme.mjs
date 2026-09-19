@@ -30,7 +30,7 @@ for (const datei of readdirSync(QUELLEN).filter(f => f.endsWith('.mmd') && f.sta
     // Eindeutige IDs, damit mehrere Diagramme auf einer Seite (als <img>) sich nicht stoeren, und eine Beschreibung fuer Screenreader.
     let svg = readFileSync(aus, 'utf8').replace(/id="my-svg"/g, `id="svg-${name}-${lang}"`).replace(/#my-svg/g, `#svg-${name}-${lang}`)
     // Natuerliche Groesse aus der viewBox, damit das Bild im <img> nicht auf Spaltenbreite schrumpft, sondern in seiner Figur scrollt.
-    const vb = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg)
+    const vb = /<svg[^>]*viewBox="[\d.-]+ [\d.-]+ ([\d.]+) ([\d.]+)"/.exec(svg)
     if (vb) svg = svg.replace(/width="100%"/, `width="${Math.round(+vb[1])}" height="${Math.round(+vb[2])}"`)
     writeFileSync(aus, svg); n++
     console.log(`  ${name}-${lang}.svg`)

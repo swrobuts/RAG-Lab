@@ -28,6 +28,11 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#pdf"><span lang="de">Was ein PDF ist</span><span lang="en">What a PDF is</span></a>
+  <a class="sidebar-link" href="#docling"><span lang="de">Der Parser</span><span lang="en">The parser</span></a>
+  <a class="sidebar-link" href="#artefakte"><span lang="de">Seite 33 im Vergleich</span><span lang="en">Page 33 compared</span></a>
+  <a class="sidebar-link" href="#provenienz"><span lang="de">Provenienz</span><span lang="en">Provenance</span></a>
+  <a class="sidebar-link" href="#pruefen"><span lang="de">Prüfen vor Ersetzen</span><span lang="en">Check before replacing</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +45,107 @@
     <span lang="en">Preparing documents</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">Die Antwort auf <strong>E:18</strong> steht auf Seite 33 des Handbuchs, in einer Tabellenzeile zwischen einem Tastensymbol und einem Querverweis. Bevor eine Suche sie finden kann, muss aus dem PDF Text werden. Dieses Lab zeigt, was ein PDF speichert, wie der Parser Docling daraus Markdown mit Tabellen und Seitenmarkern macht, was dabei verloren geht – Symbole, Bilder, eine zerschossene Überschrift – und warum das Fallbeispiel eine neue Extraktion erst prüft, bevor es die aktive Wissensdatei ersetzt.</span>
+    <span lang="en">The answer to <strong>E:18</strong> sits on page 33 of the manual, in a table row between a button symbol and a cross reference. Before a search can find it, the PDF must become text. This lab shows what a PDF stores, how the parser Docling turns it into Markdown with tables and page markers, what gets lost on the way – symbols, pictures, a scrambled heading – and why the case study checks a new extraction before it replaces the active knowledge file.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip">PDF → Markdown</span>
+    <span class="lernziel-chip">Docling</span>
+    <span class="lernziel-chip"><span lang="de">Artefakte</span><span lang="en">Artefacts</span></span>
+    <span class="lernziel-chip"><span lang="de">Seitenmarker</span><span lang="en">Page markers</span></span>
+    <span class="lernziel-chip"><span lang="de">Provenienz</span><span lang="en">Provenance</span></span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="pdf">
+    <h2><span lang="de">Was ein PDF speichert</span><span lang="en">What a PDF stores</span></h2>
+    <p>
+      <span lang="de">Ein PDF ist eine Seitenbeschreibung, keine Textdatei. Die Norm ISO 32000 legt fest, wie Glyphen einer Schrift an Koordinaten gesetzt werden; Absätze, Spalten, Tabellen und Lesereihenfolge kennt das Format nicht. Ein Parser muss sie aus den Positionen zurückgewinnen. Wo das Layout ungewöhnlich ist, geht das schief: Die Kapitelüberschrift „Störungen, was tun?“ steht im Handbuch als gestaltete Marke, und der erste Parserlauf las ihre Buchstaben in der Reihenfolge der Objekte: „S t r ö n u , e g w a . ? s“. Symbole aus einer Symbolschrift kommen als die Buchstaben an, die an ihrer Stelle im Zeichensatz stehen; Bilder werden zu <code>&lt;!-- image --&gt;</code>.</span>
+      <span lang="en">A PDF is a page description, not a text file. The ISO 32000 standard defines how glyphs of a font are placed at coordinates; paragraphs, columns, tables and reading order are unknown to the format. A parser has to recover them from the positions. Where the layout is unusual, this goes wrong: the chapter heading “Störungen, was tun?” appears in the manual as a designed mark, and the first parser run read its letters in the order of the objects: “S t r ö n u , e g w a . ? s”. Symbols from a symbol font arrive as the letters that sit at their position in the character set; pictures become <code>&lt;!-- image --&gt;</code>.</span>
+    </p>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">PDF</span><span class="befehl-was"><span lang="de">Portable Document Format, ISO 32000</span><span lang="en">Portable Document Format, ISO 32000</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><span lang="de">Enthält</span><span lang="en">Contains</span><span><span lang="de">Textobjekte (Glyphen, Schrift, Position), Bilder, Vektorgrafik, Seiten. Optional eine Tag-Struktur mit Lesereihenfolge; das Handbuch hat keine.</span><span lang="en">Text objects (glyphs, font, position), pictures, vector graphics, pages. Optionally a tag structure with reading order; the manual has none.</span></span></li>
+          <li><span lang="de">Enthält nicht</span><span lang="en">Does not contain</span><span><span lang="de">Absätze, Tabellenzellen, Überschriftenebenen, die Bedeutung eines Symbols.</span><span lang="en">Paragraphs, table cells, heading levels, the meaning of a symbol.</span></span></li>
+          <li><span lang="de">Folge</span><span lang="en">Consequence</span><span><span lang="de">Jede Extraktion ist eine Rekonstruktion mit Fehlern, die gegen das Original geprüft werden muss.</span><span lang="en">Every extraction is a reconstruction with errors that must be checked against the original.</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Ein gescanntes PDF enthält nur Bilder; dann braucht es zusätzlich OCR, und die Fehlerquote steigt. Das Siemens-Handbuch ist ein echtes Text-PDF.</span><span lang="en">A scanned PDF contains only images; then OCR is needed on top, and the error rate rises. The Siemens manual is a genuine text PDF.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="docling">
+    <h2><span lang="de">Der Parser: Docling</span><span lang="en">The parser: Docling</span></h2>
+    <p>
+      <span lang="de">Das Fallbeispiel nutzt Docling (IBM, MIT-Lizenz; Auer et al. 2024). Docling erkennt mit dem Layoutmodell DocLayNet Textblöcke, Überschriften und Bildbereiche und mit dem Tabellenmodell TableFormer die Zellen einer Tabelle, und exportiert das Ergebnis als Markdown. Der Parser des Fallbeispiels ist neun Zeilen lang: Er ruft <code>DocumentConverter().convert()</code> auf, exportiert jede Seite einzeln mit <code>export_to_markdown(page_no=…)</code> und schreibt vor jede Seite den Marker <code>&lt;!-- pdf-page: N --&gt;</code>. Alternativen sind PyMuPDF (schnell, ohne Layoutmodell), pypdf (reines Python, ohne Tabellen) und Unstructured (viele Formate); die README des Fallbeispiels nennt Docling 2.129 und PyMuPDF 1.28 als geprüfte Versionen (Stand 19.09.2026).</span>
+      <span lang="en">The case study uses Docling (IBM, MIT licence; Auer et al. 2024). Docling recognises text blocks, headings and picture regions with the layout model DocLayNet and the cells of a table with the table model TableFormer, and exports the result as Markdown. The case study's parser is nine lines long: it calls <code>DocumentConverter().convert()</code>, exports every page separately with <code>export_to_markdown(page_no=…)</code> and writes the marker <code>&lt;!-- pdf-page: N --&gt;</code> before every page. Alternatives are PyMuPDF (fast, no layout model), pypdf (pure Python, no tables) and Unstructured (many formats); the case study's README names Docling 2.129 and PyMuPDF 1.28 as tested versions (as of 19 Sept 2026).</span>
+    </p>
+    <pre class="code-block">from docling.document_converter import DocumentConverter
+
+def convert(pdf_file, output_file):
+    result = DocumentConverter().convert(str(pdf_file))
+    pages = [f"&lt;!-- pdf-page: {page} --&gt;\n\n" + result.document.export_to_markdown(page_no=page)
+             for page in sorted(result.document.pages)]
+    Path(output_file).write_text("\n\n".join(pages), encoding="utf-8")</pre>
+    <p class="line-hilfe"><span lang="de">Aus <code>parser.py</code> des Fallbeispiels, gekürzt. Die vollständige Datei schreibt zuerst in eine temporäre Datei und benennt sie erst am Ende um, damit ein Abbruch keine halbe Wissensdatei hinterlässt.</span><span lang="en">From the case study's <code>parser.py</code>, shortened. The complete file first writes to a temporary file and only renames it at the end, so that an abort leaves no half-written knowledge file.</span></p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/aufbereitung-de.svg" alt="Ablauf der Aufbereitung: PDF, Docling mit Layout- und Tabellenmodell, Markdown je Seite mit Marker, Prüfung gegen das PDF, aktive Wissensdatei, Fingerprint und Neuaufbau des Index." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/aufbereitung-en.svg" alt="Preparation flow: PDF, Docling with layout and table model, Markdown per page with marker, check against the PDF, active knowledge file, fingerprint and rebuild of the index." loading="lazy"></span>
+      <figcaption><span lang="de">Der Weg vom PDF in den Index. Die Prüfung ist ein eigener Schritt, kein Nebenprodukt.</span><span lang="en">The way from PDF into the index. The check is a step of its own, not a by-product.</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="section-block" id="artefakte">
+    <h2><span lang="de">Seite 33 im Vergleich</span><span lang="en">Page 33 compared</span></h2>
+    <p>
+      <span lang="de">Links die gedruckte Seite 33 mit den Tabellen „Hinweise im Anzeigefeld“ und „Störungen, was tun?“, rechts das Markdown, das Docling daraus erzeugt. Die Tabellen sind vollständig, die Zeile zu E:18 steht mit beiden Ursachen und beiden Querverweisen da. Fünf Stellen sind markiert: der Seitenmarker, drei Symbole der Symbolschrift, die als Buchstaben ankommen, und ein Querverweis. Klicken Sie sie an.</span>
+      <span lang="en">Left the printed page 33 with the tables “Hinweise im Anzeigefeld” and “Störungen, was tun?”, right the Markdown Docling produces from it. The tables are complete, the row for E:18 is there with both causes and both cross references. Five spots are highlighted: the page marker, three symbols of the symbol font that arrive as letters, and a cross reference. Click them.</span>
+    </p>
+    <div data-werkzeug="seite" data-parameter='{"markierungen":[{"muster":"<!-- pdf-page: 33 -->","hinweis":{"de":"Der Seitenmarker: Der Parser schreibt vor jede Seite ihre physische Nummer. Daraus wird das Metadatum pdf_page jedes Chunks – die Fundseite in der Quellenangabe.","en":"The page marker: the parser writes the physical page number before every page. It becomes the metadata field pdf_page of every chunk – the page found in the source reference."}},{"muster":"Ï","hinweis":{"de":"Ï ist kein Buchstabe, sondern das Symbol „Einfüllfenster entriegelt“ aus der Symbolschrift des Handbuchs. Der Parser liefert den Buchstaben, der an dieser Stelle des Zeichensatzes steht.","en":"Ï is not a letter but the symbol “door unlocked” from the manual’s symbol font. The parser returns the letter that sits at that position of the character set."}},{"muster":"Ü","hinweis":{"de":"Ü steht für die Start/Pause-Taste. Im PDF ein Tastensymbol, im Text ein Buchstabe ohne Bedeutung für Suche und Modell.","en":"Ü stands for the start/pause button. A button symbol in the PDF, a letter without meaning for search and model in the text."}},{"muster":"&amp;#124;","hinweis":{"de":"Das Wasserhahn-Symbol wurde zu einem senkrechten Strich, den Docling als HTML-Entität &#124; maskiert, damit er die Markdown-Tabelle nicht zerstört.","en":"The water-tap symbol became a vertical bar, which Docling escapes as the HTML entity &#124; so that it does not break the Markdown table."}},{"muster":"~ Seite \\d+","hinweis":{"de":"Ein Querverweis im Handbuchtext: die Seite, auf der die Anleitung steht, nicht die Seite dieses Satzes. Die Quellenangabe des Fallbeispiels nennt ihn deshalb „Querverweis auf Seite“.","en":"A cross reference in the manual text: the page where the instructions are, not the page of this sentence. The case study’s source reference therefore calls it “cross reference to page”."}}]}'></div>
+    <div class="warn-box">
+      <p><strong><span lang="de">Die aktive Wissensdatei stammt vom alten Parserlauf.</span><span lang="en">The active knowledge file comes from the old parser run.</span></strong> <span lang="de">Sie enthält <span data-wert="tokens.handbuchAbschnitte">187</span> Abschnitte, <span data-wert="tokens.handbuchWoerter">12 218</span> Wörter und keine Seitenmarker. Der überarbeitete Parser mit Markern wurde an Seite 33 geprüft; das Fallbeispiel hat die aktive Datei nicht ersetzt, weil eine vollständige neue Extraktion erst gegen alle Tabellen, Symbole und Warnungen geprüft werden muss. Deshalb nennen die Antworten heute Querverweise statt Fundseiten.</span><span lang="en">It contains <span data-wert="tokens.handbuchAbschnitte">187</span> sections, <span data-wert="tokens.handbuchWoerter">12,218</span> words and no page markers. The revised parser with markers was checked on page 33; the case study did not replace the active file because a complete new extraction must first be checked against all tables, symbols and warnings. That is why answers today name cross references instead of pages found.</span></p>
+    </div>
+  </section>
+
+  <section class="section-block" id="provenienz">
+    <h2><span lang="de">Provenienz: woher eine Antwort ihre Seite hat</span><span lang="en">Provenance: where an answer gets its page from</span></h2>
+    <p>
+      <span lang="de">Die Funktion <code>prepare_nodes()</code> in <code>rag_engine.py</code> zerlegt das Markdown an den Seitenmarkern und schreibt die Nummer als <code>pdf_page</code> in die Metadaten jedes Chunks. <code>format_source_reference()</code> baut daraus die Quellenangabe: den Abschnittstitel des besten Chunks, dann die Fundseiten aus <code>pdf_page</code>, und nur wenn es keine gibt, die Querverweise „~ Seite NN“ aus dem Text, ausdrücklich als Querverweise bezeichnet. Der Prüfbericht des Fallbeispiels hält fest, warum diese Trennung nötig war: Querverweise erschienen zuvor wie Fundseiten.</span>
+      <span lang="en">The function <code>prepare_nodes()</code> in <code>rag_engine.py</code> splits the Markdown at the page markers and writes the number as <code>pdf_page</code> into every chunk's metadata. <code>format_source_reference()</code> builds the source reference from it: the section title of the best chunk, then the pages found from <code>pdf_page</code>, and only if there are none, the cross references “~ Seite NN” from the text, explicitly labelled as cross references. The case study's audit report records why this separation was needed: cross references previously looked like pages found.</span>
+    </p>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name"><span lang="de">Provenienz</span><span lang="en">Provenance</span></span><span class="befehl-was"><span lang="de">Die Herkunft eines Textstücks, mitgeführt als Metadaten</span><span lang="en">The origin of a text piece, carried along as metadata</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><code>file_name</code><span><span lang="de">Die Quelldatei; wichtig, sobald mehr als ein Dokument im Index liegt.</span><span lang="en">The source file; important as soon as more than one document is in the index.</span></span></li>
+          <li><code>pdf_page</code><span><span lang="de">Die physische Seite aus dem Marker. Fehlt in der aktiven Datei des Fallbeispiels.</span><span lang="en">The physical page from the marker. Missing in the case study's active file.</span></span></li>
+          <li><code>section</code><span><span lang="de">Die Markdown-Überschrift, unter der der Chunk steht.</span><span lang="en">The Markdown heading under which the chunk sits.</span></span></li>
+          <li><code>context_group</code><span><span lang="de">Die kuratierte Verfahrensgruppe (Pumpenreinigung, Notentriegelung, erster Waschgang, Transport), Lab 04.</span><span lang="en">The curated procedure group (pump cleaning, emergency release, first wash, transport), lab 04.</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Metadaten müssen mit dem Text mitreisen, dürfen aber nicht in den Embedding-Text kopiert werden: Sonst rückt jeder Chunk derselben Seite im Vektorraum zusammen, ohne dass sein Inhalt ähnlicher wäre.</span><span lang="en">Metadata must travel with the text but must not be copied into the embedding text: otherwise every chunk of the same page moves closer in vector space without its content being any more similar.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="pruefen">
+    <h2><span lang="de">Prüfen vor Ersetzen</span><span lang="en">Check before replacing</span></h2>
+    <p>
+      <span lang="de">Die README des Fallbeispiels schreibt die Reihenfolge vor: neue Extraktion in eine neue Datei (<code>siemens_wissen_neu.md</code>), Vergleich mit dem PDF an Tabellen und Warnhinweisen, erst dann die aktive Datei ersetzen. Der Grund ist der Fingerprint (Lab 09): Ändert sich der Inhalt der Wissensdatei, wird der gesamte Index neu gebaut, und jede Antwort stützt sich danach auf die neue Extraktion. Ein Fehler in der Extraktion wird so zum Fehler in jeder Antwort. Die vier kuratierten Verfahrensgruppen in <code>manual_context.py</code> sind die Antwort des Fallbeispiels auf die Artefakte, die sich nicht wegparsen ließen: Sie binden die Warnhinweise zur Pumpenreinigung und zur Notentriegelung wieder an ihre Arbeitsschritte.</span>
+      <span lang="en">The case study's README prescribes the order: new extraction into a new file (<code>siemens_wissen_neu.md</code>), comparison with the PDF on tables and warnings, only then replace the active file. The reason is the fingerprint (lab 09): if the content of the knowledge file changes, the whole index is rebuilt, and every answer afterwards relies on the new extraction. An error in the extraction thus becomes an error in every answer. The four curated procedure groups in <code>manual_context.py</code> are the case study's answer to the artefacts that could not be parsed away: they bind the warnings for pump cleaning and emergency release back to their work steps.</span>
+    </p>
+    <div class="challenge-box">
+      <h3><span lang="de">Übertragung auf ein eigenes Dokument</span><span lang="en">Transfer to a document of your own</span></h3>
+      <p><span lang="de">Vor dem Indexieren eines eigenen PDFs: eine Seite mit Tabelle, eine mit Warnhinweis und eine mit Symbolen extrahieren und neben das Original legen. Was dort verloren geht, geht überall verloren. Lab 10 macht daraus eine Checkliste.</span><span lang="en">Before indexing a PDF of your own: extract one page with a table, one with a warning and one with symbols and put them next to the original. What is lost there is lost everywhere. Lab 10 turns this into a checklist.</span></p>
+    </div>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Fünf Übungen: die Seite lesen, die Ursache der Verluste benennen, die Aufbereitung ordnen, den Parser aufrufen und die Quellenangabe deuten.</span><span lang="en">Five exercises: read the page, name the cause of the losses, order the preparation, call the parser and interpret the source reference.</span></p>
     <div data-uebung="R03-01"></div>
     <div data-uebung="R03-02"></div>
     <div data-uebung="R03-03"></div>
@@ -58,11 +155,24 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Ein PDF speichert Glyphen mit Koordinaten; Struktur muss ein Parser rekonstruieren, und dabei entstehen Artefakte.</span><span lang="en">A PDF stores glyphs with coordinates; structure has to be reconstructed by a parser, and artefacts arise in the process.</span></li>
+      <li><span lang="de">Docling liefert Markdown mit Tabellen und, mit dem Parser des Fallbeispiels, Seitenmarker je Seite.</span><span lang="en">Docling delivers Markdown with tables and, with the case study's parser, page markers per page.</span></li>
+      <li><span lang="de">Symbole einer Symbolschrift werden zu Buchstaben, Bilder zu Kommentaren, ungewöhnliche Überschriften zu Buchstabensalat.</span><span lang="en">Symbols of a symbol font become letters, pictures become comments, unusual headings become scrambled letters.</span></li>
+      <li><span lang="de">Provenienz sind Metadaten: Datei, Seite, Abschnitt, Gruppe. Die Quellenangabe entsteht daraus, nicht aus dem Modell.</span><span lang="en">Provenance is metadata: file, page, section, group. The source reference arises from it, not from the model.</span></li>
+      <li><span lang="de">Erst prüfen, dann ersetzen: Ein Fehler in der Extraktion wird zum Fehler in jeder Antwort.</span><span lang="en">Check first, replace afterwards: an error in the extraction becomes an error in every answer.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Auer, C. et al. (2024): Docling Technical Report. IBM Research. <a href="https://arxiv.org/abs/2408.09869" rel="noopener">arXiv:2408.09869</a>; Dokumentation <a href="https://docling-project.github.io/docling/" rel="noopener">docling-project.github.io/docling</a>, abgerufen 19.09.2026</li>
+      <li>ISO 32000-2:2020: Document management – Portable document format – Part 2: PDF 2.0. <a href="https://www.iso.org/standard/75839.html" rel="noopener">iso.org</a></li>
+      <li>PyMuPDF-Dokumentation: <a href="https://pymupdf.readthedocs.io/" rel="noopener">pymupdf.readthedocs.io</a>; pypdf: <a href="https://pypdf.readthedocs.io/" rel="noopener">pypdf.readthedocs.io</a>; Unstructured: <a href="https://docs.unstructured.io/" rel="noopener">docs.unstructured.io</a>, abgerufen 19.09.2026</li>
+      <li><span lang="de">Fallbeispiel: <code>parser.py</code>, <code>rag_engine.py</code> (prepare_nodes, format_source_reference), <code>manual_context.py</code>, <code>docs/AUDIT.md</code> („Querverweise erschienen wie Fundseiten“), README (Abschnitt zur PDF-Neuverarbeitung), Stand 19.09.2026. Seite 33 als <code>assets/seite-33.png</code> (PyMuPDF, 150 dpi) und <code>data/seite-33.md</code> (Docling 2.129, page_range 33).</span><span lang="en">Case study: <code>parser.py</code>, <code>rag_engine.py</code> (prepare_nodes, format_source_reference), <code>manual_context.py</code>, <code>docs/AUDIT.md</code> (“cross references looked like pages found”), README (section on PDF re-processing), as of 19 Sept 2026. Page 33 as <code>assets/seite-33.png</code> (PyMuPDF, 150 dpi) and <code>data/seite-33.md</code> (Docling 2.129, page_range 33).</span></li>
+    </ul>
   </section>
 
 </main>

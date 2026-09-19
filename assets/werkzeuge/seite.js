@@ -14,9 +14,15 @@ export function baue (wrap, p, ctx) {
   const re = el('div'); re.append(zwei(el('h4'), L.rechts, ctx)); const pre = el('pre', 'code-block markdown'); re.append(pre); const erkl = el('div', 'tip-box'); erkl.hidden = true; re.append(erkl)
   grid.append(li, re); wrap.append(grid); k.status(L.klick, '')
   ctx.daten('seite-33.md').then(md => {
-    const marks = (p.markierungen || []).map(m => ({ re: new RegExp(m.muster, 'g'), hinweis: m.hinweis }))
-    let html = md.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
-    marks.forEach((m, i) => { html = html.replace(m.re, s => `<mark data-i="${i}" tabindex="0">${s}</mark>`) })
+    // Treffer auf dem Rohtext suchen (nicht auf dem maskierten HTML), dann Segmente maskieren und Treffer umhuellen.
+    const marks = (p.markierungen || []).map((m, i) => ({ re: new RegExp(m.muster, 'g'), hinweis: m.hinweis, i }))
+    const treffer = []
+    for (const m of marks) for (const t of md.matchAll(m.re)) if (t[0]) treffer.push({ start: t.index, ende: t.index + t[0].length, i: m.i })
+    treffer.sort((a, b) => a.start - b.start)
+    const esc = (t) => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+    let html = ''; let pos = 0
+    for (const t of treffer) { if (t.start < pos) continue; html += esc(md.slice(pos, t.start)) + `<mark data-i="${t.i}" tabindex="0">${esc(md.slice(t.start, t.ende))}</mark>`; pos = t.ende }
+    html += esc(md.slice(pos))
     pre.innerHTML = html
     const zeige = (m) => { erkl.hidden = false; erkl.textContent = txt(marks[+m.dataset.i].hinweis, ctx.lang()) }
     pre.addEventListener('click', ev => { const m = ev.target.closest('mark'); if (m) zeige(m) })

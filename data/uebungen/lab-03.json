@@ -1,1 +1,79 @@
-[]
+[
+  {
+    "id": "R03-01", "typ": "experiment", "werkzeug": "seite",
+    "parameter": { "markierungen": [
+      { "muster": "<!-- pdf-page: 33 -->", "hinweis": { "de": "Der Seitenmarker: Der neue Parser schreibt vor jede Seite ihre physische Nummer. Daraus wird später das Feld pdf_page in den Metadaten jedes Chunks – die Seitenzahl in der Quellenangabe.", "en": "The page marker: the new parser writes the physical page number before every page. Later this becomes the field pdf_page in every chunk's metadata – the page number in the source reference." } },
+      { "muster": "Ï", "hinweis": { "de": "Ï ist kein Buchstabe, sondern das Symbol „Einfüllfenster entriegelt“ aus der Symbolschrift des Handbuchs. Der Parser kennt die Schrift nicht und liefert den Buchstaben, der an dieser Stelle des Zeichensatzes steht.", "en": "Ï is not a letter but the symbol “door unlocked” from the manual's symbol font. The parser does not know the font and returns the letter that sits at that position of the character set." } },
+      { "muster": "Ü", "hinweis": { "de": "Ü steht für die Start/Pause-Taste. Im PDF ist es ein Tastensymbol; im Text bleibt ein Buchstabe, der für Suche und Modell keine Bedeutung trägt.", "en": "Ü stands for the start/pause button. In the PDF it is a button symbol; in the text a letter remains that carries no meaning for search and model." } },
+      { "muster": "&#124;", "hinweis": { "de": "Das Wasserhahn-Symbol wurde zu einem senkrechten Strich, den Docling als HTML-Entität &#124; maskiert, damit er die Markdown-Tabelle nicht zerstört.", "en": "The water-tap symbol became a vertical bar, which Docling escapes as the HTML entity &#124; so that it does not break the Markdown table." } },
+      { "muster": "~ Seite \\d+", "hinweis": { "de": "Ein Querverweis im Handbuchtext. Er nennt die Seite, auf der die Anleitung steht – nicht die Seite, auf der dieser Satz steht. Die Quellenangabe des Fallbeispiels kennzeichnet ihn deshalb als „Querverweis auf Seite“.", "en": "A cross reference in the manual text. It names the page where the instructions are – not the page this sentence is on. The case study's source reference therefore labels it as “cross reference to page”." } }
+    ] },
+    "titel": { "de": "Was der Parser sieht", "en": "What the parser sees" },
+    "aufgabe": { "de": "<p>Vergleichen Sie die gedruckte Seite 33 mit dem Markdown daneben. Klicken Sie die markierten Stellen an und beantworten Sie dann die Fragen.</p>", "en": "<p>Compare the printed page 33 with the Markdown next to it. Click the highlighted spots, then answer the questions.</p>" },
+    "fragen": [
+      { "frage": { "de": "Woher stammt das „Ü“ in „Taste Ü wählen“?", "en": "Where does the “Ü” in “Taste Ü wählen” come from?" },
+        "optionen": [ { "de": "Aus der Symbolschrift des Handbuchs: Das Tastensymbol steht im Zeichensatz an der Stelle des Ü.", "en": "From the manual's symbol font: the button symbol sits at the position of Ü in the character set." }, { "de": "Ein Tippfehler im Handbuch.", "en": "A typo in the manual." }, { "de": "Docling übersetzt Symbole in den nächstliegenden Umlaut.", "en": "Docling translates symbols into the closest umlaut." } ], "richtig": [0],
+        "erklaerung": { "de": "Ein PDF speichert Glyphen einer Schrift, keine Bedeutung. Für eine Symbolschrift liefert die Extraktion den Code des Zeichens, nicht das Bild.", "en": "A PDF stores glyphs of a font, not meaning. For a symbol font the extraction returns the character code, not the picture." } },
+      { "frage": { "de": "Was bedeutet „~ Seite 30“ hinter „Laugenpumpe reinigen“?", "en": "What does “~ Seite 30” after “Laugenpumpe reinigen” mean?" },
+        "optionen": [ { "de": "Ein Querverweis auf die Seite mit der Reinigungsanleitung; die Zeile selbst steht auf Seite 33.", "en": "A cross reference to the page with the cleaning instructions; the line itself is on page 33." }, { "de": "Die Fundseite dieser Zeile.", "en": "The page where this line is found." }, { "de": "Eine Seitenzahl, die der Parser erfunden hat.", "en": "A page number the parser invented." } ], "richtig": [0],
+        "erklaerung": { "de": "Zwei Arten von Seitenzahlen: der Seitenmarker (Fundseite, vom Parser) und Querverweise (im Text, vom Handbuch). Die Quellenangabe des Fallbeispiels trennt beide.", "en": "Two kinds of page numbers: the page marker (page found, from the parser) and cross references (in the text, from the manual). The case study's source reference keeps them apart." } },
+      { "frage": { "de": "Was leistet der Seitenmarker <code>&lt;!-- pdf-page: 33 --&gt;</code>?", "en": "What does the page marker <code>&lt;!-- pdf-page: 33 --&gt;</code> provide?" },
+        "optionen": [ { "de": "Provenienz: Jeder Chunk dieser Seite erhält pdf_page = 33 in seinen Metadaten, und die Antwort kann die Fundseite nennen.", "en": "Provenance: every chunk of this page receives pdf_page = 33 in its metadata, and the answer can name the page found." }, { "de": "Er wird in das Embedding eingerechnet und verbessert die Suche.", "en": "It is computed into the embedding and improves search." }, { "de": "Er trennt Kapitel voneinander.", "en": "It separates chapters from each other." } ], "richtig": [0],
+        "erklaerung": { "de": "In rag_engine.py zerlegt prepare_nodes() den Text an den Markern und setzt pdf_page als Metadatum. Metadaten sind vom Embedding ausgeschlossen (Lab 04).", "en": "In rag_engine.py, prepare_nodes() splits the text at the markers and sets pdf_page as metadata. Metadata are excluded from the embedding (lab 04)." } }
+    ],
+    "rueckmeldung": { "de": "Sie haben gesehen, was aus einer gedruckten Seite wird: Text mit Tabellen und Marker, aber ohne Symbole und ohne Bilder.", "en": "You have seen what becomes of a printed page: text with tables and marker, but without symbols and without pictures." }
+  },
+  {
+    "id": "R03-02", "typ": "quiz",
+    "titel": { "de": "Warum PDF-Extraktion Verluste hat", "en": "Why PDF extraction loses information" },
+    "aufgabe": { "de": "<p>Die Überschrift „Störungen, was tun?“ kam im ersten Parserlauf als „S t r ö n u , e g w a . ? s“ an. Was ist die Ursache?</p>", "en": "<p>The heading “Störungen, was tun?” arrived from the first parser run as “S t r ö n u , e g w a . ? s”. What is the cause?</p>" },
+    "fragen": [
+      { "frage": { "de": "Welche Erklärung trifft zu?", "en": "Which explanation is correct?" },
+        "optionen": [ { "de": "Ein PDF speichert Glyphen mit Koordinaten, keine Lesereihenfolge. Die Überschrift ist im Layout gesetzt (Buchstaben einzeln positioniert), und der Parser hat sie in der Reihenfolge der Objekte gelesen.", "en": "A PDF stores glyphs with coordinates, no reading order. The heading is typeset in the layout (letters positioned individually), and the parser read them in the order of the objects." }, { "de": "Das Handbuch ist auf Seite 32 falsch gedruckt.", "en": "The manual is misprinted on page 32." }, { "de": "Docling verschlüsselt Überschriften.", "en": "Docling encrypts headings." } ], "richtig": [0],
+        "erklaerung": { "de": "ISO 32000 beschreibt PDF als Seitenbeschreibung: Textobjekte mit Position und Schrift. Absätze, Spalten und Tabellen muss ein Parser rekonstruieren; Docling nutzt dafür ein Layoutmodell und ein Tabellenmodell.", "en": "ISO 32000 describes PDF as a page description: text objects with position and font. Paragraphs, columns and tables must be reconstructed by a parser; Docling uses a layout model and a table model for that." } },
+      { "frage": { "de": "Welche Folge hat die zerschossene Überschrift für die Suche?", "en": "What consequence does the scrambled heading have for search?" },
+        "optionen": [ { "de": "Der Abschnitt darunter trägt einen Titel ohne Bedeutung; die Warnung zur Notentriegelung hängt nicht mehr an einem findbaren Begriff.", "en": "The section below carries a meaningless title; the warning about the emergency release no longer hangs on a findable term." }, { "de": "Keine, weil Überschriften nicht eingebettet werden.", "en": "None, because headings are not embedded." }, { "de": "Die Suche findet die Seite gar nicht mehr.", "en": "Search cannot find the page at all any more." } ], "richtig": [0],
+        "erklaerung": { "de": "Die Überschrift bleibt Teil des Chunk-Texts (Lab 04). Das Fallbeispiel arbeitet mit vier kuratierten Verfahrensgruppen in manual_context.py, die solche Abschnitte an ihren Titel binden – die Notentriegelung ist eine davon.", "en": "The heading stays part of the chunk text (lab 04). The case study uses four curated procedure groups in manual_context.py that bind such sections to their title – the emergency release is one of them." } }
+    ],
+    "rueckmeldung": { "de": "Parser rekonstruieren Struktur aus Koordinaten. Das gelingt oft, aber nicht immer, und der Fehler wandert unbemerkt in den Index.", "en": "Parsers reconstruct structure from coordinates. That often works, but not always, and the error travels unnoticed into the index." }
+  },
+  {
+    "id": "R03-03", "typ": "sortieren",
+    "titel": { "de": "Die Aufbereitung in Reihenfolge", "en": "Preparation in order" },
+    "aufgabe": { "de": "<p>Bringen Sie die Schritte in die Reihenfolge, in der das Fallbeispiel ein neues Handbuch in den Index bringt.</p>", "en": "<p>Put the steps into the order in which the case study brings a new manual into the index.</p>" },
+    "elemente": [
+      { "text": { "de": "PDF beschaffen und im Projektordner ablegen", "en": "Obtain the PDF and place it in the project folder" } },
+      { "text": { "de": "Mit Docling parsen: python parser.py --pdf … --output siemens_wissen_neu.md", "en": "Parse with Docling: python parser.py --pdf … --output siemens_wissen_neu.md" } },
+      { "text": { "de": "Seitenmarker und Überschriften im Markdown prüfen", "en": "Check page markers and headings in the Markdown" } },
+      { "text": { "de": "Tabellen und Warnhinweise gegen das PDF vergleichen", "en": "Compare tables and warnings against the PDF" } },
+      { "text": { "de": "Aktive Wissensdatei siemens_wissen.md ersetzen", "en": "Replace the active knowledge file siemens_wissen.md" } },
+      { "text": { "de": "Server starten: Fingerprint weicht ab, Index wird neu gebaut", "en": "Start the server: fingerprint differs, index is rebuilt" } }
+    ],
+    "rueckmeldung": { "de": "Die Prüfung steht vor dem Ersetzen. Das Fallbeispiel hat die aktive Datei bewusst nicht blind durch eine neue Extraktion ersetzt.", "en": "The check comes before replacing. The case study deliberately did not blindly replace the active file with a new extraction." }
+  },
+  {
+    "id": "R03-04", "typ": "luecken",
+    "titel": { "de": "Der Parseraufruf", "en": "The parser call" },
+    "aufgabe": { "de": "<p>Vervollständigen Sie den Aufruf, mit dem das Fallbeispiel das Handbuch neu extrahiert, ohne die aktive Wissensdatei zu überschreiben.</p>", "en": "<p>Complete the call with which the case study re-extracts the manual without overwriting the active knowledge file.</p>" },
+    "text": { "de": "python parser.py --pdf ___1___ --output ___2___", "en": "python parser.py --pdf ___1___ --output ___2___" },
+    "luecken": [ { "loesung": ["siemens-handbuch.pdf"] }, { "loesung": ["siemens_wissen_neu.md"] } ],
+    "hinweis": { "de": "Die PDF-Datei heißt siemens-handbuch.pdf. Die README des Fallbeispiels verlangt eine neue Ausgabedatei, damit die aktive siemens_wissen.md erst nach der Prüfung ersetzt wird.", "en": "The PDF file is siemens-handbuch.pdf. The case study's README demands a new output file so that the active siemens_wissen.md is only replaced after the check." },
+    "rueckmeldung": { "de": "Zwei Dateinamen, ein Prinzip: Erst prüfen, dann ersetzen.", "en": "Two file names, one principle: check first, replace afterwards." }
+  },
+  {
+    "id": "R03-05", "typ": "quiz",
+    "titel": { "de": "Provenienz", "en": "Provenance" },
+    "aufgabe": { "de": "<p>Eine Antwort des Fallbeispiels endet mit „Handbuch: Hinweise im Anzeigefeld · Querverweise auf Seite 30/31“. Welche Aussagen dazu sind richtig?</p>", "en": "<p>An answer of the case study ends with “Handbuch: Hinweise im Anzeigefeld · Querverweise auf Seite 30/31”. Which statements about it are correct?</p>" },
+    "fragen": [
+      { "frage": { "de": "Wählen Sie alle zutreffenden Aussagen.", "en": "Select all statements that apply." }, "mehrfach": true,
+        "optionen": [
+          { "de": "„Hinweise im Anzeigefeld“ ist der Abschnittstitel aus den Metadaten des besten Chunks.", "en": "“Hinweise im Anzeigefeld” is the section title from the metadata of the best chunk." },
+          { "de": "„Querverweise auf Seite 30/31“ sind die Seitenzahlen aus dem Chunk-Text, keine Fundseiten.", "en": "“Querverweise auf Seite 30/31” are the page numbers from the chunk text, not pages found." },
+          { "de": "Mit Seitenmarkern aus dem neuen Parser stünde stattdessen „PDF-Seite 33“, die Fundseite.", "en": "With page markers from the new parser, it would instead read “PDF-Seite 33”, the page found." },
+          { "de": "Docling erkennt die Warnsymbole des Handbuchs zuverlässig als Text.", "en": "Docling reliably recognises the manual's warning symbols as text." }
+        ], "richtig": [0, 1, 2],
+        "erklaerung": { "de": "format_source_reference() in rag_engine.py baut die Angabe: Abschnitt aus den Metadaten, dann pdf_page, falls vorhanden, sonst Querverweise aus dem Text. Die aktive Wissensdatei stammt noch vom alten Parser ohne Marker; deshalb erscheinen Querverweise.", "en": "format_source_reference() in rag_engine.py builds the reference: section from the metadata, then pdf_page if present, otherwise cross references from the text. The active knowledge file still comes from the old parser without markers; hence cross references appear." } }
+    ],
+    "rueckmeldung": { "de": "Eine Quellenangabe ist nur so gut wie die Metadaten, aus denen sie gebaut wird.", "en": "A source reference is only as good as the metadata it is built from." }
+  }
+]
