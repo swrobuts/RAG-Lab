@@ -50,7 +50,8 @@ Läufe:
 - Elf Seiten in DE und EN bei 390, 768 und 1 440 px Breite: kein horizontaler Überlauf.
 - Modell im Browser (Lab 05): Laden 43 s beim ersten Mal (118 MB + 17 MB vom Hub, danach Cache API), Selbsttest Kosinus 0,9966 (E:18-Frage) und 0,9972 (Kindersicherung) gegen die Python-Vektoren; erster Vektor 9,3 s (WASM-Aufwärmen), danach 150–180 ms je Frage.
 - Hub blockiert (`env.remoteHost` auf 0.0.0.0, Cache geleert): Fehlermeldung im Werkzeug, Status bleibt „Vorberechnete Vektoren“, Werkzeug arbeitet weiter.
-- LLM-Werkzeug (Lab 07) gegen LM Studio ohne CORS: Fehlertext mit den Schritten zum Einschalten; „Senden“ gesperrt. Der Stream mit eingeschaltetem CORS ist noch nicht geprüft (siehe Grenzen).
+- LLM-Werkzeug (Lab 07) gegen LM Studio ohne CORS: Fehlertext mit den Schritten zum Einschalten; „Senden“ gesperrt.
+- LLM-Werkzeug mit CORS (20.09.2026, `lms server start --cors`, gemma-4-12b-it-mlx): lokal (`http://localhost:8777`) und auf der Live-Seite (`https://swrobuts.github.io`, Chrome 152) verbunden mit drei Chatmodellen; Stream der E:18-Frage mit Kontext in 8,1–9,4 s, erstes Token nach 1,1–2,4 s, 396/149 Tokens, Ausgabe wächst sichtbar (47 → 220 → 365 → 461 Zeichen), drei Tags geparst (Laugenpumpe, Ablaufschlauch, Seiten 30/31); ohne Kontext 6,2 s, 50/122 Tokens, die „Wasserzufuhr“-Halluzination. Befund dabei: Der laufende LM-Studio-Server hatte den CORS-Schalter der Oberfläche nicht übernommen und musste neu gestartet werden; und Chrome fragt von einer HTTPS-Seite aus einmal je Site nach „Local Network Access“ (Chrome 142+), die Anfrage wartet bis zum Klick auf „Zulassen“ – Hinweis in Werkzeug und Text ergänzt. Der eingebettete Browser der Claude-Desktop-App blockt solche Aufrufe (`ERR_BLOCKED_BY_CLIENT`); geprüft wurde deshalb im regulären Chrome.
 
 Behoben während der Abnahme:
 
@@ -64,8 +65,7 @@ Behoben während der Abnahme:
 
 Grenzen:
 
-- Der Live-Stream aus dem Browser gegen LM Studio setzt CORS auf dem Server voraus (`lms server start --cors`); das wurde in dieser Abnahme nicht eingeschaltet. Der Fehlerpfad ist geprüft, der Erfolgspfad noch nicht.
-- Die Prüfung lief im Chromium der Desktop-App; Safari (Mixed-Content-Sperre für `http://localhost`) und Firefox wurden nicht geprüft.
+- Die Prüfung lief im Chromium der Desktop-App und (LLM-Stream) in Chrome 152; Safari (Mixed-Content-Sperre für `http://localhost`) und Firefox wurden nicht geprüft.
 - Die Modell-Ladezeit hängt von Verbindung und Rechner ab; die 43 s sind ein Einzelwert auf einem Mac mit Apple Silicon.
 
 ## Veröffentlichung
