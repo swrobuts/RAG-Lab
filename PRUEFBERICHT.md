@@ -67,3 +67,12 @@ Grenzen:
 - Der Live-Stream aus dem Browser gegen LM Studio setzt CORS auf dem Server voraus (`lms server start --cors`); das wurde in dieser Abnahme nicht eingeschaltet. Der Fehlerpfad ist geprüft, der Erfolgspfad noch nicht.
 - Die Prüfung lief im Chromium der Desktop-App; Safari (Mixed-Content-Sperre für `http://localhost`) und Firefox wurden nicht geprüft.
 - Die Modell-Ladezeit hängt von Verbindung und Rechner ab; die 43 s sind ein Einzelwert auf einem Mac mit Apple Silicon.
+
+## Veröffentlichung
+
+Stand: 20.09.2026. Repository [github.com/swrobuts/RAG-Lab](https://github.com/swrobuts/RAG-Lab),
+GitHub Pages aus `main` (Wurzel), Live-Adresse <https://swrobuts.github.io/RAG-Lab/>.
+
+- Der erste Push wurde vom Push-Schutz von GitHub abgewiesen: Der Secret-Scanner hielt den Klassennamen `Mistral3ForConditionalGeneration` (32 Zeichen) in der mitgelieferten `assets/transformers/transformers.min.js` für einen Mistral-API-Schlüssel. Nach Rücksprache wurde der Treffer über die API als Fehlalarm freigegeben (`push-protection-bypasses`, Grund `false_positive`); der Push-Schutz des Repositorys ist wieder eingeschaltet.
+- SHA-256 lokal gegen live gleich für `assets/rag.js`, `data/chunks.json`, `data/uebungen/lab-06.json`, `lab-06-retrieval.html`, `assets/transformers/ort-wasm-simd-threaded.asyncify.wasm`, `assets/diagramme/architektur-de.svg`.
+- Live geprüft (Chromium der Desktop-App): Startseite mit Kennzahlen 10 · 55 · 346 · 24; Lab 06 lädt das Modell vom Hub in 16,5 s, Selbsttest 0,9966, eigene Frage läuft durch die Vektorstufe; Lab 07 gegen LM Studio ohne CORS zeigt den Fehlertext (Chromium erlaubt den Aufruf von HTTPS an `http://localhost`, LM Studio antwortet ohne CORS-Header); Lab 10 Terminal mit dem Fehlerbild „venv mit Python 3.9“.
