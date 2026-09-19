@@ -51,6 +51,7 @@ Läufe:
 - Modell im Browser (Lab 05): Laden 43 s beim ersten Mal (118 MB + 17 MB vom Hub, danach Cache API), Selbsttest Kosinus 0,9966 (E:18-Frage) und 0,9972 (Kindersicherung) gegen die Python-Vektoren; erster Vektor 9,3 s (WASM-Aufwärmen), danach 150–180 ms je Frage.
 - Hub blockiert (`env.remoteHost` auf 0.0.0.0, Cache geleert): Fehlermeldung im Werkzeug, Status bleibt „Vorberechnete Vektoren“, Werkzeug arbeitet weiter.
 - LLM-Werkzeug (Lab 07) gegen LM Studio ohne CORS: Fehlertext mit den Schritten zum Einschalten; „Senden“ gesperrt.
+- Safari 26.5.2 (20.09.2026, Live-Seite, gesteuert über AppleScript „JavaScript von Apple Events“): `audit.js` auf allen elf Seiten ohne Befund, `durchlauf.js` 55/55 Übungen „Richtig“, kein Überlauf bei 390/768/1 440 px in DE und EN; Modell vom Hub in 12,6 s geladen (Cache API `transformers-cache`), Selbsttest 0,9966 / 0,9972, danach 20–56 ms je Vektor (schneller als Chromium); Such-Stepper mit eigener Frage live. LLM-Werkzeug: `fetch` an `http://localhost` scheitert mit „Load failed“ – auch gegen einen Prüfserver mit CORS-Headern –, und mit dem auf diesem Mac aktiven Modus „Nur HTTPS“ lädt Safari HTTP-Adressen gar nicht (WebKitErrorDomain 305), also auch nicht das lokal über `http://localhost:8777` geöffnete Lab. Fehlertext des Werkzeugs und Lab-07-Text entsprechend ergänzt.
 - LLM-Werkzeug mit CORS (20.09.2026, `lms server start --cors`, gemma-4-12b-it-mlx): lokal (`http://localhost:8777`) und auf der Live-Seite (`https://swrobuts.github.io`, Chrome 152) verbunden mit drei Chatmodellen; Stream der E:18-Frage mit Kontext in 8,1–9,4 s, erstes Token nach 1,1–2,4 s, 396/149 Tokens, Ausgabe wächst sichtbar (47 → 220 → 365 → 461 Zeichen), drei Tags geparst (Laugenpumpe, Ablaufschlauch, Seiten 30/31); ohne Kontext 6,2 s, 50/122 Tokens, die „Wasserzufuhr“-Halluzination. Befund dabei: Der laufende LM-Studio-Server hatte den CORS-Schalter der Oberfläche nicht übernommen und musste neu gestartet werden; und Chrome fragt von einer HTTPS-Seite aus einmal je Site nach „Local Network Access“ (Chrome 142+), die Anfrage wartet bis zum Klick auf „Zulassen“ – Hinweis in Werkzeug und Text ergänzt. Der eingebettete Browser der Claude-Desktop-App blockt solche Aufrufe (`ERR_BLOCKED_BY_CLIENT`); geprüft wurde deshalb im regulären Chrome.
 
 Behoben während der Abnahme:
@@ -65,7 +66,7 @@ Behoben während der Abnahme:
 
 Grenzen:
 
-- Die Prüfung lief im Chromium der Desktop-App und (LLM-Stream) in Chrome 152; Safari (Mixed-Content-Sperre für `http://localhost`) und Firefox wurden nicht geprüft.
+- Firefox wurde nicht geprüft.
 - Die Modell-Ladezeit hängt von Verbindung und Rechner ab; die 43 s sind ein Einzelwert auf einem Mac mit Apple Silicon.
 
 ## Veröffentlichung
