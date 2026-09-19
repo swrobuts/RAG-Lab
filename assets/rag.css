@@ -720,6 +720,8 @@ ul.checkliste li { border: 0; padding: 0.25rem 0; }
 .werkzeug label { display: block; font-size: 0.85rem; }
 .werkzeug .rechen-feld { display: grid; }
 .werkzeug .rechen-feld input { width: auto; }
+.werkzeug[data-name=metrik] td:first-child { min-width: 15rem; }
+.werkzeug[data-name=metrik] td:last-child { min-width: 12rem; }
 .werkzeug .zeile { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.4rem 0; }
 .werkzeug .zeile > * { flex: 1 1 200px; }
 .werkzeug .zeile > button { flex: 0 0 auto; }

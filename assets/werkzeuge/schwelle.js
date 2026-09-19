@@ -2,8 +2,8 @@
 import { el, txt, zwei, kopf, fmt } from './gemein.js'
 const L = {
   titel: { de: 'Schwellen-Regler: 14 echte Fälle', en: 'Threshold slider: 14 real cases' }, schwelle: { de: 'Schwelle GUARDRAIL_MIN_SCORE', en: 'Threshold GUARDRAIL_MIN_SCORE' },
-  ang: { de: 'Handbuchfragen angenommen', en: 'in-manual questions accepted' }, abg: { de: 'Handbuchfragen abgelehnt (falsche Ablehnung)', en: 'in-manual questions rejected (false rejection)' },
-  negAbg: { de: 'Fremdfragen abgelehnt', en: 'off-topic questions rejected' }, negAng: { de: 'Fremdfragen angenommen (Halluzinationsrisiko)', en: 'off-topic questions accepted (hallucination risk)' },
+  ang: { de: 'Handbuchfrage|n angenommen', en: 'in-manual question|s accepted' }, abg: { de: 'Handbuchfrage|n abgelehnt (falsche Ablehnung)', en: 'in-manual question|s rejected (false rejection)' },
+  negAbg: { de: 'Fremdfrage|n abgelehnt', en: 'off-topic question|s rejected' }, negAng: { de: 'Fremdfrage|n angenommen (Halluzinationsrisiko)', en: 'off-topic question|s accepted (hallucination risk)' },
   log: { de: 'Achse logarithmisch, damit die Fremdfragen (Scores um 0,0001) sichtbar bleiben. Obere Reihe: die zehn Evaluationsfragen; untere Reihe: die vier Fremdfragen. Grün = richtig behandelt, rot = falsch.', en: 'Logarithmic axis so the off-topic questions (scores around 0.0001) stay visible. Upper row: the ten evaluation questions; lower row: the four off-topic questions. Green = handled correctly, red = wrongly.' },
   beispiele: { de: 'Beispielfragen einblenden', en: 'Show example questions' }, status: { de: 'oberster Reranker-Score je Frage (vorberechnet, bge-reranker-v2-m3)', en: 'top reranker score per question (precomputed, bge-reranker-v2-m3)' }
 }
@@ -33,7 +33,9 @@ export function baue (wrap, p, ctx) {
       const ti = ns('title'); ti.textContent = `${f.frage} · ${fmt(s, 4, lang)}${f.gedeckt ? '' : ' · ' + (lang === 'de' ? 'im Fallbeispiel abgelehnt' : 'rejected in the case study')}`; c.append(ti); svg.append(c)
       if ((pos && !drin) || (!pos && !bsp && drin)) { const l = ns('text'); l.setAttribute('x', x(s)); l.setAttribute('y', pos ? 78 : 205); l.setAttribute('font-size', '10'); l.setAttribute('text-anchor', 'middle'); l.setAttribute('fill', '#2E2418'); l.textContent = f.id; svg.append(l) }
     }
-    zaehl.replaceChildren(el('span', null, `${ang} ${txt(L.ang, lang)}`), el('span', null, `${abg} ${txt(L.abg, lang)}`), el('span', null, `${nAbg} ${txt(L.negAbg, lang)}`), el('span', null, `${nAng} ${txt(L.negAng, lang)}`))
+    // Singular/Plural: "Handbuchfrage|n" -> ohne Endung bei genau 1
+    const z = (n, l) => `${n} ${txt(l, lang).replace(/\|(\w*)/, n === 1 ? '' : '$1')}`
+    zaehl.replaceChildren(el('span', null, z(ang, L.ang)), el('span', null, z(abg, L.abg)), el('span', null, z(nAbg, L.negAbg)), el('span', null, z(nAng, L.negAng)))
     wrap.dataset.schwelle = String(t)
   }
   ctx.daten('fragen.json').then(f => { F = f.fragen; k.status(L.status, 'vorberechnet'); zeige() })

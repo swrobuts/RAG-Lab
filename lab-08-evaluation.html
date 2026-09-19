@@ -28,6 +28,13 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#trennen"><span lang="de">Suche getrennt messen</span><span lang="en">Measure retrieval separately</span></a>
+  <a class="sidebar-link" href="#masse"><span lang="de">Vier Maße</span><span lang="en">Four measures</span></a>
+  <a class="sidebar-link" href="#zehnfragen"><span lang="de">Die zehn Fragen</span><span lang="en">The ten questions</span></a>
+  <a class="sidebar-link" href="#ablation"><span lang="de">Ablation</span><span lang="en">Ablation</span></a>
+  <a class="sidebar-link" href="#negativ"><span lang="de">Negativtests</span><span lang="en">Negative tests</span></a>
+  <a class="sidebar-link" href="#schwelle"><span lang="de">Die Schwelle</span><span lang="en">The threshold</span></a>
+  <a class="sidebar-link" href="#antwortqualitaet"><span lang="de">Antwortqualität</span><span lang="en">Answer quality</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +47,138 @@
     <span lang="en">Evaluation and guardrails</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">„Besser“ ist eine Zahl oder eine Behauptung. Das Fallbeispiel hat zehn Fragen mit erwarteten Stichwörtern angelegt und misst nach jeder Änderung, wie oft die Suche das Richtige findet – ohne Sprachmodell, in Sekunden. Dieses Lab rechnet die vier Maße vor, liest die Ablation von <span data-wert="eval.vector.hit5">80</span> auf <span data-wert="eval.rerank.hit5">100</span> Prozent, prüft die vier Fremdfragen, verschiebt die Schwelle und zeigt ihren Preis: Eine der zehn Handbuchfragen liegt bei <span data-wert="fragen.keinWassereinlauf.score">0,119</span> und wird zu Unrecht abgelehnt. Am Ende steht, was der Stichwort-Proxy nicht misst und welche Maße die Antwort selbst bräuchte.</span>
+    <span lang="en">“Better” is a number or a claim. The case study set up ten questions with expected keywords and measures after every change how often retrieval finds the right thing – without a language model, in seconds. This lab works through the four measures, reads the ablation from <span data-wert="eval.vector.hit5">80</span> to <span data-wert="eval.rerank.hit5">100</span> percent, checks the four off-topic questions, moves the threshold and shows its price: one of the ten manual questions sits at <span data-wert="fragen.keinWassereinlauf.score">0.119</span> and is wrongly rejected. At the end comes what the keyword proxy does not measure and which measures the answer itself would need.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Hit@5 · Hit@1 · MRR</span>
+    <span class="lernziel-chip"><span lang="de">Abdeckung</span><span lang="en">Coverage</span></span>
+    <span class="lernziel-chip">Ablation</span>
+    <span class="lernziel-chip"><span lang="de">Negativtests</span><span lang="en">Negative tests</span></span>
+    <span class="lernziel-chip">Guardrail 0,15</span>
+    <span class="lernziel-chip">Faithfulness</span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="trennen">
+    <h2><span lang="de">Die Suche getrennt messen</span><span lang="en">Measure retrieval separately</span></h2>
+    <p>
+      <span lang="de">Eine RAG-Antwort kann aus zwei Gründen falsch sein: Die Suche hat das falsche Stück geliefert, oder das Modell hat das richtige Stück falsch verarbeitet. Wer nur die Antwort bewertet, kann beides nicht trennen. Das Fallbeispiel misst deshalb zuerst die Suche allein: <code>eval/run_eval.py</code> lädt den Index und das Embedding-Modell, stellt jede der zehn Fragen, holt die Kandidaten und prüft, ob erwartete Stichwörter darin vorkommen. Kein Sprachmodell läuft, LM Studio muss nicht gestartet sein, und der Lauf dauert eine Sekunde ohne und rund 90 Sekunden mit Reranker. Weil <code>rag_engine.py</code> von <code>server.py</code> getrennt ist, kann die Messung dieselben Funktionen aufrufen wie die Anwendung; das war die erste Entscheidung des Umbaus im Juli 2026.</span>
+      <span lang="en">A RAG answer can be wrong for two reasons: retrieval delivered the wrong piece, or the model processed the right piece wrongly. Whoever only rates the answer cannot separate the two. The case study therefore measures retrieval alone first: <code>eval/run_eval.py</code> loads the index and the embedding model, asks each of the ten questions, fetches the candidates and checks whether expected keywords occur in them. No language model runs, LM Studio need not be started, and the run takes one second without and about 90 seconds with the reranker. Because <code>rag_engine.py</code> is separated from <code>server.py</code>, the measurement can call the same functions as the application; that was the first decision of the rebuild in July 2026.</span>
+    </p>
+    <pre class="code-block">python eval/run_eval.py --output docs/evaluation/hybrid-rerank.json
+python eval/run_eval.py --no-rerank --output docs/evaluation/hybrid-no-rerank.json
+python eval/run_eval.py --vector-only --no-rerank --output docs/evaluation/vector.json</pre>
+  </section>
+
+  <section class="section-block" id="masse">
+    <h2><span lang="de">Vier Maße</span><span lang="en">Four measures</span></h2>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Maß</span><span lang="en">Measure</span></th><th><span lang="de">Definition im Fallbeispiel</span><span lang="en">Definition in the case study</span></th><th><span lang="de">Was es sagt</span><span lang="en">What it says</span></th></tr></thead>
+      <tbody>
+        <tr><td>Hit@5 (Trefferquote)</td><td><span lang="de">Anteil der Fragen, bei denen mindestens ein erwartetes Stichwort in einem der fünf Kandidaten steht</span><span lang="en">Share of questions for which at least one expected keyword appears in one of the five candidates</span></td><td><span lang="de">Ob die Suche überhaupt in die Nähe kommt</span><span lang="en">Whether retrieval gets close at all</span></td></tr>
+        <tr><td>Hit@1</td><td><span lang="de">Anteil der Fragen, bei denen schon der erste Kandidat ein Stichwort enthält</span><span lang="en">Share of questions for which already the first candidate contains a keyword</span></td><td><span lang="de">Ob das Beste vorn steht; wichtig, weil der relative Boden am ersten Kandidaten hängt</span><span lang="en">Whether the best is in front; important because the relative floor hangs on the first candidate</span></td></tr>
+        <tr><td>MRR</td><td><span lang="de">Mittelwert von 1 ÷ Rang des ersten Treffers; kein Treffer zählt 0</span><span lang="en">Mean of 1 ÷ rank of the first hit; no hit counts 0</span></td><td><span lang="de">Wie weit vorn die Treffer stehen, mit harter Strafe für Fehlsuchen</span><span lang="en">How far in front the hits are, with a hard penalty for failed searches</span></td></tr>
+        <tr><td><span lang="de">Abdeckung</span><span lang="en">Coverage</span></td><td><span lang="de">Anteil der erwarteten Stichwörter je Frage, die in den fünf Kandidaten vorkommen, gemittelt</span><span lang="en">Share of expected keywords per question that occur in the five candidates, averaged</span></td><td><span lang="de">Ob die Kandidaten die ganze Antwort tragen, nicht nur einen Teil</span><span lang="en">Whether the candidates carry the whole answer, not just a part</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">In der Fachliteratur heißen diese Maße Recall@k, Precision@1 und Mean Reciprocal Rank (Manning, Raghavan und Schütze 2008, Kapitel 8); das Fallbeispiel nennt sie ausdrücklich Stichwort-Proxys, weil „relevant“ hier heißt: enthält ein erwartetes Wort. Dieses Lab rechnet dieselben Maße in <code>pruefung.js</code> nach; ein Test stellt sicher, dass alle drei Protokolle des Fallbeispiels auf die letzte Stelle reproduziert werden.</span>
+      <span lang="en">In the literature these measures are called recall@k, precision@1 and mean reciprocal rank (Manning, Raghavan and Schütze 2008, chapter 8); the case study explicitly calls them keyword proxies because “relevant” here means: contains an expected word. This lab recomputes the same measures in <code>pruefung.js</code>; a test ensures that all three logs of the case study are reproduced to the last digit.</span>
+    </p>
+    <div data-werkzeug="metrik" data-parameter='{"variante":"vektor"}'></div>
+  </section>
+
+  <section class="section-block" id="zehnfragen">
+    <h2><span lang="de">Die zehn Fragen</span><span lang="en">The ten questions</span></h2>
+    <p>
+      <span lang="de">Der Testbestand steht in <code>eval/questions.json</code>. Jede Frage ist eine reale Störungsfrage, und die erwarteten Stichwörter stammen aus den Tabellen „Hinweise im Anzeigefeld“ und „Störungen, was tun?“ des Handbuchs – nicht aus dem Kopf. Zehn Fragen sind wenige: Eine Frage sind zehn Prozentpunkte, und ein Unterschied von 80 zu 90 Prozent ist eine einzige Frage. Das Fallbeispiel nennt den kleinen Bestand als offene Grenze.</span>
+      <span lang="en">The test set lives in <code>eval/questions.json</code>. Every question is a real fault question, and the expected keywords come from the manual's tables “Hinweise im Anzeigefeld” and “Störungen, was tun?” – not from memory. Ten questions are few: one question is ten percentage points, and a difference of 80 to 90 percent is a single question. The case study names the small set as an open limit.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>ID</th><th><span lang="de">Frage</span><span lang="en">Question (German)</span></th><th><span lang="de">Erwartete Stichwörter</span><span lang="en">Expected keywords</span></th></tr></thead>
+      <tbody>
+        <tr><td><code>wasser-austritt</code></td><td lang="de">Wasser läuft unter meiner Waschmaschine aus, was kann ich tun?</td><td>ablaufschlauch, zulaufschlauch, verschraubung, bodenwanne, undichtigkeit</td></tr>
+        <tr><td><code>fehler-e18</code></td><td lang="de">Was bedeutet der Fehlercode E:18?</td><td>laugenpumpe, verstopft, ablaufschlauch, abflussrohr</td></tr>
+        <tr><td><code>fehler-e23</code></td><td lang="de">Meine Maschine zeigt E:23 an. Was ist das Problem?</td><td>bodenwanne, undichtigkeit, wasserhahn, kundendienst</td></tr>
+        <tr><td><code>kein-abpumpen</code></td><td lang="de">Die Waschlauge wird nicht abgepumpt.</td><td>laugenpumpe, abflussrohr, ablaufschlauch, spülstopp</td></tr>
+        <tr><td><code>kein-wassereinlauf</code></td><td lang="de">Es läuft kein Wasser in die Maschine ein.</td><td>wasserhahn, sieb, zulaufschlauch, geknickt</td></tr>
+        <tr><td><code>tuer-oeffnet-nicht</code></td><td lang="de">Das Einfüllfenster lässt sich nicht öffnen.</td><td>notentriegelung, sicherheitsfunktion, spülstopp</td></tr>
+        <tr><td><code>programm-startet-nicht</code></td><td lang="de">Das Programm startet einfach nicht.</td><td>einfüllfenster, kindersicherung, taste</td></tr>
+        <tr><td><code>zu-viel-schaum</code></td><td lang="de">Es bildet sich viel zu viel Schaum in der Maschine.</td><td>schaum, waschmittel, spülgänge, dosieren</td></tr>
+        <tr><td><code>kindersicherung</code></td><td lang="de">Wie schalte ich die Kindersicherung wieder aus?</td><td>kindersicherung, deaktivieren</td></tr>
+        <tr><td><code>trommel-reinigen</code></td><td lang="de">Wie reinige ich die Trommel meiner Waschmaschine?</td><td>trommel reinigen, pulvervollwaschmittel, bleichehaltiges, laugenbehälter</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="section-block" id="ablation">
+    <h2><span lang="de">Ablation: drei Varianten, dieselben Fragen</span><span lang="en">Ablation: three variants, the same questions</span></h2>
+    <p>
+      <span lang="de">Ablation heißt, eine Komponente wegzulassen und zu messen, was fehlt. Die drei Protokolle vom 19.09.2026 nutzen denselben Index, dieselben Fragen und dieselben Stichwörter; sie unterscheiden sich nur in den Stufen.</span>
+      <span lang="en">Ablation means leaving one component out and measuring what is missing. The three logs of 19 Sept 2026 use the same index, the same questions and the same keywords; they differ only in the stages.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Variante</span><span lang="en">Variant</span></th><th>Hit@5</th><th>Hit@1</th><th>MRR</th><th><span lang="de">Abdeckung</span><span lang="en">Coverage</span></th><th><span lang="de">Was fehlt</span><span lang="en">What is missing</span></th></tr></thead>
+      <tbody>
+        <tr><td><span lang="de">Vektor allein</span><span lang="en">Vector only</span></td><td><span data-wert="eval.vector.hit5">80</span> %</td><td><span data-wert="eval.vector.hit1">60</span> %</td><td><span data-wert="eval.vector.mrr">0,70</span></td><td><span data-wert="eval.vector.abdeckung">64,5</span> %</td><td><span lang="de">E:18 und Wassereinlauf ohne Treffer; zwei Fragen erst auf Rang 2</span><span lang="en">E:18 and water intake without a hit; two questions only at rank 2</span></td></tr>
+        <tr><td><span lang="de">Hybrid ohne Reranker</span><span lang="en">Hybrid without reranker</span></td><td><span data-wert="eval.hybrid.hit5">90</span> %</td><td><span data-wert="eval.hybrid.hit1">70</span> %</td><td><span data-wert="eval.hybrid.mrr">0,80</span></td><td><span data-wert="eval.hybrid.abdeckung">82,0</span> %</td><td><span lang="de">E:18 gefunden; Wassereinlauf weiter ohne Treffer</span><span lang="en">E:18 found; water intake still without a hit</span></td></tr>
+        <tr><td><span lang="de">Hybrid mit Reranker</span><span lang="en">Hybrid with reranker</span></td><td><span data-wert="eval.rerank.hit5">100</span> %</td><td><span data-wert="eval.rerank.hit1">100</span> %</td><td><span data-wert="eval.rerank.mrr">1,00</span></td><td><span data-wert="eval.rerank.abdeckung">93,5</span> %</td><td><span lang="de">Alles gefunden, alles vorn; 6,5 Prozent der Stichwörter fehlen weiter</span><span lang="en">Everything found, everything in front; 6.5 percent of the keywords still missing</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">Die Messung zählt die fünf Kandidaten vor der Schwelle und vor der Kontextauswahl; das Feld <code>evaluation_stage</code> im Protokoll sagt das. Deshalb kann eine Frage als Treffer zählen und trotzdem abgelehnt werden – der Fall im nächsten Abschnitt.</span>
+      <span lang="en">The measurement counts the five candidates before the threshold and before the context selection; the field <code>evaluation_stage</code> in the log says so. That is why a question can count as a hit and still be rejected – the case in the next section.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="negativ">
+    <h2><span lang="de">Negativtests: was abgelehnt werden muss</span><span lang="en">Negative tests: what must be refused</span></h2>
+    <p>
+      <span lang="de">Ein RAG-System muss auch schweigen können. Vier Fremdfragen prüfen das: die Hauptstadt Frankreichs (Score <span data-wert="fragen.negativ1.score">0,0001</span>), ein Gedicht über den Mond, der unbekannte Code E:180 und der Motor einer Bosch-Spülmaschine (<span data-wert="fragen.negativMax.score">0,0274</span>, der höchste der vier). Alle liegen weit unter 0,15 und werden ohne Modellaufruf abgelehnt; im Live-Test antwortete das System auf die Hauptstadt-Frage mit „Nicht im Handbuch gefunden“ statt mit Paris. Der Prüfbericht nennt vier Beispiele „keine allgemeine Garantie gegen falsche Antworten oder Prompt-Injection“; ein Negativtest zeigt, dass eine Falle zu ist, nicht, dass alle zu sind.</span>
+      <span lang="en">A RAG system must also be able to stay silent. Four off-topic questions test this: the capital of France (score <span data-wert="fragen.negativ1.score">0.0001</span>), a poem about the moon, the unknown code E:180 and the motor of a Bosch dishwasher (<span data-wert="fragen.negativMax.score">0.0274</span>, the highest of the four). All lie far below 0.15 and are refused without a model call; in the live test the system answered the capital question with “not found in the manual” instead of Paris. The audit report calls four examples “no general guarantee against wrong answers or prompt injection”; a negative test shows that one trap is closed, not that all are.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="schwelle">
+    <h2><span lang="de">Die Schwelle und ihr Preis</span><span lang="en">The threshold and its price</span></h2>
+    <p>
+      <span lang="de">Der Regler zeigt die 14 Fälle auf einer logarithmischen Achse: oben die zehn Handbuchfragen, unten die vier Fremdfragen, jeweils mit dem obersten Reranker-Score. Bei 0,15 werden neun Handbuchfragen angenommen und eine abgelehnt: „Es läuft kein Wasser in die Maschine ein“ erreicht nur <span data-wert="fragen.keinWassereinlauf.score">0,119</span>, obwohl der Reranker die richtige Zeile (Sieb im Wasserzulauf verstopft) auf Rang 1 hat. Die Retrieval-Messung zählt die Frage als Treffer, der Guardrail lehnt sie ab: eine <strong>falsche Ablehnung</strong>. Zwischen <span data-wert="fragen.negativMax.score">0,0274</span> und <span data-wert="fragen.keinWassereinlauf.score">0,119</span> liegt ein Fenster, in dem alle 14 Fälle richtig behandelt würden. Dass die Schwelle trotzdem bei 0,15 steht, ist eine Entscheidung für Vorsicht bei kleinem Testbestand; der Code nennt sie einen Projektparameter, „keine kalibrierte Wahrheitswahrscheinlichkeit“, und fordert einen größeren annotierten Testbestand.</span>
+      <span lang="en">The slider shows the 14 cases on a logarithmic axis: on top the ten manual questions, below the four off-topic questions, each with its top reranker score. At 0.15 nine manual questions are accepted and one rejected: “Es läuft kein Wasser in die Maschine ein” only reaches <span data-wert="fragen.keinWassereinlauf.score">0.119</span>, although the reranker has the right row (strainer in the water inlet blocked) at rank 1. The retrieval measurement counts the question as a hit, the guardrail rejects it: a <strong>false rejection</strong>. Between <span data-wert="fragen.negativMax.score">0.0274</span> and <span data-wert="fragen.keinWassereinlauf.score">0.119</span> lies a window in which all 14 cases would be handled correctly. That the threshold still sits at 0.15 is a decision for caution with a small test set; the code calls it a project parameter, “no calibrated probability of truth”, and asks for a larger annotated test set.</span>
+    </p>
+    <div data-werkzeug="schwelle" data-parameter='{"schwelle":0.15}'></div>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">Guardrail</span><span class="befehl-was"><span lang="de">Die Regel, die vor dem Modellaufruf entscheidet</span><span lang="en">The rule that decides before the model call</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><span lang="de">Schwelle</span><span lang="en">Threshold</span><span><span lang="de">Bester Reranker-Score ≥ GUARDRAIL_MIN_SCORE (0,15), sonst Ablehnungstext, kein Modellaufruf, keine Kosten.</span><span lang="en">Best reranker score ≥ GUARDRAIL_MIN_SCORE (0.15), otherwise refusal text, no model call, no cost.</span></span></li>
+          <li><span lang="de">Codes</span><span lang="en">Codes</span><span><span lang="de">Jeder gefragte Fehlercode muss im Kontext stehen; E:180 leiht sich nicht E:18.</span><span lang="en">Every requested error code must appear in the context; E:180 does not borrow E:18.</span></span></li>
+          <li><span lang="de">Zwei Fehlerarten</span><span lang="en">Two error types</span><span><span lang="de">Falsche Ablehnung (Handbuchfrage bleibt unbeantwortet) gegen falsche Annahme (Fremdfrage bekommt eine Antwort aus falschem Kontext).</span><span lang="en">False rejection (manual question stays unanswered) versus false acceptance (off-topic question gets an answer from wrong context).</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Eine Schwelle an 14 Fällen einzustellen ist Anpassung an die Stichprobe. Die nächste Fremdfrage kann bei 0,3 landen. Deshalb gehört zu jeder Schwelle ein wachsender Testbestand.</span><span lang="en">Setting a threshold on 14 cases is fitting to the sample. The next off-topic question may land at 0.3. That is why every threshold needs a growing test set.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="antwortqualitaet">
+    <h2><span lang="de">Antwortqualität: was noch fehlt</span><span lang="en">Answer quality: what is still missing</span></h2>
+    <p>
+      <span lang="de">Der Stichwort-Proxy misst die Suche. Ob die Antwort richtig, vollständig und belegt ist, misst er nicht; das Protokoll sagt es im Feld <code>metric_note</code>. Für die Antwort selbst hat sich ein Satz von Maßen etabliert, den RAGAS (Es et al. 2023) ohne handannotierte Musterantworten berechnet, mit einem Sprachmodell als Richter: <strong>Faithfulness</strong> (jede Behauptung der Antwort ist durch den Kontext gedeckt – das, was Sie in Übung R07-02 von Hand getan haben), <strong>Answer Relevance</strong> (die Antwort trifft die Frage), <strong>Context Precision</strong> (die gefundenen Passagen sind relevant und stehen oben) und <strong>Context Recall</strong> (alle nötigen Passagen wurden gefunden). ARES (Saad-Falcon et al. 2023) trainiert dafür kleine Richtermodelle mit wenigen menschlichen Urteilen. Beide Wege brauchen, was dem Fallbeispiel fehlt und was sein Prüfbericht als erste offene Grenze nennt: einen größeren, fachlich annotierten Testbestand. Ein Sprachmodell als Richter hat zudem eigene Fehler; seine Urteile werden stichprobenweise gegen Menschen geprüft.</span>
+      <span lang="en">The keyword proxy measures retrieval. Whether the answer is correct, complete and supported, it does not measure; the log says so in the field <code>metric_note</code>. For the answer itself a set of measures has become established that RAGAS (Es et al. 2023) computes without hand-annotated reference answers, with a language model as judge: <strong>faithfulness</strong> (every claim of the answer is covered by the context – what you did by hand in exercise R07-02), <strong>answer relevance</strong> (the answer hits the question), <strong>context precision</strong> (the retrieved passages are relevant and at the top) and <strong>context recall</strong> (all necessary passages were found). ARES (Saad-Falcon et al. 2023) trains small judge models for this with few human judgements. Both paths need what the case study lacks and what its audit report names as the first open limit: a larger, expertly annotated test set. A language model as judge also has errors of its own; its judgements are spot-checked against humans.</span>
+    </p>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Sechs Übungen: vier Zahlen selbst rechnen, MRR aus Rängen, die Schwelle verschieben, die Grenzen des Proxys benennen, RAGAS-Maße zuordnen und die Ablation lesen.</span><span lang="en">Six exercises: compute four numbers yourself, MRR from ranks, move the threshold, name the limits of the proxy, assign RAGAS measures and read the ablation.</span></p>
     <div data-uebung="R08-01"></div>
     <div data-uebung="R08-02"></div>
     <div data-uebung="R08-03"></div>
@@ -59,11 +189,25 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Suche und Antwort getrennt messen; die Suche misst man ohne Sprachmodell in Sekunden.</span><span lang="en">Measure retrieval and answer separately; retrieval is measured without a language model in seconds.</span></li>
+      <li><span lang="de">Hit@5, Hit@1, MRR und Abdeckung sagen, ob, wie weit vorn und wie vollständig gefunden wird.</span><span lang="en">Hit@5, hit@1, MRR and coverage say whether, how far in front and how completely things are found.</span></li>
+      <li><span lang="de">Ablation weist jeder Komponente ihren Beitrag zu: Hybrid für E:18, Reranker für Ränge und den Wassereinlauf.</span><span lang="en">Ablation attributes its contribution to every component: hybrid for E:18, reranker for ranks and the water intake.</span></li>
+      <li><span lang="de">Negativtests prüfen das Schweigen; vier Fälle sind ein Anfang, keine Garantie.</span><span lang="en">Negative tests check the silence; four cases are a start, not a guarantee.</span></li>
+      <li><span lang="de">Die Schwelle ist eine Abwägung mit Preis: eine falsche Ablehnung bei 0,15; sie braucht einen wachsenden Testbestand.</span><span lang="en">The threshold is a trade-off with a price: one false rejection at 0.15; it needs a growing test set.</span></li>
+      <li><span lang="de">Antwortqualität braucht eigene Maße (Faithfulness, Relevance, Precision, Recall) und annotierte Daten, die dem Fallbeispiel fehlen.</span><span lang="en">Answer quality needs its own measures (faithfulness, relevance, precision, recall) and annotated data that the case study lacks.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Manning, C. D., Raghavan, P., Schütze, H. (2008): Introduction to Information Retrieval, Kapitel 8 (Evaluation). Cambridge University Press. <a href="https://nlp.stanford.edu/IR-book/" rel="noopener">nlp.stanford.edu/IR-book</a></li>
+      <li>Es, S., James, J., Espinosa-Anke, L., Schockaert, S. (2023): Ragas: Automated Evaluation of Retrieval Augmented Generation. <a href="https://arxiv.org/abs/2309.15217" rel="noopener">arXiv:2309.15217</a></li>
+      <li>Saad-Falcon, J. et al. (2023): ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems. <a href="https://arxiv.org/abs/2311.09476" rel="noopener">arXiv:2311.09476</a></li>
+      <li><span lang="de">Fallbeispiel: <code>eval/questions.json</code>, <code>eval/run_eval.py</code>, <code>docs/evaluation/vector.json</code>, <code>hybrid-no-rerank.json</code>, <code>hybrid-rerank.json</code>, <code>negative-checks.json</code>, <code>docs/AUDIT.md</code> (Reale Retrieval-Messung, Gegenbeispiele, Verbleibende Grenzen), <code>docs/evaluation/LIVE.md</code> (Hauptstadt-Frage), Stand 19.09.2026; Nachrechnung in <code>data/fragen.json</code> und <code>tools/pruefung.test.mjs</code>.</span><span lang="en">Case study: <code>eval/questions.json</code>, <code>eval/run_eval.py</code>, <code>docs/evaluation/vector.json</code>, <code>hybrid-no-rerank.json</code>, <code>hybrid-rerank.json</code>, <code>negative-checks.json</code>, <code>docs/AUDIT.md</code> (real retrieval measurement, counter-examples, remaining limits), <code>docs/evaluation/LIVE.md</code> (capital question), as of 19 Sept 2026; recomputation in <code>data/fragen.json</code> and <code>tools/pruefung.test.mjs</code>.</span></li>
+    </ul>
   </section>
 
 </main>

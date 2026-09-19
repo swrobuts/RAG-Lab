@@ -109,6 +109,7 @@ const WERTE = {
   'fragen.wasserSchiesst.score': () => frage('wasser-schiesst').obersterScore,
   'fragen.wasserLaeuft.score': () => frage('wasser-laeuft').obersterScore,
   'fragen.fehler18.score': () => frage('fehler-18-ohne-doppelpunkt').obersterScore,
+  'fragen.negativ1.score': () => frage('negativ-1').obersterScore,
   'fragen.negativMax.score': () => Math.max(...fr.fragen.filter(f => f.art === 'negativ').map(f => f.obersterScore)),
   'fragen.anzahl': () => fr.fragen.length,
   'projektion.varianz': () => (pr.varianz[0] + pr.varianz[1]) * 100,
