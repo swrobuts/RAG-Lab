@@ -6,6 +6,6 @@ set -e
 cd "$(dirname "$0")"
 PY=${PY:-/Users/robert/miniforge3/bin/python3.12}
 export KMP_DUPLICATE_LIB_OK=TRUE
-$PY export_chunks.py && $PY embed_fragen.py && $PY projektion.py && $PY tokens.py && $PY logits.py && $PY seite.py
+$PY export_chunks.py && $PY umgebung.py && $PY embed_fragen.py && $PY projektion.py && $PY tokens.py && $PY logits.py && $PY seite.py
 [ "$1" = "--mit-llm" ] && $PY aufzeichnen.py
 echo "Daten erzeugt."

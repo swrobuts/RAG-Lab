@@ -14,7 +14,7 @@ PROMPTS = {"e18": "Die Waschmaschine zeigt den Fehlercode E:18. Das bedeutet, da
            "englisch": "The washing machine shows error E:18, which means that"}
 
 
-def fortsetzung(ids, temperatur, seed=7):
+def fortsetzung(ids, temperatur, seed):
     torch.manual_seed(seed)
     if temperatur > 0:
         out = model.generate(ids, max_new_tokens=24, do_sample=True, temperature=temperatur, top_k=0, top_p=1.0,
@@ -25,7 +25,7 @@ def fortsetzung(ids, temperatur, seed=7):
 
 
 eintraege = []
-for key, p in PROMPTS.items():
+for i, (key, p) in enumerate(PROMPTS.items()):
     ids = tok(p, return_tensors="pt").input_ids
     with torch.no_grad():
         logits = model(ids).logits[0, -1]
@@ -33,8 +33,8 @@ for key, p in PROMPTS.items():
     eintraege.append({"id": key, "prompt": p,
                       "tokens": [{"token": tok.decode([int(i)]), "logit": round(float(l), 3)} for l, i in zip(top.values, top.indices)],
                       "restLogsumexp": round(float(torch.logsumexp(logits, 0)), 3),
-                      "fortsetzungen": {"0": fortsetzung(ids, 0), "0.7": fortsetzung(ids, 0.7), "1.5": fortsetzung(ids, 1.5)}})
+                      "seed": 7 + i, "fortsetzungen": {"0": fortsetzung(ids, 0, 7 + i), "0.7": fortsetzung(ids, 0.7, 7 + i), "1.5": fortsetzung(ids, 1.5, 7 + i)}})
     print(key, "→", [t["token"] for t in eintraege[-1]["tokens"][:5]], "| T=0:", eintraege[-1]["fortsetzungen"]["0"][:60])
 schreibe("logits.json", {"modell": NAME, "datum": datetime.date.today().isoformat(), "vokabular": len(tok),
-                         "hinweis": "Basismodell ohne Instruktionstuning; Fortsetzungen mit festem Zufallsstartwert 7, 24 neue Tokens; Logits aus einem Vorwärtslauf in float32.",
+                         "hinweis": "Basismodell ohne Instruktionstuning; Fortsetzungen mit festem Zufallsstartwert je Prompt (7 + Index), 24 neue Tokens; Logits aus einem Vorwärtslauf in float32.",
                          "prompts": eintraege})

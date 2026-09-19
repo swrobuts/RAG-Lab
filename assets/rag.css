@@ -812,3 +812,12 @@ ul.checkliste li { border: 0; padding: 0.25rem 0; }
 .terminal-auftrag li.aktuell::marker { color: var(--signal); }
 .terminal-auftrag strong { color: var(--term-fg); }
 .terminal-auftrag .gut { color: #A8E0A0; margin-top: 0.4rem; }
+
+/* ============================================================ Diagramme */
+figure.diagramm { margin: 1.2rem 0; padding: 0.8rem; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+figure.diagramm img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figure.diagramm figcaption { font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.6rem; text-align: center; }
+blockquote.warn-box p, blockquote.concept-box p { margin: 0; font-style: italic; }
+ul.quellen { font-size: 0.88rem; }
+ul.quellen li { margin-bottom: 0.45rem; }
+.lab-intro strong { color: var(--accent); }

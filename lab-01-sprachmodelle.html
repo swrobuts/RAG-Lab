@@ -28,6 +28,11 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#tokens"><span lang="de">Tokens</span><span lang="en">Tokens</span></a>
+  <a class="sidebar-link" href="#vorhersage"><span lang="de">Das nächste Token</span><span lang="en">The next token</span></a>
+  <a class="sidebar-link" href="#transformer"><span lang="de">Transformer und Training</span><span lang="en">Transformer and training</span></a>
+  <a class="sidebar-link" href="#kontext"><span lang="de">Kontextfenster</span><span lang="en">Context window</span></a>
+  <a class="sidebar-link" href="#halluzination"><span lang="de">Halluzination und Wissensstand</span><span lang="en">Hallucination and cutoff</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +45,129 @@
     <span lang="en">Language models</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">Eine Waschmaschine zeigt <strong>E:18</strong>. Wer das Handbuch nicht hat, fragt ein Sprachmodell – und bekommt eine flüssige Antwort, die falsch ist. Dieses Lab zeigt, warum: Ein Sprachmodell zerlegt Text in Tokens, berechnet für jedes der <span data-wert="tokens.vokabular">250 002</span> Tokens seines Vokabulars die Wahrscheinlichkeit, das nächste zu sein, und hängt eines davon an. Mehr passiert nicht, und daraus folgen Kontextfenster, Temperatur, Halluzination und Wissensstand. Der Tokenizer und der Temperatur-Regler laufen hier live.</span>
+    <span lang="en">A washing machine shows <strong>E:18</strong>. Anyone without the manual asks a language model – and gets a fluent answer that is wrong. This lab shows why: a language model splits text into tokens, computes for each of the <span data-wert="tokens.vokabular">250,002</span> tokens of its vocabulary the probability of being the next one, and appends one of them. Nothing more happens, and from this follow context window, temperature, hallucination and knowledge cutoff. The tokenizer and the temperature slider run live here.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Token</span>
+    <span class="lernziel-chip"><span lang="de">Nächstes-Token-Vorhersage</span><span lang="en">Next-token prediction</span></span>
+    <span class="lernziel-chip"><span lang="de">Kontextfenster</span><span lang="en">Context window</span></span>
+    <span class="lernziel-chip"><span lang="de">Temperatur</span><span lang="en">Temperature</span></span>
+    <span class="lernziel-chip"><span lang="de">Halluzination</span><span lang="en">Hallucination</span></span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="tokens">
+    <h2><span lang="de">Tokens: die kleinste Einheit</span><span lang="en">Tokens: the smallest unit</span></h2>
+    <p>
+      <span lang="de">Ein Sprachmodell liest keine Buchstaben und keine Wörter, sondern <strong>Tokens</strong>: Zeichenfolgen aus einem festen Vokabular. Der Tokenizer des Fallbeispiels (aus dem Embedding-Modell <code>multilingual-e5-small</code>, übernommen von XLM-RoBERTa) kennt <span data-wert="tokens.vokabular">250 002</span> solcher Einträge. Häufige Wörter sind ein Token, seltene zerfallen in Stücke: „Laugenpumpe“ wird zu <code>▁Lau</code> <code>gen</code> <code>pump</code> <code>e</code>, wobei <code>▁</code> den Wortanfang markiert. Die Frage „Was bedeutet E:18?“ besteht aus <span data-wert="tokens.e18">5</span> Tokens – und <code>:18</code> ist eines davon, weil diese Zeichenfolge im Trainingstext häufig vorkam.</span>
+      <span lang="en">A language model reads neither letters nor words but <strong>tokens</strong>: character sequences from a fixed vocabulary. The case study's tokenizer (from the embedding model <code>multilingual-e5-small</code>, inherited from XLM-RoBERTa) knows <span data-wert="tokens.vokabular">250,002</span> such entries. Frequent words are one token, rare ones fall into pieces: “Laugenpumpe” becomes <code>▁Lau</code> <code>gen</code> <code>pump</code> <code>e</code>, where <code>▁</code> marks the beginning of a word. The question “Was bedeutet E:18?” consists of <span data-wert="tokens.e18">5</span> tokens – and <code>:18</code> is one of them, because this character sequence occurred often in the training text.</span>
+    </p>
+    <p>
+      <span lang="de">Das Vokabular entsteht vor dem Training aus Statistik: Byte-Pair-Encoding (Sennrich, Haddow und Birch 2016) verschmilzt schrittweise die häufigsten Zeichenpaare zu neuen Einträgen; SentencePiece (Kudo und Richardson 2018) tut das direkt auf dem Rohtext, ohne Vorzerlegung in Wörter, und deshalb für Deutsch, Englisch oder Chinesisch mit einem Verfahren. Weil der Trainingstext überwiegend englisch war, braucht derselbe Satz auf Deutsch mehr Tokens: <span data-wert="tokens.satzDe">17</span> gegenüber <span data-wert="tokens.satzEn">14</span> im Beispiel unten. Im Handbuch des Fallbeispiels kommen auf ein Token im Mittel <span data-wert="tokens.zeichenJeToken">4,72</span> Zeichen.</span>
+      <span lang="en">The vocabulary is built before training from statistics: byte-pair encoding (Sennrich, Haddow and Birch 2016) step by step merges the most frequent character pairs into new entries; SentencePiece (Kudo and Richardson 2018) does this directly on raw text, without pre-splitting into words, and therefore handles German, English or Chinese with one procedure. Because the training text was mostly English, the same sentence needs more tokens in German: <span data-wert="tokens.satzDe">17</span> versus <span data-wert="tokens.satzEn">14</span> in the example below. In the case study's manual, one token covers <span data-wert="tokens.zeichenJeToken">4.72</span> characters on average.</span>
+    </p>
+    <div data-werkzeug="tokenizer" data-parameter='{"beispiel":"e18"}'></div>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">Token</span><span class="befehl-was"><span lang="de">Die Recheneinheit eines Sprachmodells</span><span lang="en">The unit of computation of a language model</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><span lang="de">Was es ist</span><span lang="en">What it is</span><span><span lang="de">Eine Zeichenfolge aus einem festen Vokabular, hier 250 002 Einträge. Ein Wort kann ein Token sein oder mehrere.</span><span lang="en">A character sequence from a fixed vocabulary, here 250,002 entries. A word can be one token or several.</span></span></li>
+          <li><span lang="de">Wo es zählt</span><span lang="en">Where it counts</span><span><span lang="de">Kontextfenster, Preise der Anbieter, Maximallänge eines Embedding-Modells (512 bei e5), Chunk-Größe (440 im Fallbeispiel).</span><span lang="en">Context window, provider prices, maximum length of an embedding model (512 for e5), chunk size (440 in the case study).</span></span></li>
+          <li><span lang="de">Faustregel</span><span lang="en">Rule of thumb</span><span><span lang="de">Deutsch mit diesem Tokenizer: rund 4,7 Zeichen je Token. Englisch braucht weniger Tokens für denselben Inhalt.</span><span lang="en">German with this tokenizer: about 4.7 characters per token. English needs fewer tokens for the same content.</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Jedes Modell hat seinen eigenen Tokenizer. Die Tokenzahl aus dem e5-Tokenizer ist eine Größenordnung für das Chatmodell, keine exakte Zahl.</span><span lang="en">Every model has its own tokenizer. The token count from the e5 tokenizer is an order of magnitude for the chat model, not an exact figure.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="vorhersage">
+    <h2><span lang="de">Das nächste Token</span><span lang="en">The next token</span></h2>
+    <p>
+      <span lang="de">Ein Sprachmodell rechnet in jedem Schritt dasselbe aus: Aus den bisherigen Tokens entsteht eine Wahrscheinlichkeitsverteilung über das gesamte Vokabular, das Modell wählt daraus ein Token, hängt es an und beginnt von vorn. Das Werkzeug unten zeigt diese Verteilung für den Satzanfang „Die Waschmaschine zeigt den Fehlercode E:18. Das bedeutet, dass“, berechnet mit dem offenen Basismodell <span data-wert="logits.modell">Qwen/Qwen2.5-0.5B</span>. Auf Rang 1 steht „ die“ mit <span data-wert="logits.e18.pTop1">22</span> Prozent, dann „ der“ und „ das“; erst mit den Wahrscheinlichkeiten aller <span data-wert="logits.vokabular">151 665</span> Tokens ergibt sich 100 Prozent.</span>
+      <span lang="en">At every step a language model computes the same thing: from the tokens so far arises a probability distribution over the whole vocabulary, the model picks one token from it, appends it and starts over. The tool below shows this distribution for the sentence start “Die Waschmaschine zeigt den Fehlercode E:18. Das bedeutet, dass”, computed with the open base model <span data-wert="logits.modell">Qwen/Qwen2.5-0.5B</span>. In first place is “ die” with <span data-wert="logits.e18.pTop1">22</span> percent, then “ der” and “ das”; only the probabilities of all <span data-wert="logits.vokabular">151,665</span> tokens add up to 100 percent.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/token-vorhersage-de.svg" alt="Ablauf: Text wird tokenisiert, der Transformer berechnet eine Verteilung über das Vokabular, das Sampling wählt ein Token, das angehängt wird, dann wiederholt sich der Ablauf." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/token-vorhersage-en.svg" alt="Flow: text is tokenised, the transformer computes a distribution over the vocabulary, sampling picks a token which is appended, then the flow repeats." loading="lazy"></span>
+      <figcaption><span lang="de">Ein Durchlauf erzeugt ein Token. Eine Antwort mit 150 Tokens sind 150 Durchläufe.</span><span lang="en">One pass produces one token. An answer of 150 tokens is 150 passes.</span></figcaption>
+    </figure>
+    <p>
+      <span lang="de">Wie das Modell aus der Verteilung wählt, entscheidet das <strong>Sampling</strong>. Die <strong>Temperatur</strong> T teilt vor dem Softmax alle Logits: p<sub>i</sub> = exp(z<sub>i</sub>/T) / Σ<sub>j</sub> exp(z<sub>j</sub>/T). Bei T → 0 bleibt nur das Maximum übrig, die Antwort ist bei gleicher Frage immer dieselbe; bei großem T werden seltene Tokens wahrscheinlicher, bis der Text zerfällt. Holtzman et al. (2020) zeigen beide Enden: reine Maximierung wiederholt sich stumpf, zu viel Zufall verliert den Zusammenhang; Top-p-Sampling schneidet den unwahrscheinlichen Rest der Verteilung ab. Das Fallbeispiel arbeitet mit Temperatur 0, damit dieselbe Frage dieselbe belegte Antwort ergibt.</span>
+      <span lang="en">How the model picks from the distribution is decided by <strong>sampling</strong>. The <strong>temperature</strong> T divides all logits before the softmax: p<sub>i</sub> = exp(z<sub>i</sub>/T) / Σ<sub>j</sub> exp(z<sub>j</sub>/T). As T → 0 only the maximum remains and the answer to the same question is always the same; at large T rare tokens become more probable until the text falls apart. Holtzman et al. (2020) show both ends: pure maximisation repeats itself dully, too much randomness loses coherence; top-p sampling cuts off the improbable tail of the distribution. The case study runs at temperature 0 so that the same question yields the same grounded answer.</span>
+    </p>
+    <div data-werkzeug="temperatur" data-parameter='{"prompt":"e18"}'></div>
+    <div class="tip-box">
+      <p><strong><span lang="de">Basismodell gegen Chatmodell.</span><span lang="en">Base model versus chat model.</span></strong> <span lang="de">Das Werkzeug nutzt ein kleines Basismodell, das nur Text fortsetzt. Chatmodelle wie gemma-4-12b-it haben zusätzlich gelernt, auf Anweisungen zu antworten (nächster Abschnitt). Der Rechenschritt ist derselbe: eine Verteilung, ein Token, von vorn.</span><span lang="en">The tool uses a small base model that only continues text. Chat models such as gemma-4-12b-it have additionally learned to respond to instructions (next section). The computation is the same: one distribution, one token, start over.</span></p>
+    </div>
+  </section>
+
+  <section class="section-block" id="transformer">
+    <h2><span lang="de">Transformer und Training</span><span lang="en">Transformer and training</span></h2>
+    <p>
+      <span lang="de">Die Verteilung berechnet ein <strong>Transformer</strong> (Vaswani et al. 2017): ein Netz aus Schichten, in denen jedes Token per <strong>Attention</strong> gewichtet auf alle vorherigen Tokens schaut. „E:18“ bekommt so den Kontext „Fehlercode“ und „Waschmaschine“ mit. Das Netz besteht aus Milliarden Parametern; gemma-4-12b hat rund zwölf Milliarden, das Werkzeugmodell Qwen2.5-0.5B eine halbe. Diese Parameter sind gelernt, nicht programmiert.</span>
+      <span lang="en">The distribution is computed by a <strong>transformer</strong> (Vaswani et al. 2017): a network of layers in which every token looks at all previous tokens with weights, via <strong>attention</strong>. “E:18” thereby carries the context “Fehlercode” and “Waschmaschine”. The network consists of billions of parameters; gemma-4-12b has about twelve billion, the tool model Qwen2.5-0.5B half a billion. These parameters are learned, not programmed.</span>
+    </p>
+    <p>
+      <span lang="de">Das Training läuft in drei Stufen. Im <strong>Vortraining</strong> lernt das Modell aus Billionen Tokens Text, das jeweils nächste Token vorherzusagen; daraus entstehen Sprachgefühl und Weltwissen bis zum Stichtag der Daten. Brown et al. (2020) zeigten mit 175 Milliarden Parametern, dass ein solches Modell Aufgaben aus wenigen Beispielen im Prompt löst. Im <strong>Instruktionstuning</strong> lernt es aus Beispieldialogen, Anweisungen zu befolgen; im <strong>Präferenzabgleich</strong> bewerten Menschen Antwortpaare, und das Modell wird auf die bevorzugten hin optimiert (RLHF, Ouyang et al. 2022; ein 1,3-Milliarden-Modell mit diesem Training wurde dem 175-Milliarden-Basismodell vorgezogen). Das Ergebnis heißt Chatmodell; die Endung <code>-it</code> in <code>gemma-4-12b-it</code> steht für <em>instruction-tuned</em>.</span>
+      <span lang="en">Training runs in three stages. In <strong>pre-training</strong> the model learns from trillions of tokens of text to predict the next token; from this arise a feel for language and world knowledge up to the data cutoff. Brown et al. (2020) showed with 175 billion parameters that such a model solves tasks from a few examples in the prompt. In <strong>instruction tuning</strong> it learns from example dialogues to follow instructions; in <strong>preference alignment</strong> humans rate answer pairs and the model is optimised towards the preferred ones (RLHF, Ouyang et al. 2022; a 1.3-billion model with this training was preferred over the 175-billion base model). The result is called a chat model; the suffix <code>-it</code> in <code>gemma-4-12b-it</code> stands for <em>instruction-tuned</em>.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/llm-training-de.svg" alt="Drei Trainingsstufen: Vortraining, Instruktionstuning, Präferenzabgleich; daraus entsteht ein Chatmodell. Nach dem Vortraining allein bleibt ein Basismodell, das nur fortsetzt." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/llm-training-en.svg" alt="Three training stages: pre-training, instruction tuning, preference alignment; the result is a chat model. After pre-training alone a base model remains that only continues text." loading="lazy"></span>
+      <figcaption><span lang="de">Alle drei Stufen ändern Parameter. RAG ändert später keine Parameter, sondern den Text im Kontextfenster.</span><span lang="en">All three stages change parameters. RAG later changes no parameters, only the text in the context window.</span></figcaption>
+    </figure>
+    <div class="concept-box">
+      <h3><span lang="de">Quantisierung: warum 12 Milliarden Parameter auf einen Laptop passen</span><span lang="en">Quantisation: why 12 billion parameters fit on a laptop</span></h3>
+      <p><span lang="de">Jeder Parameter ist eine Zahl. Mit 16 Bit je Zahl braucht gemma-4-12b rund 24 GB Speicher; LM Studio lädt das Modell im Fallbeispiel mit 6 Bit je Parameter (Stand 19.09.2026, LM-Studio-API), also mit rund einem Drittel. Die Antworten werden dadurch etwas ungenauer, das Modell läuft aber auf einem Rechner mit 16 GB Arbeitsspeicher. Dasselbe Prinzip nutzt Lab 05 für das Embedding-Modell im Browser: 8 Bit statt 32, 118 MB statt 470.</span><span lang="en">Every parameter is a number. At 16 bits per number gemma-4-12b needs about 24 GB of memory; in the case study LM Studio loads the model with 6 bits per parameter (as of 19 Sept 2026, LM Studio API), so with about a third. Answers become slightly less precise, but the model runs on a machine with 16 GB of RAM. Lab 05 uses the same principle for the embedding model in the browser: 8 bits instead of 32, 118 MB instead of 470.</span></p>
+    </div>
+  </section>
+
+  <section class="section-block" id="kontext">
+    <h2><span lang="de">Das Kontextfenster</span><span lang="en">The context window</span></h2>
+    <p>
+      <span lang="de">Alles, was das Modell bei einer Antwort sieht, steht in einem Fenster fester Länge, gemessen in Tokens: Systemprompt, Frage, mitgegebene Texte und die Antwort selbst. gemma-4-12b-it meldet in LM Studio ein Fenster von <span data-wert="lms.kontext">262 144</span> Tokens (Stand 19.09.2026); ältere oder kleinere Modelle haben 4 096 oder 8 192. Das Fenster ist ein Budget. Was nicht hineinpasst, sieht das Modell nicht, und Liu et al. (2023) zeigen, dass Modelle Informationen in der Mitte sehr langer Kontexte schlechter nutzen als am Anfang oder Ende. Das Fallbeispiel begrenzt die Handbuchauszüge deshalb auf 14 000 Zeichen, nach dem Maß dieses Tokenizers rund <span data-wert="tokens.budgetTokens">2 966</span> Tokens; der Systemprompt allein belegt <span data-wert="tokens.systemprompt">279</span> Tokens.</span>
+      <span lang="en">Everything the model sees when answering sits in a window of fixed length, measured in tokens: system prompt, question, supplied texts and the answer itself. In LM Studio, gemma-4-12b-it reports a window of <span data-wert="lms.kontext">262,144</span> tokens (as of 19 Sept 2026); older or smaller models have 4,096 or 8,192. The window is a budget. What does not fit, the model does not see, and Liu et al. (2023) show that models use information in the middle of very long contexts worse than at the beginning or end. The case study therefore limits the manual excerpts to 14,000 characters, about <span data-wert="tokens.budgetTokens">2,966</span> tokens by this tokenizer's measure; the system prompt alone takes <span data-wert="tokens.systemprompt">279</span> tokens.</span>
+    </p>
+    <div data-werkzeug="kontext" data-parameter='{"fenster":8192,"k":5}'></div>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name"><span lang="de">Kontextfenster</span><span lang="en">Context window</span></span><span class="befehl-was"><span lang="de">Das Budget einer Anfrage in Tokens</span><span lang="en">The budget of one request in tokens</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><span lang="de">Enthält</span><span lang="en">Contains</span><span><span lang="de">Systemprompt + Frage + mitgegebene Texte + Antwort. Die Antwort zählt mit.</span><span lang="en">System prompt + question + supplied texts + answer. The answer counts.</span></span></li>
+          <li><span lang="de">Grenze</span><span lang="en">Limit</span><span><span lang="de">Modellabhängig, 4 096 bis über 200 000 Tokens. Größer heißt langsamer und teurer je Anfrage.</span><span lang="en">Model-dependent, 4,096 to over 200,000 tokens. Larger means slower and more expensive per request.</span></span></li>
+          <li><span lang="de">Im Fallbeispiel</span><span lang="en">In the case study</span><span><span lang="de"><code>CONTEXT_MAX_CHARS=14000</code> für die Auszüge, <code>ANSWER_MAX_TOKENS=1024</code> für die Antwort.</span><span lang="en"><code>CONTEXT_MAX_CHARS=14000</code> for the excerpts, <code>ANSWER_MAX_TOKENS=1024</code> for the answer.</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Ein großes Fenster ist kein Ersatz für Suche. Ein ganzes Handbuch (<span data-wert="tokens.handbuch">23 925</span> Tokens) passt zwar hinein, aber jede Frage kostet dann das ganze Handbuch an Rechenzeit, und die relevante Zeile steht irgendwo in der Mitte.</span><span lang="en">A large window is no substitute for search. A whole manual (<span data-wert="tokens.handbuch">23,925</span> tokens) does fit, but every question then costs the whole manual in compute, and the relevant line sits somewhere in the middle.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="halluzination">
+    <h2><span lang="de">Halluzination und Wissensstand</span><span lang="en">Hallucination and knowledge cutoff</span></h2>
+    <p>
+      <span lang="de">Auf die nackte Frage „Was bedeutet der Fehlercode E:18?“ antwortete gemma-4-12b-it am 19.09.2026 in LM Studio:</span>
+      <span lang="en">Asked the bare question “Was bedeutet der Fehlercode E:18?”, gemma-4-12b-it answered in LM Studio on 19 Sept 2026:</span>
+    </p>
+    <blockquote class="warn-box">
+      <p lang="de">„Der Fehlercode E:18 kann je nach Gerät und Hersteller unterschiedliche Bedeutungen haben. Häufig tritt er bei Waschmaschinen oder Geschirrspülern auf und weist auf ein Problem mit der Wasserzufuhr oder dem Wasserdruck hin. […] Schauen Sie am besten in die Bedienungsanleitung oder auf der Website des Herstellers nach.“</p>
+      <p lang="en">“The error code E:18 can have different meanings depending on the appliance and manufacturer. It often occurs on washing machines or dishwashers and indicates a problem with the water supply or water pressure. […] It is best to check the manual or the manufacturer's website.” (translated from the German answer)</p>
+    </blockquote>
+    <p>
+      <span lang="de">Das Handbuch sagt etwas anderes: <strong>Laugenpumpe verstopft</strong> oder <strong>Ablaufschlauch verstopft</strong>, also das Gegenteil von Wasserzufuhr. Die Antwort ist grammatisch einwandfrei, vorsichtig formuliert und falsch. Ji et al. (2023) nennen das <strong>Halluzination</strong>: Das Modell erzeugt Inhalte, die nicht durch Wissen gedeckt sind, weil sein Verfahren in jedem Schritt ein plausibles nächstes Token verlangt und kein Schritt „ich weiß es nicht“ heißt. Der zweite Grund ist der <strong>Wissensstand</strong>: Das Vortraining endet an einem Stichtag, und ein Handbuch, das nicht im Trainingstext war, kennt das Modell nicht – gleich, wie neu oder alt es ist.</span>
+      <span lang="en">The manual says something else: <strong>drain pump blocked</strong> or <strong>drain hose blocked</strong>, the opposite of water supply. The answer is grammatically flawless, cautiously worded and wrong. Ji et al. (2023) call this <strong>hallucination</strong>: the model produces content not covered by knowledge because its procedure demands a plausible next token at every step, and no step means “I don't know”. The second reason is the <strong>knowledge cutoff</strong>: pre-training ends at a cutoff date, and a manual that was not in the training text is unknown to the model – however new or old it is.</span>
+    </p>
+    <div class="challenge-box">
+      <h3><span lang="de">Der rote Faden</span><span lang="en">The thread</span></h3>
+      <p><span lang="de">Die Frage „Was bedeutet E:18?“ begleitet Sie durch alle zehn Labs. Hier hat sie ein Modell allein falsch beantwortet. Lab 02 zeigt, wie dieselbe Frage mit dem Handbuch im Kontextfenster richtig und mit Seitenzahl beantwortet wird, und Lab 08 misst, wie oft das gelingt.</span><span lang="en">The question “Was bedeutet E:18?” accompanies you through all ten labs. Here a model on its own answered it wrongly. Lab 02 shows how the same question is answered correctly, with page numbers, once the manual is in the context window, and lab 08 measures how often that succeeds.</span></p>
+    </div>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Fünf Übungen: Tokens zählen, den Rechenschritt benennen, die Temperatur bedienen, ein Kontextbudget rechnen und die Halluzination einordnen.</span><span lang="en">Five exercises: count tokens, name the computation, operate the temperature, compute a context budget and classify the hallucination.</span></p>
     <div data-uebung="R01-01"></div>
     <div data-uebung="R01-02"></div>
     <div data-uebung="R01-03"></div>
@@ -58,11 +177,31 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Ein Token ist eine Zeichenfolge aus einem festen Vokabular; deutsche Wörter zerfallen in mehr Tokens als englische.</span><span lang="en">A token is a character sequence from a fixed vocabulary; German words fall into more tokens than English ones.</span></li>
+      <li><span lang="de">Ein Sprachmodell berechnet in jedem Schritt eine Verteilung über das Vokabular und hängt ein Token an; Temperatur regelt den Zufall dieser Wahl.</span><span lang="en">At every step a language model computes a distribution over the vocabulary and appends one token; temperature controls the randomness of that choice.</span></li>
+      <li><span lang="de">Vortraining, Instruktionstuning und Präferenzabgleich ändern die Parameter; danach steht das Wissen des Modells fest.</span><span lang="en">Pre-training, instruction tuning and preference alignment change the parameters; after that the model's knowledge is fixed.</span></li>
+      <li><span lang="de">Das Kontextfenster ist ein Budget in Tokens, in das auch die Antwort gehört.</span><span lang="en">The context window is a budget in tokens that also has to hold the answer.</span></li>
+      <li><span lang="de">Halluzination folgt aus dem Verfahren; das Handbuch zur Laufzeit mitzugeben ist der Weg, den Lab 02 beginnt.</span><span lang="en">Hallucination follows from the mechanism; supplying the manual at query time is the path lab 02 begins.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Vaswani, A. et al. (2017): Attention Is All You Need. NeurIPS. <a href="https://arxiv.org/abs/1706.03762" rel="noopener">arXiv:1706.03762</a></li>
+      <li>Brown, T. B. et al. (2020): Language Models are Few-Shot Learners. <a href="https://arxiv.org/abs/2005.14165" rel="noopener">arXiv:2005.14165</a></li>
+      <li>Ouyang, L. et al. (2022): Training language models to follow instructions with human feedback. <a href="https://arxiv.org/abs/2203.02155" rel="noopener">arXiv:2203.02155</a></li>
+      <li>Sennrich, R., Haddow, B., Birch, A. (2016): Neural Machine Translation of Rare Words with Subword Units. ACL. <a href="https://arxiv.org/abs/1508.07909" rel="noopener">arXiv:1508.07909</a></li>
+      <li>Kudo, T., Richardson, J. (2018): SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing. <a href="https://arxiv.org/abs/1808.06226" rel="noopener">arXiv:1808.06226</a></li>
+      <li>Conneau, A. et al. (2020): Unsupervised Cross-lingual Representation Learning at Scale (XLM-R). ACL. <a href="https://arxiv.org/abs/1911.02116" rel="noopener">arXiv:1911.02116</a></li>
+      <li>Holtzman, A. et al. (2020): The Curious Case of Neural Text Degeneration. ICLR. <a href="https://arxiv.org/abs/1904.09751" rel="noopener">arXiv:1904.09751</a></li>
+      <li>Liu, N. F. et al. (2023): Lost in the Middle: How Language Models Use Long Contexts. <a href="https://arxiv.org/abs/2307.03172" rel="noopener">arXiv:2307.03172</a></li>
+      <li>Ji, Z. et al. (2023): Survey of Hallucination in Natural Language Generation. ACM Computing Surveys 55(12). <a href="https://arxiv.org/abs/2202.03629" rel="noopener">arXiv:2202.03629</a></li>
+      <li>Wang, L. et al. (2024): Multilingual E5 Text Embeddings: A Technical Report. <a href="https://arxiv.org/abs/2402.05672" rel="noopener">arXiv:2402.05672</a>; Modellkarte <a href="https://huggingface.co/intfloat/multilingual-e5-small" rel="noopener">intfloat/multilingual-e5-small</a> (12 Schichten, 384 Dimensionen, 512 Tokens), abgerufen 19.09.2026</li>
+      <li><span lang="de">Messungen dieses Labs: <code>data/tokens.json</code> (e5-Tokenizer), <code>data/logits.json</code> (Qwen/Qwen2.5-0.5B, Apache-2.0), <code>data/antworten.json</code> (gemma-4-12b-it-mlx in LM Studio, 19.09.2026); Kontextfenster laut LM-Studio-API <code>/api/v0/models</code>, 19.09.2026.</span><span lang="en">Measurements of this lab: <code>data/tokens.json</code> (e5 tokenizer), <code>data/logits.json</code> (Qwen/Qwen2.5-0.5B, Apache-2.0), <code>data/antworten.json</code> (gemma-4-12b-it-mlx in LM Studio, 19 Sept 2026); context window per LM Studio API <code>/api/v0/models</code>, 19 Sept 2026.</span></li>
+    </ul>
   </section>
 
 </main>

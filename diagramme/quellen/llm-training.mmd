@@ -1,0 +1,5 @@
+flowchart TB
+  A["<b>[[Vortraining|Pre-training]]</b><br/>[[nächstes Token vorhersagen,<br/>Billionen Tokens Text|predict the next token,<br/>trillions of tokens of text]]"] --> B["<b>[[Instruktionstuning|Instruction tuning]]</b><br/>[[Beispieldialoge:<br/>Anweisung → gewünschte Antwort|example dialogues:<br/>instruction → desired answer]]"]
+  B --> C["<b>[[Präferenzabgleich|Preference alignment]]</b><br/>[[Menschen bewerten Antwortpaare;<br/>RLHF oder DPO|humans rate answer pairs;<br/>RLHF or DPO]]"]
+  C --> D(["[[Chatmodell, z. B. gemma-4-12b-it|Chat model, e.g. gemma-4-12b-it]]"])
+  A -. "[[Basismodell, z. B. Qwen2.5-0.5B (Lab-Werkzeug)|base model, e.g. Qwen2.5-0.5B (lab tool)]]" .-> E(["[[nur Fortsetzung|continuation only]]"])

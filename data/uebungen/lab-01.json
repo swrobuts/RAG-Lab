@@ -1,1 +1,78 @@
-[]
+[
+  {
+    "id": "R01-01", "typ": "experiment", "werkzeug": "tokenizer", "parameter": { "beispiel": "e18" },
+    "titel": { "de": "Die Frage in Stücken", "en": "The question in pieces" },
+    "aufgabe": { "de": "<p>Wählen Sie im Werkzeug nacheinander die Beispiele „Was bedeutet E:18?“, „Laugenpumpe reinigen“ und die beiden Sätze auf Deutsch und Englisch. Zählen Sie die Tokens und sehen Sie sich an, wo der Tokenizer Wörter zerschneidet.</p>", "en": "<p>In the tool, select the examples “Was bedeutet E:18?”, “Laugenpumpe reinigen” and the two sentences in German and English one after another. Count the tokens and look at where the tokenizer cuts words.</p>" },
+    "fragen": [
+      { "frage": { "de": "Aus wie vielen Tokens besteht „Was bedeutet E:18?“?", "en": "How many tokens does “Was bedeutet E:18?” consist of?" },
+        "optionen": [ { "de": "3", "en": "3" }, { "de": "5", "en": "5" }, { "de": "8", "en": "8" } ], "richtig": [1],
+        "erklaerung": { "de": "▁Was, ▁bedeutet, ▁E, :18 und ? – der Doppelpunkt mit der 18 ist ein einziges Token, weil diese Zeichenfolge im Trainingstext des Tokenizers häufig vorkam.", "en": "▁Was, ▁bedeutet, ▁E, :18 and ? – the colon with the 18 is a single token because this character sequence occurred often in the tokenizer's training text." } },
+      { "frage": { "de": "Warum zerfällt „Laugenpumpe“ in vier Stücke (Lau, gen, pump, e)?", "en": "Why does “Laugenpumpe” fall into four pieces (Lau, gen, pump, e)?" },
+        "optionen": [ { "de": "Das Wort ist im Trainingstext des Tokenizers selten; seltene Wörter werden aus häufigen Teilstücken zusammengesetzt.", "en": "The word is rare in the tokenizer's training text; rare words are assembled from frequent sub-pieces." }, { "de": "Der Tokenizer trennt jedes deutsche Wort an den Silbengrenzen.", "en": "The tokenizer splits every German word at syllable boundaries." }, { "de": "Zusammengesetzte Wörter werden immer in ihre Bestandteile zerlegt.", "en": "Compound words are always split into their components." } ], "richtig": [0],
+        "erklaerung": { "de": "SentencePiece kennt weder Silben noch Wortbestandteile. Es kennt 250 002 Zeichenfolgen, die im Trainingstext häufig waren; alles andere wird aus ihnen zusammengesetzt.", "en": "SentencePiece knows neither syllables nor word parts. It knows 250,002 character sequences that were frequent in the training text; everything else is assembled from them." } },
+      { "frage": { "de": "Derselbe Satz braucht auf Deutsch 17 Tokens und auf Englisch 14. Was folgt daraus für ein Kontextfenster?", "en": "The same sentence needs 17 tokens in German and 14 in English. What follows for a context window?" },
+        "optionen": [ { "de": "Deutscher Text füllt dasselbe Kontextfenster schneller; die Zeichenzahl allein sagt nichts über den Platzbedarf.", "en": "German text fills the same context window faster; the character count alone says nothing about the space needed." }, { "de": "Nichts, weil Kontextfenster in Zeichen gemessen werden.", "en": "Nothing, because context windows are measured in characters." }, { "de": "Englischer Text ist für das Modell schwerer zu verstehen.", "en": "English text is harder for the model to understand." } ], "richtig": [0],
+        "erklaerung": { "de": "Kontextfenster und Preise werden in Tokens gemessen. Der Tokenizer wurde mehrheitlich auf englischem Text trainiert; deutsche Wörter zerfallen in mehr Stücke.", "en": "Context windows and prices are measured in tokens. The tokenizer was trained mostly on English text; German words fall into more pieces." } }
+    ],
+    "rueckmeldung": { "de": "Sie haben die kleinste Einheit eines Sprachmodells gesehen. Alles Weitere in diesem Lab rechnet in Tokens.", "en": "You have seen the smallest unit of a language model. Everything else in this lab counts in tokens." }
+  },
+  {
+    "id": "R01-02", "typ": "quiz",
+    "titel": { "de": "Was das Modell wirklich tut", "en": "What the model really does" },
+    "aufgabe": { "de": "<p>Ein Sprachmodell erhält die Tokens „Die Waschmaschine zeigt den Fehlercode E:18. Das bedeutet, dass“. Was passiert im Modell?</p>", "en": "<p>A language model receives the tokens “Die Waschmaschine zeigt den Fehlercode E:18. Das bedeutet, dass”. What happens inside the model?</p>" },
+    "fragen": [
+      { "frage": { "de": "Welche Aussage beschreibt den Rechenschritt richtig?", "en": "Which statement describes the computation correctly?" },
+        "optionen": [ { "de": "Das Modell berechnet für jedes der 250 002 Tokens des Vokabulars eine Wahrscheinlichkeit, das nächste zu sein.", "en": "The model computes, for each of the 250,002 vocabulary tokens, a probability of being the next one." }, { "de": "Das Modell schlägt den Fehlercode in einer gespeicherten Tabelle nach und gibt den Eintrag zurück.", "en": "The model looks the error code up in a stored table and returns the entry." }, { "de": "Das Modell prüft, ob es die Antwort weiß, und antwortet sonst mit „unbekannt“.", "en": "The model checks whether it knows the answer and otherwise replies “unknown”." } ], "richtig": [0],
+        "erklaerung": { "de": "Ein Vorwärtslauf liefert eine Verteilung über das gesamte Vokabular. Gespeichert sind Gewichte, keine Tabelle; eine Prüfung des eigenen Wissens gibt es im Rechenschritt nicht.", "en": "One forward pass yields a distribution over the whole vocabulary. What is stored are weights, not a table; there is no check of its own knowledge in the computation." } },
+      { "frage": { "de": "Wie entsteht aus der Verteilung ein Satz?", "en": "How does a sentence arise from the distribution?" },
+        "optionen": [ { "de": "Ein Token wird gewählt, an den Text angehängt, und der Vorwärtslauf beginnt von vorn – Token für Token.", "en": "One token is chosen, appended to the text, and the forward pass starts again – token by token." }, { "de": "Das Modell erzeugt den ganzen Satz in einem Schritt.", "en": "The model produces the whole sentence in one step." }, { "de": "Das Modell wählt immer das Token mit der geringsten Wahrscheinlichkeit.", "en": "The model always chooses the token with the lowest probability." } ], "richtig": [0],
+        "erklaerung": { "de": "Deshalb kostet eine lange Antwort mehr Zeit und mehr Geld: Jedes Ausgabetoken ist ein eigener Durchlauf durch das Netz.", "en": "This is why a long answer costs more time and more money: every output token is a separate pass through the network." } }
+    ],
+    "rueckmeldung": { "de": "Vorhersage des nächsten Tokens: mehr steckt im Kern nicht dahinter. Alles Weitere sind Folgen dieses Mechanismus.", "en": "Predicting the next token: there is nothing more at the core. Everything else follows from this mechanism." }
+  },
+  {
+    "id": "R01-03", "typ": "experiment", "werkzeug": "temperatur", "parameter": { "prompt": "e18" },
+    "titel": { "de": "Temperatur am Regler", "en": "Temperature on the slider" },
+    "aufgabe": { "de": "<p>Stellen Sie die Temperatur auf 0, dann auf 1, dann auf 2, und ziehen Sie bei jeder Einstellung mehrfach eine Stichprobe. Lesen Sie danach die drei aufgezeichneten Fortsetzungen des Basismodells.</p>", "en": "<p>Set the temperature to 0, then 1, then 2, and draw several samples at each setting. Then read the three recorded continuations of the base model.</p>" },
+    "fragen": [
+      { "frage": { "de": "Was passiert bei Temperatur 0?", "en": "What happens at temperature 0?" },
+        "optionen": [ { "de": "Immer das wahrscheinlichste Token wird gewählt; die Stichprobe liefert jedes Mal dasselbe.", "en": "The most probable token is always chosen; the sample yields the same result every time." }, { "de": "Das Modell antwortet nicht mehr.", "en": "The model stops answering." }, { "de": "Alle Tokens werden gleich wahrscheinlich.", "en": "All tokens become equally probable." } ], "richtig": [0],
+        "erklaerung": { "de": "Bei T → 0 wird die Verteilung zur Spitze auf dem Maximum (argmax). Das Fallbeispiel arbeitet mit Temperatur 0, damit dieselbe Frage dieselbe Antwort ergibt.", "en": "As T → 0 the distribution collapses onto the maximum (argmax). The case study runs at temperature 0 so that the same question yields the same answer." } },
+      { "frage": { "de": "Was zeigt die Fortsetzung bei T = 1,5?", "en": "What does the continuation at T = 1.5 show?" },
+        "optionen": [ { "de": "Seltene Tokens werden wahrscheinlicher; der Text zerfällt in unzusammenhängende Wörter, hier sogar in andere Sprachen.", "en": "Rare tokens become more probable; the text degenerates into unconnected words, here even into other languages." }, { "de": "Der Text wird länger, bleibt aber richtig.", "en": "The text gets longer but stays correct." }, { "de": "Das Modell antwortet schneller.", "en": "The model answers faster." } ], "richtig": [0],
+        "erklaerung": { "de": "Die Temperatur teilt die Logits vor dem Softmax: Große T flachen die Verteilung ab, kleine T schärfen sie. Holtzman et al. (2020) beschreiben beide Enden: stumpfe Wiederholung bei reiner Maximierung, Zerfall bei zu viel Zufall.", "en": "Temperature divides the logits before the softmax: large T flattens the distribution, small T sharpens it. Holtzman et al. (2020) describe both ends: dull repetition under pure maximisation, decay under too much randomness." } },
+      { "frage": { "de": "Die Fortsetzung bei T = 0 lautet „die Maschine nicht die richtige Einstellung für die Eingabe …“. Was ist das?", "en": "The continuation at T = 0 reads “die Maschine nicht die richtige Einstellung für die Eingabe …”. What is that?" },
+        "optionen": [ { "de": "Eine flüssige, aber erfundene Erklärung: Das Modell kennt die Bedeutung von E:18 nicht und erzeugt trotzdem das plausibelste nächste Token.", "en": "A fluent but invented explanation: the model does not know the meaning of E:18 and still produces the most plausible next token." }, { "de": "Die richtige Bedeutung aus dem Handbuch.", "en": "The correct meaning from the manual." }, { "de": "Ein Zeichen, dass das Modell die Antwort verweigert.", "en": "A sign that the model refuses to answer." } ], "richtig": [0],
+        "erklaerung": { "de": "Laut Handbuch bedeutet E:18: Laugenpumpe oder Ablaufschlauch verstopft. Das Modell hat diese Seite nie gesehen und füllt die Lücke mit dem, was nach „Das bedeutet, dass“ üblicherweise folgt.", "en": "According to the manual, E:18 means: drain pump or drain hose blocked. The model has never seen that page and fills the gap with what usually follows “Das bedeutet, dass”." } }
+    ],
+    "rueckmeldung": { "de": "Temperatur ist ein Regler für Zufall, kein Regler für Wahrheit. Für belegte Antworten steht er auf 0.", "en": "Temperature is a control for randomness, not for truth. For grounded answers it stays at 0." }
+  },
+  {
+    "id": "R01-04", "typ": "rechnen",
+    "titel": { "de": "Passt das in den Kontext?", "en": "Does it fit into the context?" },
+    "aufgabe": { "de": "<p>Ein Chatmodell hat ein Kontextfenster von 8 192 Tokens. Der Systemprompt des Fallbeispiels belegt 279 Tokens, die Frage 14 Tokens, und es werden 5 Handbuch-Chunks mit im Mittel 76 Tokens übergeben. Für die Antwort sind 1 024 Tokens reserviert. Wie viele Tokens sind belegt, und wie viele bleiben frei?</p>", "en": "<p>A chat model has a context window of 8,192 tokens. The case study's system prompt takes 279 tokens, the question 14 tokens, and 5 manual chunks of 76 tokens on average are passed. 1,024 tokens are reserved for the answer. How many tokens are used, and how many remain free?</p>" },
+    "felder": [
+      { "name": { "de": "Belegte Tokens", "en": "Tokens used" }, "loesung": 1697, "toleranz": 5, "einheit": "Tokens" },
+      { "name": { "de": "Freie Tokens", "en": "Tokens free" }, "loesung": 6495, "toleranz": 5, "einheit": "Tokens" }
+    ],
+    "loesungsweg": { "de": "279 + 14 + 5 × 76 + 1 024 = 1 697 belegt; 8 192 − 1 697 = 6 495 frei. Selbst ein Kontextfenster von 8 192 Tokens ist mit fünf Chunks nur zu einem Fünftel gefüllt; die Grenze setzt das Fallbeispiel früher, mit 14 000 Zeichen für die Auszüge.", "en": "279 + 14 + 5 × 76 + 1,024 = 1,697 used; 8,192 − 1,697 = 6,495 free. Even an 8,192-token window is only one fifth full with five chunks; the case study sets its limit earlier, at 14,000 characters for the excerpts." },
+    "hinweis": { "de": "Belegt = Systemprompt + Frage + Chunks + Antwortbudget. Das Werkzeug „Kontextfenster-Füllstand“ oben rechnet dieselben Zahlen.", "en": "Used = system prompt + question + chunks + answer budget. The “context window fill level” tool above computes the same numbers." },
+    "rueckmeldung": { "de": "Das Kontextfenster ist ein Budget in Tokens, und die Antwort gehört mit hinein.", "en": "The context window is a budget in tokens, and the answer counts towards it." }
+  },
+  {
+    "id": "R01-05", "typ": "quiz",
+    "titel": { "de": "Halluzination und Wissensstand", "en": "Hallucination and knowledge cutoff" },
+    "aufgabe": { "de": "<p>Das Modell gemma-4-12b hat auf die nackte Frage „Was bedeutet der Fehlercode E:18?“ geantwortet, der Code weise häufig „auf ein Problem mit der Wasserzufuhr oder dem Wasserdruck“ hin. Das Handbuch nennt die Laugenpumpe und den Ablaufschlauch. Welche Aussagen treffen zu?</p>", "en": "<p>Asked the bare question “Was bedeutet der Fehlercode E:18?”, the model gemma-4-12b answered that the code often indicates “a problem with the water supply or water pressure”. The manual names the drain pump and the drain hose. Which statements are true?</p>" },
+    "fragen": [
+      { "frage": { "de": "Wählen Sie alle zutreffenden Aussagen.", "en": "Select all statements that apply." }, "mehrfach": true,
+        "optionen": [
+          { "de": "Die falsche Antwort ist eine Folge des Verfahrens: Das Modell erzeugt in jedem Schritt ein plausibles nächstes Token, auch wenn kein passendes Wissen vorliegt.", "en": "The wrong answer follows from the mechanism: at every step the model produces a plausible next token, even when no matching knowledge exists." },
+          { "de": "Fakten, die nach dem Ende der Trainingsdaten entstanden sind, kennt das Modell nicht; ein Handbuch von 2026 kann es nur kennen, wenn es im Training war.", "en": "Facts that arose after the end of the training data are unknown to the model; it can only know a 2026 manual if it was in the training data." },
+          { "de": "Mit genügend Parametern verschwindet das Problem vollständig.", "en": "With enough parameters the problem disappears entirely." },
+          { "de": "Eine flüssige, sichere Formulierung ist kein Hinweis darauf, dass die Aussage stimmt.", "en": "A fluent, confident wording is no indication that the statement is true." }
+        ], "richtig": [0, 1, 3],
+        "erklaerung": { "de": "Ji et al. (2023) beschreiben Halluzination als systematische Eigenschaft generativer Modelle, nicht als Ausrutscher. Größere Modelle halluzinieren seltener, aber weiterhin; die Abhilfe im Fallbeispiel heißt: Wissen zur Laufzeit mitgeben und Antworten ohne Beleg ablehnen.", "en": "Ji et al. (2023) describe hallucination as a systematic property of generative models, not a slip. Larger models hallucinate less often, but still do; the remedy in the case study is: supply knowledge at query time and refuse answers without evidence." } }
+    ],
+    "rueckmeldung": { "de": "Damit ist die Frage gestellt, die Lab 02 beantwortet: Wie kommt das Handbuch zur Laufzeit in das Modell?", "en": "This poses the question that lab 02 answers: how does the manual get into the model at query time?" }
+  }
+]

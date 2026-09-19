@@ -1,0 +1,7 @@
+flowchart TB
+  T["„Die Waschmaschine zeigt den<br/>Fehlercode E:18. Das bedeutet, dass“"] --> K["<b>Tokenizer</b><br/>[[Text → Token-IDs|text → token IDs]]"]
+  K --> M["<b>Transformer</b><br/>[[Attention über alle Tokens,<br/>Milliarden Parameter|attention over all tokens,<br/>billions of parameters]]"]
+  M --> V["<b>[[Verteilung über das Vokabular|Distribution over the vocabulary]]</b><br/>„ die“ 22 % · „ der“ 17 % · „ das“ 9 % · …"]
+  V --> S["<b>Sampling</b><br/>[[Temperatur, Top-p|temperature, top-p]]"]
+  S --> N["„ die“"]
+  N -. "[[anhängen und wiederholen|append and repeat]]" .-> K

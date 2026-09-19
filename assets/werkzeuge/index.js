@@ -23,7 +23,7 @@ export const WERKZEUGE = {
 }
 export function baueWerkzeug (ziel, name, parameter, ctx) {
   const b = WERKZEUGE[name]
-  const wrap = el('div', 'werkzeug'); wrap.dataset.werkzeug = name; ziel.replaceChildren(wrap)
+  const wrap = el('div', 'werkzeug'); wrap.dataset.name = name; ziel.replaceChildren(wrap)
   if (!b) { wrap.textContent = `Werkzeug „${name}“ folgt.`; return null }
   try { return b(wrap, parameter || {}, ctx) } catch (e) { console.error(name, e); wrap.textContent = `Werkzeug „${name}“ konnte nicht aufgebaut werden.`; return null }
 }

@@ -1,0 +1,30 @@
+{
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#EFE7D6",
+    "primaryTextColor": "#2E2418",
+    "primaryBorderColor": "#2E2418",
+    "lineColor": "#5B4E3E",
+    "secondaryColor": "#F8F4EC",
+    "secondaryBorderColor": "#5B4E3E",
+    "tertiaryColor": "#F5E3D6",
+    "tertiaryBorderColor": "#C4602A",
+    "noteBkgColor": "#F8F4EC",
+    "noteBorderColor": "#C4602A",
+    "actorBkg": "#EFE7D6",
+    "actorBorder": "#2E2418",
+    "signalColor": "#2E2418",
+    "signalTextColor": "#2E2418",
+    "clusterBkg": "#F8F4EC",
+    "clusterBorder": "#C9C3B4",
+    "edgeLabelBackground": "#FFFFFF",
+    "fontFamily": "Space Grotesk, Helvetica Neue, Arial, sans-serif",
+    "fontSize": "14px",
+    "git0": "#C4602A", "git1": "#2E2418", "git2": "#6B6A1C", "git3": "#9E4A1C",
+    "gitBranchLabel0": "#FFFFFF", "gitBranchLabel1": "#FFFFFF", "commitLabelColor": "#2E2418", "commitLabelBackground": "#F8F4EC",
+    "tagLabelColor": "#2E2418", "tagLabelBackground": "#F5E3D6", "tagLabelBorder": "#C4602A"
+  },
+  "flowchart": { "htmlLabels": true, "curve": "basis", "padding": 12 },
+  "sequence": { "mirrorActors": false, "actorMargin": 40 },
+  "gitGraph": { "showBranches": true, "showCommitLabel": true, "mainBranchName": "main", "rotateCommitLabel": true }
+}

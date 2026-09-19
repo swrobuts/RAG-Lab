@@ -55,6 +55,87 @@ meld(!!co && co.chunks.length === 346 && co.chunks.every(c => c.v.length === 384
 for (const n of ['handbuch.md', 'seite-33.md', 'eval/vector.json', 'eval/hybrid-no-rerank.json', 'eval/hybrid-rerank.json', 'eval/negative-checks.json', 'eval/questions.json']) meld(existsSync(join(ROOT, 'data', n)), `data/${n} vorhanden`)
 meld(existsSync(join(ROOT, 'assets/seite-33.png')), 'assets/seite-33.png vorhanden')
 
+/* --------------------------------------------------------- Zahlen im Text */
+// Jede Zahl aus dem Fallbeispiel steht im HTML als <span data-wert="schluessel">…</span>.
+// Hier steht, woher der Wert kommt; die Pruefung akzeptiert deutsche und englische Schreibweise.
+const um = daten('umgebung.json'); const ev = (n) => daten('eval/' + n)
+meld(!!um && um.lmStudioModelle.some(m => m.id === 'gemma-4-12b-it-mlx' && m.maxKontext > 0), 'umgebung.json: LM-Studio-Modelle mit Kontextfenster')
+const lmsModell = (id) => (um && um.lmStudioModelle.find(m => m.id === id)) || {}
+const frage = (id) => fr && fr.fragen.find(f => f.id === id)
+const rang = (f, stufe, chunkId) => { const i = f[stufe].findIndex(t => t.chunk === chunkId); return i < 0 ? '–' : i + 1 }
+const e18Chunk = ch && ch.chunks.find(c => c.text.includes('Anzeige: E:18;'))
+const WERTE = {
+  'chunks.anzahl': () => ch.anzahl,
+  'chunks.e18Text': () => e18Chunk.text,
+  'tokens.vokabular': () => tk.vokabular,
+  'tokens.e18': () => tk.beispiele.e18.tokens.length,
+  'tokens.satzDe': () => tk.beispiele['satz-de'].tokens.length,
+  'tokens.satzEn': () => tk.beispiele['satz-en'].tokens.length,
+  'tokens.zeichenJeToken': () => tk.zaehlungen.zeichenJeToken,
+  'tokens.systemprompt': () => tk.zaehlungen.systemprompt,
+  'tokens.handbuch': () => tk.zaehlungen.handbuch,
+  'tokens.handbuchWoerter': () => tk.zaehlungen.handbuchWoerter,
+  'tokens.handbuchAbschnitte': () => tk.zaehlungen.handbuchAbschnitte,
+  'tokens.maxChunkTokens': () => tk.zaehlungen.maxChunkTokens,
+  'tokens.mittelChunkTokens': () => tk.zaehlungen.mittelChunkTokens,
+  'tokens.e18Chunk': () => tk.zaehlungen.e18Chunk,
+  'tokens.budgetTokens': () => Math.round(14000 / tk.zaehlungen.zeichenJeToken),
+  'logits.modell': () => lg.modell,
+  'logits.vokabular': () => lg.vokabular,
+  'logits.e18.pTop1': () => { const q = lg.prompts.find(x => x.id === 'e18'); return Math.round(Math.exp(q.tokens[0].logit - q.restLogsumexp) * 100) },
+  'lms.kontext': () => lmsModell('gemma-4-12b-it-mlx').maxKontext,
+  'lms.quant': () => lmsModell('gemma-4-12b-it-mlx').quantisierung,
+  'eval.vector.hit5': () => ev('vector.json').keyword_hit_rate * 100,
+  'eval.vector.hit1': () => ev('vector.json').keyword_hit_at_1 * 100,
+  'eval.vector.mrr': () => ev('vector.json').keyword_mrr,
+  'eval.vector.abdeckung': () => ev('vector.json').keyword_coverage * 100,
+  'eval.hybrid.hit5': () => ev('hybrid-no-rerank.json').keyword_hit_rate * 100,
+  'eval.hybrid.hit1': () => ev('hybrid-no-rerank.json').keyword_hit_at_1 * 100,
+  'eval.hybrid.mrr': () => ev('hybrid-no-rerank.json').keyword_mrr,
+  'eval.hybrid.abdeckung': () => ev('hybrid-no-rerank.json').keyword_coverage * 100,
+  'eval.rerank.hit5': () => ev('hybrid-rerank.json').keyword_hit_rate * 100,
+  'eval.rerank.hit1': () => ev('hybrid-rerank.json').keyword_hit_at_1 * 100,
+  'eval.rerank.mrr': () => ev('hybrid-rerank.json').keyword_mrr,
+  'eval.rerank.abdeckung': () => ev('hybrid-rerank.json').keyword_coverage * 100,
+  'fragen.e18.rerankScore': () => frage('fehler-e18').obersterScore,
+  'fragen.e18.rangVektor': () => rang(frage('fehler-e18'), 'vektor', e18Chunk.id),
+  'fragen.e18.rangHybrid': () => rang(frage('fehler-e18'), 'hybrid', e18Chunk.id),
+  'fragen.e18.rangRerank': () => rang(frage('fehler-e18'), 'rerank', e18Chunk.id),
+  'fragen.keinWassereinlauf.score': () => frage('kein-wassereinlauf').obersterScore,
+  'fragen.wasserSchiesst.score': () => frage('wasser-schiesst').obersterScore,
+  'fragen.wasserLaeuft.score': () => frage('wasser-laeuft').obersterScore,
+  'fragen.fehler18.score': () => frage('fehler-18-ohne-doppelpunkt').obersterScore,
+  'fragen.negativMax.score': () => Math.max(...fr.fragen.filter(f => f.art === 'negativ').map(f => f.obersterScore)),
+  'fragen.anzahl': () => fr.fragen.length,
+  'projektion.varianz': () => (pr.varianz[0] + pr.varianz[1]) * 100,
+  'antworten.e18.tokens': () => { const e = an.eintraege.find(x => x.id === 'e18-rag'); return `${e.usage.ein}/${e.usage.aus}` },
+  'antworten.e18nackt.tokens': () => { const e = an.eintraege.find(x => x.id === 'e18-nackt'); return `${e.usage.ein}/${e.usage.aus}` },
+  'antworten.e18.sekunden': () => an.eintraege.find(x => x.id === 'e18-rag').sekunden,
+  'antworten.modell': () => an.eintraege[0].modell
+}
+const NBSP = /[\s   ]/g
+const fmtZahl = (v) => {
+  if (typeof v !== 'number') return [String(v)]
+  const ganzzahl = Number.isInteger(v) || Math.abs(v - Math.round(v)) < 1e-9
+  const aus = []
+  for (const st of ganzzahl ? [0] : [1, 2, 3, 4]) {
+    aus.push(v.toLocaleString('de-DE', { minimumFractionDigits: st, maximumFractionDigits: st }).replace(NBSP, ''))
+    aus.push(v.toLocaleString('de-DE', { minimumFractionDigits: st, maximumFractionDigits: st, useGrouping: false }))
+    aus.push(v.toLocaleString('en-GB', { minimumFractionDigits: st, maximumFractionDigits: st }).replace(NBSP, ''))
+    aus.push(v.toLocaleString('en-GB', { minimumFractionDigits: st, maximumFractionDigits: st, useGrouping: false }))
+  }
+  return aus
+}
+function pruefeWerte (html, name) {
+  for (const m of html.matchAll(/<span data-wert="([^"]+)">([\s\S]*?)<\/span>/g)) {
+    const key = m[1]; const text = m[2].replace(/<[^>]+>/g, '').replace(NBSP, '').trim()
+    if (!WERTE[key]) { meld(false, `${name}: unbekannter Marker ${key}`); continue }
+    let soll; try { soll = WERTE[key]() } catch (e) { meld(false, `${name}: ${key} nicht berechenbar (${e.message})`); continue }
+    const ok = fmtZahl(soll).some(k => k.replace(NBSP, '') === text.replace(/\.(?=\d{3}\b)/g, '').replace(/^(\d{1,3})(?:[.,](\d{3}))+$/, (x) => x.replace(/[.,]/g, '')) || k === text)
+    meld(ok, `${name}: ${key} = „${text}“ (Daten: ${typeof soll === 'string' ? soll : fmtZahl(soll)[0]})`)
+  }
+}
+
 /* --------------------------------------------------------- Labs und Uebungen */
 console.log('Labs und Übungen')
 const opt = (arr) => Array.isArray(arr) && arr.length >= 2 && arr.every(zwei)
@@ -109,9 +190,11 @@ for (const lab of LABS) {
     if (m[2]) { let ok = true; try { JSON.parse(m[2]) } catch { ok = false } meld(ok, `${lab.id}: data-parameter für ${m[1]} ist JSON`) }
   }
   meld(!/TODO|TBD|Lorem ipsum/.test(html), `${lab.id}: keine Platzhaltertexte`)
+  pruefeWerte(html, lab.id)
 }
 const index = readFileSync(join(ROOT, 'index.html'), 'utf8')
 for (const m of index.matchAll(/data-werkzeug="([^"]+)"/g)) meld(WERKZEUGE.includes(m[1]), `index: Werkzeug ${m[1]} bekannt`)
+pruefeWerte(index, 'index')
 
 console.log(fehler ? `\n${fehler} Befund(e).` : '\nAlles in Ordnung.')
 process.exit(fehler ? 1 : 0)
