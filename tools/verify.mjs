@@ -67,6 +67,7 @@ const e18Chunk = ch && ch.chunks.find(c => c.text.includes('Anzeige: E:18;'))
 const WERTE = {
   'chunks.anzahl': () => ch.anzahl,
   'chunks.e18Text': () => e18Chunk.text,
+  'chunks.e18Vektor': () => '[' + e18Chunk.v.slice(0, 8).join(', ') + ', …]',
   'chunks.zeilen': () => ch.chunks.filter(c => /^## .*\n[^\n|]+: [^\n]+; /.test(c.text)).length,
   'chunks.mitGruppe': () => ch.chunks.filter(c => c.text.startsWith('Dokumentkontext:')).length,
   'handbuch.anzeigeZeichen': () => { const md = readFileSync(join(ROOT, 'data/handbuch.md'), 'utf8'); const s = md.split(/(?=^## )/m).find(x => x.startsWith('## Hinweise im Anzeigefeld')); return s.length },

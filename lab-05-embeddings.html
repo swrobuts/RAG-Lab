@@ -28,6 +28,13 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#vektor"><span lang="de">384 Zahlen</span><span lang="en">384 numbers</span></a>
+  <a class="sidebar-link" href="#kosinus"><span lang="de">Kosinusähnlichkeit</span><span lang="en">Cosine similarity</span></a>
+  <a class="sidebar-link" href="#biencoder"><span lang="de">Bi-Encoder</span><span lang="en">Bi-encoder</span></a>
+  <a class="sidebar-link" href="#praefix"><span lang="de">Das Präfix</span><span lang="en">The prefix</span></a>
+  <a class="sidebar-link" href="#modelle"><span lang="de">Modelle wählen</span><span lang="en">Choosing models</span></a>
+  <a class="sidebar-link" href="#karte"><span lang="de">Die Karte</span><span lang="en">The map</span></a>
+  <a class="sidebar-link" href="#grenzen"><span lang="de">Grenzen</span><span lang="en">Limits</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +47,128 @@
     <span lang="en">Embeddings</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">Jeder der <span data-wert="chunks.anzahl">346</span> Chunks wird zu 384 Zahlen, und die Frage „Was bedeutet <strong>E:18</strong>?“ ebenso. Suchen heißt dann: den Winkel zwischen zwei Zahlenreihen messen. Dieses Lab rechnet die Kosinusähnlichkeit vor, erklärt den Bi-Encoder und das Präfix <code>query:</code>/<code>passage:</code>, vergleicht fünf Embedding-Modelle nach Sprache, Länge und Größe und zeichnet alle Chunks auf eine Karte. Das Modell des Fallbeispiels läuft dabei in Ihrem Browser: Sie können eigene Sätze einbetten und vergleichen.</span>
+    <span lang="en">Each of the <span data-wert="chunks.anzahl">346</span> chunks becomes 384 numbers, and so does the question “Was bedeutet <strong>E:18</strong>?”. Searching then means: measuring the angle between two rows of numbers. This lab works through cosine similarity, explains the bi-encoder and the prefix <code>query:</code>/<code>passage:</code>, compares five embedding models by language, length and size and draws all chunks onto a map. The case study's model runs in your browser: you can embed and compare sentences of your own.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip"><span lang="de">Vektor · 384 Dimensionen</span><span lang="en">Vector · 384 dimensions</span></span>
+    <span class="lernziel-chip"><span lang="de">Kosinusähnlichkeit</span><span lang="en">Cosine similarity</span></span>
+    <span class="lernziel-chip">Bi-Encoder</span>
+    <span class="lernziel-chip">query: · passage:</span>
+    <span class="lernziel-chip"><span lang="de">Modellwahl</span><span lang="en">Model choice</span></span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="vektor">
+    <h2><span lang="de">384 Zahlen für einen Text</span><span lang="en">384 numbers for a text</span></h2>
+    <p>
+      <span lang="de">Ein <strong>Embedding</strong> ist ein Vektor fester Länge, der die Bedeutung eines Textes so kodiert, dass ähnliche Texte ähnliche Vektoren bekommen. <code>multilingual-e5-small</code> liefert 384 Zahlen je Text, gleich ob der Text drei Wörter oder 440 Tokens hat. Die Zahlen selbst sind nicht deutbar; bedeutsam ist nur ihre Lage zueinander. So beginnt der Vektor des E:18-Chunks, wie er im Index des Fallbeispiels gespeichert ist:</span>
+      <span lang="en">An <strong>embedding</strong> is a vector of fixed length that encodes the meaning of a text such that similar texts get similar vectors. <code>multilingual-e5-small</code> delivers 384 numbers per text, whether the text has three words or 440 tokens. The numbers themselves are not interpretable; only their position relative to each other matters. This is how the vector of the E:18 chunk begins, as stored in the case study's index:</span>
+    </p>
+    <pre class="code-block" data-wert-text="chunks.e18Vektor">[0.05, -0.0229, -0.05, -0.0819, 0.0659, -0.0188, 0.002, 0.0298, …]</pre>
+    <p>
+      <span lang="de">Alle Vektoren sind auf die Länge 1 normalisiert. Der Index des Fallbeispiels (<code>storage/default__vector_store.json</code>) ist deshalb eine Matrix mit 346 Zeilen und 384 Spalten, rund 130 000 Zahlen, und liegt als JSON auf der Platte; dieses Lab liefert ihn als <code>data/chunks.json</code> mit.</span>
+      <span lang="en">All vectors are normalised to length 1. The case study's index (<code>storage/default__vector_store.json</code>) is therefore a matrix with 346 rows and 384 columns, about 130,000 numbers, and sits on disk as JSON; this lab ships it as <code>data/chunks.json</code>.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="kosinus">
+    <h2><span lang="de">Kosinusähnlichkeit</span><span lang="en">Cosine similarity</span></h2>
+    <p>
+      <span lang="de">Der Abstand zweier Vektoren wird als Kosinus des Winkels zwischen ihnen gemessen: cos(a, b) = (a · b) ÷ (|a| · |b|). Der Wert liegt zwischen −1 und 1; gleiche Richtung heißt 1, rechtwinklig heißt 0. Sind die Vektoren normalisiert, ist der Kosinus einfach das Skalarprodukt, und die Suche über 346 Chunks ist eine Multiplikation der Matrix mit dem Fragevektor: 346 × 384 Rechenschritte, im Browser eine Millisekunde. Für e5-Modelle liegen die Werte in einem engen Band: Der beste Treffer einer Frage hat im Fallbeispiel typischerweise 0,84 bis 0,92, der zwölfte noch 0,81 bis 0,87. Der Betrag sagt deshalb wenig; die Reihenfolge zählt.</span>
+      <span lang="en">The distance between two vectors is measured as the cosine of the angle between them: cos(a, b) = (a · b) ÷ (|a| · |b|). The value lies between −1 and 1; same direction means 1, perpendicular means 0. If the vectors are normalised, the cosine is simply the dot product, and the search over 346 chunks is a multiplication of the matrix by the question vector: 346 × 384 operations, one millisecond in the browser. For e5 models the values lie in a narrow band: in the case study a question's best hit typically scores 0.84 to 0.92, the twelfth still 0.81 to 0.87. The magnitude therefore says little; the order counts.</span>
+    </p>
+    <div data-werkzeug="embedding" data-parameter='{"katalogA":"kein-abpumpen","katalogB":"pumpe-blockiert","a":"Die Waschlauge wird nicht abgepumpt.","b":"Die Pumpe ist blockiert"}'></div>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">cos(q, p)</span><span class="befehl-was"><span lang="de">Kosinusähnlichkeit zwischen Frage q und Passage p</span><span lang="en">Cosine similarity between question q and passage p</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><span lang="de">Formel</span><span lang="en">Formula</span><span>cos(q, p) = Σ<sub>i</sub> q<sub>i</sub>p<sub>i</sub> ÷ (√Σq<sub>i</sub>² · √Σp<sub>i</sub>²)</span></li>
+          <li><span lang="de">Normalisiert</span><span lang="en">Normalised</span><span><span lang="de">|q| = |p| = 1, also cos(q, p) = q · p. So speichert es das Fallbeispiel (<code>normalize=True</code>).</span><span lang="en">|q| = |p| = 1, so cos(q, p) = q · p. That is how the case study stores it (<code>normalize=True</code>).</span></span></li>
+          <li><span lang="de">Top-k</span><span lang="en">Top-k</span><span><span lang="de">Alle 346 Produkte berechnen, absteigend sortieren, die ersten k behalten; k = 12 im Fallbeispiel.</span><span lang="en">Compute all 346 products, sort descending, keep the first k; k = 12 in the case study.</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Ein Kosinus von 0,85 ist bei e5 kein „85 Prozent passend“. Werte verschiedener Modelle sind nicht vergleichbar, und eine Schwelle auf dem Kosinus ist willkürlich. Das Fallbeispiel legt die Schwelle auf den Reranker-Score (Lab 06).</span><span lang="en">A cosine of 0.85 is not “85 percent matching” with e5. Values of different models are not comparable, and a threshold on the cosine is arbitrary. The case study puts the threshold on the reranker score (lab 06).</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="biencoder">
+    <h2><span lang="de">Der Bi-Encoder</span><span lang="en">The bi-encoder</span></h2>
+    <p>
+      <span lang="de">Ein Embedding-Modell ist ein <strong>Bi-Encoder</strong> (Reimers und Gurevych 2019): Frage und Passage laufen getrennt durch dasselbe Netz und werden getrennt zu je einem Vektor. Das erlaubt, alle Passagen vorab einzubetten und zu speichern; zur Laufzeit wird nur noch die Frage eingebettet und mit dem Index verglichen. <code>multilingual-e5-small</code> hat 12 Schichten und 118 Millionen Parameter, wurde aus Multilingual-MiniLM initialisiert und in zwei Stufen trainiert: kontrastives Vortraining auf rund einer Milliarde Textpaaren aus 100 Sprachen, danach Feinabstimmung auf annotierten Datensätzen (Wang et al. 2022 und 2024). Kontrastiv heißt: Das Modell lernt, zusammengehörige Paare nahe und zufällige Paare fern voneinander abzubilden. Aus den 384 Werten je Token macht Mean Pooling einen Vektor je Text.</span>
+      <span lang="en">An embedding model is a <strong>bi-encoder</strong> (Reimers and Gurevych 2019): question and passage pass separately through the same network and become one vector each, separately. This allows all passages to be embedded and stored in advance; at query time only the question is embedded and compared with the index. <code>multilingual-e5-small</code> has 12 layers and 118 million parameters, was initialised from Multilingual-MiniLM and trained in two stages: contrastive pre-training on about one billion text pairs from 100 languages, then fine-tuning on annotated datasets (Wang et al. 2022 and 2024). Contrastive means: the model learns to map matching pairs close together and random pairs far apart. Mean pooling turns the 384 values per token into one vector per text.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/bi-encoder-de.svg" alt="Zwei Türme: die Frage mit Präfix query wird zur Laufzeit zu einem Vektor, die Passage mit Präfix passage vorab; beide Vektoren haben 384 Dimensionen und Länge 1, ihr Skalarprodukt ist die Kosinusähnlichkeit." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/bi-encoder-en.svg" alt="Two towers: the question with prefix query becomes a vector at query time, the passage with prefix passage in advance; both vectors have 384 dimensions and length 1, their dot product is the cosine similarity." loading="lazy"></span>
+      <figcaption><span lang="de">Dasselbe Netz, zwei Eingaben, zwei Vektoren. Der Cross-Encoder von Lab 06 liest dagegen beide Texte zusammen.</span><span lang="en">The same network, two inputs, two vectors. The cross-encoder of lab 06, by contrast, reads both texts together.</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="section-block" id="praefix">
+    <h2><span lang="de">Das Präfix: query: und passage:</span><span lang="en">The prefix: query: and passage:</span></h2>
+    <p>
+      <span lang="de">Die Modellkarte von e5 verlangt: Jeder Eingabetext beginnt mit <code>query: </code> oder <code>passage: </code>, auch in anderen Sprachen als Englisch. Das Modell wurde so trainiert: Fragen sind kurz und Passagen lang, und das Präfix sagt dem Netz, welche Seite es gerade sieht (asymmetrisches Retrieval). Die Ausgangsversion des Fallbeispiels hatte die Präfixe vergessen; der Entwurf vom 07.07.2026 nennt das den „größten einzelnen Retrieval-Verlust“ und setzte sie als erste Maßnahme (<code>query_instruction</code>, <code>text_instruction</code> in <code>get_embed_model()</code>).</span>
+      <span lang="en">The e5 model card demands: every input text starts with <code>query: </code> or <code>passage: </code>, also in languages other than English. The model was trained that way: questions are short and passages long, and the prefix tells the network which side it is currently seeing (asymmetric retrieval). The initial version of the case study had forgotten the prefixes; the design note of 7 July 2026 calls this the “largest single retrieval loss” and set them as the first measure (<code>query_instruction</code>, <code>text_instruction</code> in <code>get_embed_model()</code>).</span>
+    </p>
+    <p>
+      <span lang="de">Dieses Lab hat den Effekt nachgemessen, mit beiden Varianten über alle 346 Chunks und die zehn Evaluationsfragen (<code>data/fragen.json</code>, Felder <code>vektor</code> und <code>vektorOhne</code>). Das Ergebnis ist kleiner als die Erwartung: Mit Präfix finden 8 von 10 Fragen in den ersten fünf Treffern ein erwartetes Stichwort, ohne Präfix ebenfalls 8; die Stichwortabdeckung liegt bei 64,5 gegenüber 61 Prozent, und einzelne Fragen gewinnen oder verlieren („Die Waschlauge wird nicht abgepumpt“ steht mit Präfix auf Rang 2, ohne Präfix gar nicht in den Top 5; „Wasser läuft aus“ umgekehrt Rang 2 gegenüber Rang 1). Die Regel der Modellkarte bleibt richtig, denn so wurde das Modell trainiert; der messbare Gewinn hängt vom Datensatz ab, und zehn Fragen sind zu wenige für eine sichere Aussage. Genau deshalb hat das Fallbeispiel einen Evaluationslauf (Lab 08).</span>
+      <span lang="en">This lab re-measured the effect, with both variants over all 346 chunks and the ten evaluation questions (<code>data/fragen.json</code>, fields <code>vektor</code> and <code>vektorOhne</code>). The result is smaller than expected: with prefix, 8 of 10 questions find an expected keyword among the first five hits, without prefix also 8; keyword coverage is 64.5 versus 61 percent, and individual questions gain or lose (“Die Waschlauge wird nicht abgepumpt” ranks 2nd with prefix and not in the top 5 without; “Wasser läuft aus” the other way round, rank 2 versus rank 1). The model card's rule stays right, because that is how the model was trained; the measurable gain depends on the dataset, and ten questions are too few for a firm statement. That is exactly why the case study has an evaluation run (lab 08).</span>
+    </p>
+    <pre class="code-block">kwargs = {"model_name": model_name, "cache_folder": HF_HUB_CACHE}
+if "e5" in model_name.lower():
+    kwargs["query_instruction"] = "query: "
+    kwargs["text_instruction"] = "passage: "
+return HuggingFaceEmbedding(**kwargs)</pre>
+    <p class="line-hilfe"><span lang="de">Aus <code>get_embed_model()</code> in <code>rag_engine.py</code>. Im Werkzeug oben schaltet der Haken „Präfixe verwenden“ zwischen beiden Varianten; mit geladenem Modell werden Ihre Texte live mit und ohne Präfix eingebettet.</span><span lang="en">From <code>get_embed_model()</code> in <code>rag_engine.py</code>. In the tool above, the checkbox “use prefixes” switches between both variants; with the model loaded, your texts are embedded live with and without prefix.</span></p>
+  </section>
+
+  <section class="section-block" id="modelle">
+    <h2><span lang="de">Modelle wählen</span><span lang="en">Choosing models</span></h2>
+    <p>
+      <span lang="de">Drei Kriterien entscheiden vor jedem Leaderboard: die <strong>Sprache</strong> (ein englisches Modell versteht deutsche Umschreibungen schlecht), die <strong>Maximallänge</strong> (sie bestimmt die Chunk-Größe) und die <strong>Größe</strong> (Parameter bestimmen Speicher und Geschwindigkeit ohne Grafikkarte). Der MTEB-Benchmark (Muennighoff et al. 2022) vergleicht Modelle auf vielen Aufgaben; die Rangfolge dort sagt nichts darüber, ob ein Modell die Fehlercodes eines deutschen Handbuchs findet. Stand der Modellkarten: 19.09.2026.</span>
+      <span lang="en">Three criteria decide before any leaderboard: the <strong>language</strong> (an English model understands German paraphrases poorly), the <strong>maximum length</strong> (it determines the chunk size) and the <strong>size</strong> (parameters determine memory and speed without a graphics card). The MTEB benchmark (Muennighoff et al. 2022) compares models on many tasks; the ranking there says nothing about whether a model finds the error codes of a German manual. Model cards as of 19 Sept 2026.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Modell</span><span lang="en">Model</span></th><th><span lang="de">Dimensionen</span><span lang="en">Dimensions</span></th><th><span lang="de">Max. Tokens</span><span lang="en">Max. tokens</span></th><th><span lang="de">Parameter</span><span lang="en">Parameters</span></th><th><span lang="de">Sprachen</span><span lang="en">Languages</span></th><th><span lang="de">Lizenz</span><span lang="en">Licence</span></th></tr></thead>
+      <tbody>
+        <tr><td><code>intfloat/multilingual-e5-small</code> <span lang="de">(Fallbeispiel)</span><span lang="en">(case study)</span></td><td>384</td><td>512</td><td>118 Mio.</td><td>100</td><td>MIT</td></tr>
+        <tr><td><code>intfloat/multilingual-e5-base</code></td><td>768</td><td>512</td><td>278 Mio.</td><td>100</td><td>MIT</td></tr>
+        <tr><td><code>intfloat/multilingual-e5-large</code></td><td>1 024</td><td>512</td><td>560 Mio.</td><td>100</td><td>MIT</td></tr>
+        <tr><td><code>BAAI/bge-m3</code></td><td>1 024</td><td>8 192</td><td>568 Mio.</td><td>100+</td><td>MIT</td></tr>
+        <tr><td><code>nomic-ai/nomic-embed-text-v1.5</code></td><td>768</td><td>2 048</td><td>137 Mio.</td><td><span lang="de">vor allem Englisch</span><span lang="en">mainly English</span></td><td>Apache-2.0</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">Das Fallbeispiel macht das Modell per Umgebungsvariable <code>EMBED_MODEL</code> austauschbar und hat e5-base und bge-m3 als Kandidaten für bessere deutsche Treffer notiert. Der Wechsel kostet einen vollständigen Neuaufbau des Index: Vektoren verschiedener Modelle liegen in verschiedenen Räumen und sind nicht vergleichbar. Der Cache-Fingerprint (Lab 09) enthält deshalb den Modellnamen.</span>
+      <span lang="en">The case study makes the model interchangeable via the environment variable <code>EMBED_MODEL</code> and noted e5-base and bge-m3 as candidates for better German hits. The switch costs a complete rebuild of the index: vectors of different models live in different spaces and are not comparable. The cache fingerprint (lab 09) therefore contains the model name.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="karte">
+    <h2><span lang="de">Die Karte: 346 Chunks auf zwei Achsen</span><span lang="en">The map: 346 chunks on two axes</span></h2>
+    <p>
+      <span lang="de">384 Dimensionen lassen sich nicht zeichnen. Eine Hauptkomponentenanalyse (PCA) dreht den Raum so, dass zwei Achsen möglichst viel der Streuung zeigen; hier sind es <span data-wert="projektion.varianz">18,5</span> Prozent. Die Karte ist also ein Schattenbild: Punkte, die nah liegen, sind sich meist ähnlich, aber nicht immer, und die übrigen 382 Dimensionen fehlen. Farben markieren die fünf häufigsten Abschnitte des Handbuchs. Der Stern ist eine Frage, die Linien führen zu ihren fünf nächsten Chunks im vollen Raum; deshalb kreuzen sie manchmal fremde Punkte. Mit geladenem Modell projiziert das Werkzeug eigene Fragen mit derselben Matrix wie die Python-Pipeline.</span>
+      <span lang="en">384 dimensions cannot be drawn. A principal component analysis (PCA) rotates the space so that two axes show as much of the spread as possible; here that is <span data-wert="projektion.varianz">18.5</span> percent. The map is thus a shadow image: points that lie close are mostly similar, but not always, and the remaining 382 dimensions are missing. Colours mark the five most frequent sections of the manual. The star is a question, the lines lead to its five closest chunks in the full space; that is why they sometimes cross foreign points. With the model loaded, the tool projects your own questions with the same matrix as the Python pipeline.</span>
+    </p>
+    <div data-werkzeug="karte" data-parameter='{"frage":"wasser-laeuft"}'></div>
+  </section>
+
+  <section class="section-block" id="grenzen">
+    <h2><span lang="de">Grenzen der Ähnlichkeit</span><span lang="en">Limits of similarity</span></h2>
+    <p>
+      <span lang="de">Zwei Grenzen zeigt das Fallbeispiel an echten Fragen. Erstens <strong>seltene Zeichenfolgen</strong>: Der E:18-Chunk steht für „Was bedeutet der Fehlercode E:18?“ auf keinem der zwölf Plätze der Vektorsuche (Rang <span data-wert="fragen.e18.rangVektor">–</span>); die Ähnlichkeit bevorzugt Chunks über Anzeigen und Warnhinweise im Allgemeinen. Ein Fehlercode trägt im Vektorraum kaum Bedeutung. Zweitens <strong>Formulierungen</strong>: „Wasser läuft aus“ erreicht nach dem Reranker einen Score von <span data-wert="fragen.wasserLaeuft.score">0,979</span> und wird beantwortet; „Wasser schießt aus der Maschine“ erreicht <span data-wert="fragen.wasserSchiesst.score">0,0365</span> und wird abgelehnt, obwohl beide dasselbe meinen. Das Mac-Protokoll des Fallbeispiels hält diese Empfindlichkeit als bekannte Grenze fest. Die Antwort auf die erste Grenze ist die Hybrid-Suche in Lab 06, die auf die zweite ein größerer Testbestand in Lab 08.</span>
+      <span lang="en">The case study shows two limits on real questions. First, <strong>rare strings</strong>: for “Was bedeutet der Fehlercode E:18?” the E:18 chunk appears on none of the twelve places of vector search (rank <span data-wert="fragen.e18.rangVektor">–</span>); similarity prefers chunks about displays and warnings in general. An error code carries hardly any meaning in vector space. Second, <strong>phrasing</strong>: “Wasser läuft aus” reaches a reranker score of <span data-wert="fragen.wasserLaeuft.score">0.979</span> and is answered; “Wasser schießt aus der Maschine” reaches <span data-wert="fragen.wasserSchiesst.score">0.0365</span> and is refused, although both mean the same. The case study's Mac log records this sensitivity as a known limit. The answer to the first limit is hybrid search in lab 06, to the second a larger test set in lab 08.</span>
+    </p>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Sechs Übungen: den Kosinus rechnen, Ähnlichkeit ohne gleiche Wörter beobachten, E:18 in der Vektorsuche verfolgen, die Karte lesen, ein Modell wählen und Bi- von Cross-Encoder trennen.</span><span lang="en">Six exercises: compute the cosine, observe similarity without shared words, follow E:18 in vector search, read the map, choose a model and separate bi- from cross-encoder.</span></p>
     <div data-uebung="R05-01"></div>
     <div data-uebung="R05-02"></div>
     <div data-uebung="R05-03"></div>
@@ -59,11 +179,28 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Ein Embedding ist ein Vektor fester Länge (hier 384), der Bedeutung als Lage im Raum kodiert; ähnliche Texte liegen nahe.</span><span lang="en">An embedding is a vector of fixed length (here 384) that encodes meaning as position in space; similar texts lie close.</span></li>
+      <li><span lang="de">Kosinusähnlichkeit misst den Winkel; bei normalisierten Vektoren ist sie das Skalarprodukt, und Top-k ist eine Matrixmultiplikation.</span><span lang="en">Cosine similarity measures the angle; for normalised vectors it is the dot product, and top-k is a matrix multiplication.</span></li>
+      <li><span lang="de">Bi-Encoder betten Frage und Passage getrennt ein; Passagen werden vorab gerechnet und gespeichert.</span><span lang="en">Bi-encoders embed question and passage separately; passages are computed and stored in advance.</span></li>
+      <li><span lang="de">e5 verlangt query:/passage:; der messbare Gewinn ist datensatzabhängig und wird gemessen, nicht angenommen.</span><span lang="en">e5 demands query:/passage:; the measurable gain depends on the dataset and is measured, not assumed.</span></li>
+      <li><span lang="de">Sprache, Maximallänge, Größe entscheiden die Modellwahl; ein Wechsel erzwingt einen neuen Index.</span><span lang="en">Language, maximum length, size decide the model choice; a switch forces a new index.</span></li>
+      <li><span lang="de">Ähnlichkeit findet Bedeutung, nicht Zeichen: Fehlercodes brauchen Hybrid, Formulierungen brauchen Tests.</span><span lang="en">Similarity finds meaning, not characters: error codes need hybrid, phrasings need tests.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Reimers, N., Gurevych, I. (2019): Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks. EMNLP. <a href="https://arxiv.org/abs/1908.10084" rel="noopener">arXiv:1908.10084</a></li>
+      <li>Wang, L. et al. (2022): Text Embeddings by Weakly-Supervised Contrastive Pre-training. <a href="https://arxiv.org/abs/2212.03533" rel="noopener">arXiv:2212.03533</a></li>
+      <li>Wang, L. et al. (2024): Multilingual E5 Text Embeddings: A Technical Report. <a href="https://arxiv.org/abs/2402.05672" rel="noopener">arXiv:2402.05672</a>; Modellkarten <a href="https://huggingface.co/intfloat/multilingual-e5-small" rel="noopener">small</a>, <a href="https://huggingface.co/intfloat/multilingual-e5-base" rel="noopener">base</a>, <a href="https://huggingface.co/intfloat/multilingual-e5-large" rel="noopener">large</a>, abgerufen 19.09.2026</li>
+      <li>Chen, J. et al. (2024): M3-Embedding: Multi-Linguality, Multi-Functionality, Multi-Granularity Text Embeddings Through Self-Knowledge Distillation. <a href="https://arxiv.org/abs/2402.03216" rel="noopener">arXiv:2402.03216</a>; Modellkarte <a href="https://huggingface.co/BAAI/bge-m3" rel="noopener">BAAI/bge-m3</a>, abgerufen 19.09.2026</li>
+      <li>Nussbaum, Z. et al. (2024): Nomic Embed; Modellkarte <a href="https://huggingface.co/nomic-ai/nomic-embed-text-v1.5" rel="noopener">nomic-ai/nomic-embed-text-v1.5</a>, abgerufen 19.09.2026</li>
+      <li>Muennighoff, N. et al. (2022): MTEB: Massive Text Embedding Benchmark. <a href="https://arxiv.org/abs/2210.07316" rel="noopener">arXiv:2210.07316</a></li>
+      <li><span lang="de">Fallbeispiel: <code>rag_engine.py</code> (get_embed_model, _needs_e5_prefix), <code>docs/2026-07-07-optimization-design.md</code> (Kernbefund 1), <code>docs/evaluation/MAC-LIVE.md</code> („Wasser schießt aus der Maschine“), Stand 19.09.2026; Messung dieses Labs mit und ohne Präfix in <code>data/fragen.json</code> und <code>data/chunks-ohne-praefix.json</code> (tools/embed_fragen.py).</span><span lang="en">Case study: <code>rag_engine.py</code> (get_embed_model, _needs_e5_prefix), <code>docs/2026-07-07-optimization-design.md</code> (finding 1), <code>docs/evaluation/MAC-LIVE.md</code> (“Wasser schießt aus der Maschine”), as of 19 Sept 2026; this lab's measurement with and without prefix in <code>data/fragen.json</code> and <code>data/chunks-ohne-praefix.json</code> (tools/embed_fragen.py).</span></li>
+    </ul>
   </section>
 
 </main>

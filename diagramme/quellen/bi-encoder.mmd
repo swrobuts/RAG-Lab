@@ -1,0 +1,12 @@
+flowchart TB
+  subgraph Q["[[Frage – zur Laufzeit|Question – at query time]]"]
+    direction TB
+    Q1["„query: Was bedeutet E:18?“"] --> Q2["multilingual-e5-small<br/>12 [[Schichten|layers]], Mean Pooling"] --> Q3["[[Vektor|Vector]] q ∈ ℝ³⁸⁴, |q| = 1"]
+  end
+  subgraph P["[[Passage – vorab, 346-mal|Passage – in advance, 346 times]]"]
+    direction TB
+    P1["„passage: ## Hinweise im Anzeigefeld<br/>Anzeige: E:18; Ursache/Abhilfe: …“"] --> P2["multilingual-e5-small<br/>[[dieselben Gewichte|the same weights]]"] --> P3["[[Vektor|Vector]] p ∈ ℝ³⁸⁴, |p| = 1"]
+  end
+  Q ~~~ P
+  Q3 --> S(["cos(q, p) = q · p"])
+  P3 --> S
