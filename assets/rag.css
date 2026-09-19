@@ -103,6 +103,14 @@ code {
   code { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
 
+/* Sprachumschaltung: nur der aktive Sprachzweig ist sichtbar. */
+[data-lang="de"] [lang="en"], [data-lang="en"] [lang="de"] { display: none; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
 /* --------------------------------------------------------------- Bausteine */
 
 .accent-line { width: 48px; height: 4px; background: var(--signal); margin: 0.5rem 0 1rem; }
@@ -650,3 +658,106 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 }
 .frage .line-hilfe { margin: 0.35rem 0 0 0.2rem; font-size: 0.86rem; color: var(--ink-soft); }
 .frage .line-hilfe.falsch-erkl { color: #7A2612; }
+
+/* ======================================================== Uebungstypen */
+.zuordnen .paar { display: grid; grid-template-columns: 1fr minmax(160px, 260px); gap: 0.6rem; align-items: center; padding: 0.45rem 0; border-bottom: 1px solid var(--line); }
+.zuordnen .paar.richtig .begriff::before { content: '✓ '; color: var(--ok); font-weight: 700; }
+.zuordnen .paar.falsch .begriff::before { content: '✗ '; color: var(--warn); font-weight: 700; }
+.zuordnen select, .rechnen input, .luecken input, .werkzeug select {
+  font-family: var(--sans); font-size: 0.9rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line);
+  border-radius: 6px; background: #fff; min-height: 36px; color: var(--ink);
+}
+.sortieren { list-style: none; margin: 0; padding: 0; }
+.sortieren li { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 0.4rem; background: #fff; }
+.sortieren li.richtig { border-color: var(--ok); background: var(--ok-bg); }
+.sortieren li.falsch { border-color: var(--warn); background: var(--warn-bg); }
+.sortieren .sort-text { flex: 1; }
+.btn-mini { min-width: 32px; min-height: 32px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; font-family: var(--sans); color: var(--ink); }
+.btn-mini:disabled { opacity: 0.35; cursor: default; }
+.rechnen { display: grid; gap: 0.6rem; }
+.rechen-feld { display: grid; grid-template-columns: 1fr 150px auto; gap: 0.6rem; align-items: center; }
+.rechen-feld .einheit { font-size: 0.85rem; color: var(--ink-soft); min-width: 2ch; }
+.rechnen input.richtig, .luecken input.richtig { border-color: var(--ok); background: var(--ok-bg); }
+.rechnen input.falsch, .luecken input.falsch { border-color: var(--warn); background: var(--warn-bg); }
+.loesungsweg { margin-top: 0.5rem; }
+.luecken { white-space: pre-wrap; }
+.luecken input { font-family: var(--mono); font-size: 0.85rem; width: 16ch; margin: 0 0.15rem; padding: 0.1rem 0.4rem; min-height: 28px; }
+.belegen { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 1000px) { .belegen { grid-template-columns: 3fr 2fr; } }
+.belegen-saetze { margin-left: 1.2rem; }
+.belegen-saetze li { padding: 0.5rem 0.6rem; border-left: 3px solid var(--line); margin-bottom: 0.5rem; }
+.belegen-saetze li.richtig { border-left-color: var(--ok); }
+.belegen-saetze li.falsch { border-left-color: var(--warn); background: var(--warn-bg); }
+.belegen-saetze .wahl { display: flex; gap: 1rem; margin-top: 0.3rem; font-size: 0.85rem; }
+.belegen-saetze .wahl label { display: inline-flex; gap: 0.3rem; align-items: center; cursor: pointer; }
+.belegen-quellen h4 { margin-bottom: 0.4rem; }
+.belegen-quellen .quelle { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.6rem; }
+.belegen-quellen pre { white-space: pre-wrap; font-size: 0.8rem; font-family: var(--mono); margin: 0; }
+.quelle-titel { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
+.checkliste { margin-left: 1.2rem; }
+.checkliste li { padding: 0.6rem 0.6rem; border-bottom: 1px solid var(--line); }
+.checkliste li.richtig { border-left: 3px solid var(--ok); }
+.checkliste li.falsch { border-left: 3px solid var(--warn); background: var(--warn-bg); }
+.checkliste .schritt-frage { margin-top: 0.4rem; font-size: 0.9rem; }
+.checkliste .schritt-frage .frage-text { font-weight: 600; font-size: 0.88rem; }
+ul.checkliste { list-style: none; margin-left: 0; }
+ul.checkliste li { border: 0; padding: 0.25rem 0; }
+
+/* ============================================================ Werkzeuge */
+.werkzeug { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 1rem; margin: 1rem 0; }
+.werkzeug-kopf { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.7rem; }
+.werkzeug-kopf .titel { font-weight: 700; flex: 1 1 auto; }
+.werkzeug-status { font-size: 0.78rem; color: var(--ink-soft); }
+.werkzeug-status.live { color: var(--ok); font-weight: 700; }
+.werkzeug-status.vorberechnet { color: var(--accent); }
+.werkzeug textarea, .werkzeug input[type=text], .werkzeug input[type=number] {
+  font-family: var(--sans); font-size: 0.9rem; padding: 0.4rem 0.6rem; border: 1px solid var(--line);
+  border-radius: 6px; width: 100%; color: var(--ink); background: #fff;
+}
+.werkzeug input[type=range] { width: 100%; accent-color: var(--signal); }
+.werkzeug h4 { margin: 0.9rem 0 0.35rem; font-size: 0.95rem; }
+.werkzeug .code-block { margin: 0.4rem 0; font-size: 0.8rem; white-space: pre-wrap; }
+.werkzeug label { display: block; font-size: 0.85rem; }
+.werkzeug .zeile { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.4rem 0; }
+.werkzeug .zeile > * { flex: 1 1 200px; }
+.werkzeug .zeile > button { flex: 0 0 auto; }
+.lade-zeile { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin: 0.6rem 0; }
+.lade-zeile .balken { flex: 1 1 160px; }
+.lade-zeile .line-hilfe { flex: 1 1 100%; font-size: 0.8rem; color: var(--ink-soft); }
+.lade-zeile .line-hilfe.warn { color: var(--warn); }
+.tokens { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.5rem 0; }
+.tokens span { font-family: var(--mono); font-size: 0.85rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: var(--sand); border: 1px solid var(--line); }
+.tokens span:nth-child(even) { background: var(--signal-l); }
+.werkzeug .balken { height: 10px; background: var(--bg-soft); border-radius: 5px; overflow: hidden; border: 1px solid var(--line); }
+.werkzeug .balken > i { display: block; height: 100%; background: var(--signal); transition: width 0.2s; }
+.zwei-spalten { display: grid; grid-template-columns: 1fr; gap: 0.6rem; }
+@media (min-width: 800px) { .zwei-spalten { grid-template-columns: 1fr 1fr; } }
+.karte { width: 100%; height: auto; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; display: block; }
+.legende { display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.8rem; margin-top: 0.4rem; }
+.regler { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.5rem 0; }
+@media (max-width: 620px) { .regler { grid-template-columns: 1fr; } }
+.regler label { display: grid; gap: 0.2rem; font-size: 0.85rem; }
+.regler output { font-family: var(--mono); font-size: 0.85rem; }
+.stufen .stufe { margin: 0.8rem 0; }
+.stufen ol { margin-left: 1.2rem; }
+.stufen li { font-size: 0.85rem; display: grid; grid-template-columns: 62px auto 44px 1fr; gap: 0.5rem; align-items: baseline; padding: 0.2rem 0; border-bottom: 1px dashed var(--line); }
+.stufen li.im-kontext { background: var(--signal-l); }
+.stufen .score { font-family: var(--mono); }
+.stufen .chunk-id { font-family: var(--mono); color: var(--ink-soft); font-size: 0.75rem; }
+.stufen .badge { font-size: 0.6rem; padding: 0.1rem 0.4rem; }
+.stufen .snippet { color: var(--ink-soft); }
+@media (max-width: 620px) { .stufen li { grid-template-columns: 62px 1fr; } .stufen .chunk-id { display: none; } }
+.verteilung .v-zeile { display: grid; grid-template-columns: 140px 1fr 64px; gap: 0.5rem; align-items: center; font-size: 0.85rem; padding: 0.1rem 0; }
+.verteilung .v-zeile.gezogen { background: var(--signal-l); }
+.verteilung code { overflow: hidden; text-overflow: ellipsis; }
+.fuellstand { display: flex; height: 22px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg-soft); margin: 0.6rem 0; }
+.fuellstand i { display: block; height: 100%; }
+.seite img { width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+.markdown { max-height: 560px; overflow: auto; white-space: pre-wrap; font-size: 0.78rem; }
+.markdown mark { background: var(--signal-l); border-bottom: 2px solid var(--signal); cursor: pointer; }
+.chunk-liste { max-height: 560px; overflow: auto; }
+.chunk { border: 1px solid var(--line); border-radius: 6px; margin: 0.4rem 0; padding: 0.4rem 0.6rem; }
+.chunk.e18 { border-color: var(--signal); background: var(--signal-l); }
+.chunk-kopf { font-size: 0.75rem; color: var(--ink-soft); font-family: var(--mono); }
+.chunk pre { white-space: pre-wrap; font-size: 0.78rem; margin: 0.2rem 0 0; max-height: 160px; overflow: auto; font-family: var(--mono); }
+.ergebnis code { white-space: normal; }
