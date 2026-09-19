@@ -28,6 +28,15 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#voraussetzungen"><span lang="de">Voraussetzungen</span><span lang="en">Prerequisites</span></a>
+  <a class="sidebar-link" href="#einrichten"><span lang="de">Einrichten</span><span lang="en">Setting up</span></a>
+  <a class="sidebar-link" href="#lmstudio"><span lang="de">LM Studio</span><span lang="en">LM Studio</span></a>
+  <a class="sidebar-link" href="#erste-frage"><span lang="de">Die erste Frage</span><span lang="en">The first question</span></a>
+  <a class="sidebar-link" href="#pruefen"><span lang="de">Prüfen</span><span lang="en">Checking</span></a>
+  <a class="sidebar-link" href="#phasen"><span lang="de">Die Phasen</span><span lang="en">The phases</span></a>
+  <a class="sidebar-link" href="#fehlerbilder"><span lang="de">Fehlerbilder</span><span lang="en">Failure modes</span></a>
+  <a class="sidebar-link" href="#eigenes-dokument"><span lang="de">Eigenes Dokument</span><span lang="en">Your own document</span></a>
+  <a class="sidebar-link" href="#terminal"><span lang="de">Freies Terminal</span><span lang="en">Free terminal</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +49,178 @@
     <span lang="en">Rebuilding it</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">Neun Labs lang haben Sie das Fallbeispiel zerlegt. Jetzt setzen Sie es auf dem eigenen Rechner zusammen: fünf Befehle für die Umgebung, drei Zeilen für LM Studio, eine erste Frage auf der Kommandozeile, dann der Server. Das nachgebildete Terminal dieses Labs kennt zsh und PowerShell und die Fehlerbilder aus den Prüfprotokollen – die falsche Python-Version, die mehrdeutige Modell-ID, den belegten Port. Dazu die <span data-wert="commits.anzahl">33</span> Commits des Fallbeispiels als Phasen, von der Baseline (Recall <span data-wert="phasen.recallVor">64</span> %) bis zum Reranker (<span data-wert="phasen.recallNach">96</span> %), und der Weg zum eigenen Dokument.</span>
+    <span lang="en">For nine labs you have taken the case study apart. Now you put it together on your own computer: five commands for the environment, three lines for LM Studio, a first question on the command line, then the server. This lab's simulated terminal knows zsh and PowerShell and the failure modes from the audit logs – the wrong Python version, the ambiguous model ID, the taken port. Plus the case study's <span data-wert="commits.anzahl">33</span> commits as phases, from the baseline (recall <span data-wert="phasen.recallVor">64</span> %) to the reranker (<span data-wert="phasen.recallNach">96</span> %), and the path to your own document.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip">venv · pip</span>
+    <span class="lernziel-chip">LM Studio</span>
+    <span class="lernziel-chip">lokale_ki.py · server.py</span>
+    <span class="lernziel-chip">pytest · run_eval</span>
+    <span class="lernziel-chip"><span lang="de">Phasen</span><span lang="en">Phases</span></span>
+    <span class="lernziel-chip"><span lang="de">Fehlerbilder</span><span lang="en">Failure modes</span></span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="voraussetzungen">
+    <h2><span lang="de">Voraussetzungen</span><span lang="en">Prerequisites</span></h2>
+    <p>
+      <span lang="de">Die README des Fallbeispiels verlangt genau eines: Python 3.12. Nicht das 3.9, das macOS mitbringt, und nicht 3.13 – <code>torch 2.14.0</code> aus <code>requirements.txt</code> ist für 3.12 geprüft, und pip lehnt eine andere Version mit „Requires-Python“ ab. Dazu Git, LM Studio mit einem geladenen Chatmodell (oder ein OpenAI-Schlüssel), mehrere Gigabyte freier Speicher für Pakete und Modellgewichte und beim ersten Lauf Internet. Und eine Regel aus dem Mac-Prüfprotokoll: Der Projektordner gehört nicht in OneDrive, iCloud oder Dropbox. Die virtuelle Umgebung ist an Betriebssystem und Pfad gebunden, und der Modellcache besteht aus Symlinks, die ein Synchronisierer zu leeren Dateien macht.</span>
+      <span lang="en">The case study's README demands exactly one thing: Python 3.12. Not the 3.9 that macOS ships, and not 3.13 – <code>torch 2.14.0</code> from <code>requirements.txt</code> is tested for 3.12, and pip rejects another version with “Requires-Python”. Plus Git, LM Studio with a loaded chat model (or an OpenAI key), several gigabytes of free space for packages and model weights, and internet for the first run. And one rule from the Mac audit log: the project folder does not belong in OneDrive, iCloud or Dropbox. The virtual environment is bound to operating system and path, and the model cache consists of symlinks that a synchroniser turns into empty files.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Prüfen</span><span lang="en">Check</span></th><th>macOS (zsh)</th><th>Windows (PowerShell)</th><th><span lang="de">Erwartet</span><span lang="en">Expected</span></th></tr></thead>
+      <tbody>
+        <tr><td>Python</td><td><code>python3.12 --version</code></td><td><code>py -3.12 --version</code></td><td><code>Python 3.12.x</code></td></tr>
+        <tr><td>Git</td><td><code>git --version</code></td><td><code>git --version</code></td><td><code>git version 2.x</code></td></tr>
+        <tr><td>LM Studio</td><td><code>curl http://127.0.0.1:1234/v1/models</code></td><td><code>curl http://127.0.0.1:1234/v1/models</code></td><td><span lang="de">JSON-Liste mit Modell-IDs</span><span lang="en">JSON list with model IDs</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="section-block" id="einrichten">
+    <h2><span lang="de">Einrichten: fünf Befehle</span><span lang="en">Setting up: five commands</span></h2>
+    <p>
+      <span lang="de">Der Start-Abschnitt der README ist die Vorlage. Eine virtuelle Umgebung (<code>venv</code>) ist ein Ordner mit eigenem Python und eigenen Paketen; sie hält das Projekt von der Systeminstallation getrennt. Ohne sie verweigert pip auf dem Mac die Installation mit <code>externally-managed-environment</code> (PEP 668) – das ist Absicht, kein Fehler. Aktivieren setzt nur den Pfad; deshalb muss es in jedem neuen Terminalfenster wiederholt werden.</span>
+      <span lang="en">The README's start section is the template. A virtual environment (<code>venv</code>) is a folder with its own Python and its own packages; it keeps the project separate from the system installation. Without it pip on the Mac refuses installation with <code>externally-managed-environment</code> (PEP 668) – that is intentional, not a bug. Activating only sets the path; hence it has to be repeated in every new terminal window.</span>
+    </p>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">macOS · zsh</span><span class="befehl-was"><span lang="de">Klonen, Umgebung, Pakete</span><span lang="en">Clone, environment, packages</span></span></div>
+      <div class="befehl-koerper">
+        <pre class="befehl-syntax">git clone https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM.git
+cd SiemensWashingMachineTroubleShooting_LocalLLM
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt</pre>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de"><code>python3 -m venv</code> nimmt auf dem Mac das System-Python 3.9. Die Umgebung entsteht, aber <code>pip install</code> scheitert an torch. Dann <code>.venv</code> löschen und mit <code>python3.12</code> neu anlegen.</span><span lang="en"><code>python3 -m venv</code> on the Mac takes the system Python 3.9. The environment is created, but <code>pip install</code> fails on torch. Then delete <code>.venv</code> and recreate it with <code>python3.12</code>.</span></div>
+      </div>
+    </div>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">Windows · PowerShell</span><span class="befehl-was"><span lang="de">Dieselben fünf Schritte</span><span lang="en">The same five steps</span></span></div>
+      <div class="befehl-koerper">
+        <pre class="befehl-syntax">git clone https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM.git
+cd SiemensWashingMachineTroubleShooting_LocalLLM
+py -3.12 -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt</pre>
+        <ul class="befehl-teile">
+          <li><code>py -3.12</code><span><span lang="de">Der Python-Launcher wählt die Version; <code>python</code> allein nimmt, was zuerst im Pfad steht.</span><span lang="en">The Python launcher picks the version; <code>python</code> alone takes whatever is first in the path.</span></span></li>
+          <li>Activate.ps1<span><span lang="de">Meldet PowerShell „running scripts is disabled“, einmal <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> ausführen. Alternative ohne Aktivierung, wie in der README: <code>.venv\Scripts\python.exe -m pip install -r requirements.txt</code>.</span><span lang="en">If PowerShell reports “running scripts is disabled”, run <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> once. Alternative without activation, as in the README: <code>.venv\Scripts\python.exe -m pip install -r requirements.txt</code>.</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="lmstudio">
+    <h2><span lang="de">LM Studio: Modell, Server, Modell-ID</span><span lang="en">LM Studio: model, server, model ID</span></h2>
+    <p>
+      <span lang="de">In LM Studio ein Chatmodell laden, das zur Hardware passt – das Fallbeispiel lief mit <code data-wert="antworten.modell">gemma-4-12b-it-mlx</code> in <span data-wert="lms.quant">6bit</span>-Quantisierung auf einem Mac mit Apple Silicon. Dann den lokalen Server starten (Developer-Ansicht, „Start Server“, oder <code>lms server start</code>; Port 1234). Der Server bietet eine OpenAI-kompatible API; <code>/v1/models</code> listet die geladenen Modelle mit ihren IDs. Diese ID gehört in die Profildatei: <code>profiles/local/.env.example</code> nach <code>profiles/local/.env</code> kopieren und <code>LOCAL_LLM_MODEL</code> eintragen. Nur bei genau einem geladenen Chatmodell darf die Zeile leer bleiben; die Mac-Prüfung hatte drei, und die Autoauswahl brach mit einer klaren Meldung ab.</span>
+      <span lang="en">Load a chat model in LM Studio that fits the hardware – the case study ran with <code data-wert="antworten.modell">gemma-4-12b-it-mlx</code> in <span data-wert="lms.quant">6bit</span> quantisation on a Mac with Apple Silicon. Then start the local server (developer view, “Start Server”, or <code>lms server start</code>; port 1234). The server offers an OpenAI-compatible API; <code>/v1/models</code> lists the loaded models with their IDs. That ID belongs in the profile file: copy <code>profiles/local/.env.example</code> to <code>profiles/local/.env</code> and enter <code>LOCAL_LLM_MODEL</code>. Only with exactly one loaded chat model may the line stay empty; the Mac audit had three, and auto-selection aborted with a clear message.</span>
+    </p>
+    <pre class="code-block">LOCAL_LLM_ENDPOINT=http://127.0.0.1:1234/v1
+LOCAL_LLM_MODEL=gemma-4-12b-it-mlx</pre>
+    <div class="tip-box">
+      <strong><span lang="de">CORS nur für dieses Lab:</span><span lang="en">CORS only for this lab:</span></strong>
+      <span lang="de">Das Fallbeispiel braucht kein CORS – sein Python-Server spricht LM Studio direkt an. Nur das LLM-Werkzeug in Lab 07, das aus dem Browser heraus fragt, braucht <code>lms server start --cors</code>. Die LM-Studio-Dokumentation warnt, dass CORS den Server für Webseiten öffnet; nach dem Lab wieder ausschalten.</span>
+      <span lang="en">The case study needs no CORS – its Python server talks to LM Studio directly. Only the LLM tool in lab 07, which asks from the browser, needs <code>lms server start --cors</code>. The LM Studio documentation warns that CORS opens the server to web pages; switch it off again after the lab.</span>
+    </div>
+  </section>
+
+  <section class="section-block" id="erste-frage">
+    <h2><span lang="de">Die erste Frage</span><span lang="en">The first question</span></h2>
+    <p>
+      <span lang="de"><code>lokale_ki.py</code> ist die Kommandozeile des Fallbeispiels und nutzt dieselbe Suche und denselben Prompt wie die Web-App. Der erste Aufruf dauert: Er lädt <code>multilingual-e5-small</code> und <code>bge-reranker-v2-m3</code> aus dem Hugging-Face-Hub in den Benutzer-Cache, baut den Index aus 346 Chunks und schreibt <code>storage/</code> samt Fingerprint. Jeder weitere Aufruf trifft den Cache. Danach <code>python server.py</code> und im Browser <code>http://127.0.0.1:3001</code> öffnen – nicht die HTML-Datei, denn <code>file://</code> hat keinen Server hinter sich.</span>
+      <span lang="en"><code>lokale_ki.py</code> is the case study's command line and uses the same retrieval and the same prompt as the web app. The first call takes a while: it loads <code>multilingual-e5-small</code> and <code>bge-reranker-v2-m3</code> from the Hugging Face Hub into the user cache, builds the index from 346 chunks and writes <code>storage/</code> with the fingerprint. Every further call hits the cache. Then <code>python server.py</code> and open <code>http://127.0.0.1:3001</code> in the browser – not the HTML file, because <code>file://</code> has no server behind it.</span>
+    </p>
+    <pre class="code-block">python lokale_ki.py "Was bedeutet E:18?"
+INFO:rag_engine:Baue Index neu (Quelle/Konfiguration geaendert): storage
+INFO:rag_engine:Index gebaut und persistiert (346 Abschnitte).
+Der Fehlercode E:18 weist auf eine Verstopfung im Bereich der Laugenpumpe oder des Abflusssystems hin.
+…
+Quelle: Handbuch: Hinweise im Anzeigefeld · Querverweise auf Seite 30/31
+
+python server.py
+ * Running on http://127.0.0.1:3001</pre>
+  </section>
+
+  <section class="section-block" id="pruefen">
+    <h2><span lang="de">Prüfen: Tests und Messlauf</span><span lang="en">Checking: tests and evaluation run</span></h2>
+    <p>
+      <span lang="de">Zwei Läufe sagen, ob der Nachbau stimmt. <code>python -m pytest -q</code> (nach <code>requirements-dev.txt</code>) führt die Python-Tests aus – die Mac-Prüfung meldet 86 bestandene – und <code>python eval/run_eval.py</code> die zehn Fragen aus Lab 08. Steht am Ende <span data-wert="eval.rerank.hit5">100</span> % Trefferquote, MRR <span data-wert="eval.rerank.mrr">1,00</span> und <span data-wert="eval.rerank.abdeckung">93,5</span> % Abdeckung, ist die Suche identisch mit der des Fallbeispiels. Beides läuft ohne LM Studio.</span>
+      <span lang="en">Two runs tell whether the rebuild is right. <code>python -m pytest -q</code> (after <code>requirements-dev.txt</code>) runs the Python tests – the Mac audit reports 86 passed – and <code>python eval/run_eval.py</code> the ten questions from lab 08. If the end shows <span data-wert="eval.rerank.hit5">100</span> % hit rate, MRR <span data-wert="eval.rerank.mrr">1.00</span> and <span data-wert="eval.rerank.abdeckung">93.5</span> % coverage, retrieval is identical to the case study's. Both run without LM Studio.</span>
+    </p>
+    <pre class="code-block">python -m pip install -r requirements-dev.txt
+python -m pytest -q
+python eval/run_eval.py --output docs/evaluation/hybrid-rerank.json</pre>
+  </section>
+
+  <section class="section-block" id="phasen">
+    <h2><span lang="de">Die Phasen: wie das Fallbeispiel entstand</span><span lang="en">The phases: how the case study came about</span></h2>
+    <p>
+      <span lang="de">Die Historie hat <span data-wert="commits.anzahl">33</span> Commits, von <code data-wert="commits.erster">538ad35</code> am 07.07.2026 bis <code data-wert="commits.letzter">375ae9b</code> am 19.09.2026; <code>git log</code> im geklonten Ordner zeigt sie. Zehn davon sind die Phasen. Die Baseline war ein RAG ohne Präfixe, ohne Reranker und ohne Messung. Phase 0 brachte die Präfixe, den persistenten Index mit Fingerprint und den Messlauf; Phase 1 den Reranker, Phase 1+ das zeilenweise Tabellen-Chunking und den Fehlercode-Hybrid. Das Design-Dokument vom 07.07.2026 hält die Messung dazu fest: Recall <span data-wert="phasen.recallVor">64</span> → <span data-wert="phasen.recallNach">96</span> %, MRR <span data-wert="phasen.mrrVor">0,73</span> → <span data-wert="phasen.mrrNach">1,00</span>, Hit@1 <span data-wert="phasen.hit1Vor">70</span> → <span data-wert="phasen.hit1Nach">100</span> % auf den zehn Fragen. Dann Quellen, SSE-Streaming, der Guardrail, PageIndex – und im September die Vereinigung von LM Studio und OpenAI mit Sitzungsschlüsseln sowie der Cache-Fix aus der Mac-Prüfung.</span>
+      <span lang="en">The history has <span data-wert="commits.anzahl">33</span> commits, from <code data-wert="commits.erster">538ad35</code> on 7 July 2026 to <code data-wert="commits.letzter">375ae9b</code> on 19 Sept 2026; <code>git log</code> in the cloned folder shows them. Ten of them are the phases. The baseline was a RAG without prefixes, without reranker and without measurement. Phase 0 brought the prefixes, the persistent index with fingerprint and the evaluation run; phase 1 the reranker, phase 1+ the row-wise table chunking and the error-code hybrid. The design document of 7 July 2026 records the measurement: recall <span data-wert="phasen.recallVor">64</span> → <span data-wert="phasen.recallNach">96</span> %, MRR <span data-wert="phasen.mrrVor">0.73</span> → <span data-wert="phasen.mrrNach">1.00</span>, hit@1 <span data-wert="phasen.hit1Vor">70</span> → <span data-wert="phasen.hit1Nach">100</span> % on the ten questions. Then sources, SSE streaming, the guardrail, PageIndex – and in September the unification of LM Studio and OpenAI with session keys plus the cache fix from the Mac audit.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/nachbau-phasen-de.svg" alt="Git-Graph mit zehn Commits auf main: 538ad35 Baseline am 07.07.2026; 0266af9 Phase 0 mit e5-Präfixen, persistentem Index und Eval-Harness; d9f62d9 Phase 1 Reranker; 1a52f03 Phase 1+ Tabellen-Chunking und Fehlercode-Hybrid, markiert mit Recall 64 → 96 %; 6f2e9a7 Phase 2a Quellen; 0617fa3 Phase 2b SSE-Streaming; dc85695 Guardrail; b71a58e PageIndex; eec74d4 LM Studio + OpenAI mit Sitzungsschlüsseln am 19.09.2026; 5a3f74c Cache-Fix und Mac-Prüfung, markiert als Stand dieses Labs." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/nachbau-phasen-en.svg" alt="Git graph with ten commits on main: 538ad35 baseline on 7 July 2026; 0266af9 phase 0 with e5 prefixes, persistent index and eval harness; d9f62d9 phase 1 reranker; 1a52f03 phase 1+ table chunking and error-code hybrid, tagged recall 64 → 96 %; 6f2e9a7 phase 2a sources; 0617fa3 phase 2b SSE streaming; dc85695 guardrail; b71a58e PageIndex; eec74d4 LM Studio + OpenAI with session keys on 19 Sept 2026; 5a3f74c cache fix and Mac audit, tagged as the state of this lab." loading="lazy"></span>
+      <figcaption><span lang="de">Zehn Commits, jede Phase ein eigener, mit Tests. Die Hashes sind echt; <code>git show 1a52f03</code> zeigt das Tabellen-Chunking aus Lab 04.</span><span lang="en">Ten commits, every phase its own, with tests. The hashes are real; <code>git show 1a52f03</code> shows the table chunking from lab 04.</span></figcaption>
+    </figure>
+    <div class="concept-box">
+      <strong><span lang="de">Die Lehre der Reihenfolge:</span><span lang="en">The lesson of the order:</span></strong>
+      <span lang="de">Zuerst die Messung (Phase 0), dann die Verbesserungen. Ohne den Messlauf wäre der Reranker eine Behauptung geblieben. Und der zentrale Befund zur Antwortzeit stand nicht in der Suche, sondern in der Modellwahl: Ein Reasoning-Modell brauchte rund 250 Sekunden, das Instruct-Modell gemma-4-12b rund 40 – deshalb ist es der Standard.</span>
+      <span lang="en">First the measurement (phase 0), then the improvements. Without the evaluation run the reranker would have remained a claim. And the central finding on answer time lay not in retrieval but in model choice: a reasoning model needed about 250 seconds, the instruct model gemma-4-12b about 40 – which is why it is the default.</span>
+    </div>
+  </section>
+
+  <section class="section-block" id="fehlerbilder">
+    <h2><span lang="de">Fehlerbilder aus den Prüfprotokollen</span><span lang="en">Failure modes from the audit logs</span></h2>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Meldung</span><span lang="en">Message</span></th><th><span lang="de">Ursache</span><span lang="en">Cause</span></th><th><span lang="de">Abhilfe</span><span lang="en">Remedy</span></th></tr></thead>
+      <tbody>
+        <tr><td><code>ModuleNotFoundError: No module named 'flask'</code></td><td><span lang="de">venv nicht aktiv oder Pakete fehlen</span><span lang="en">venv not active or packages missing</span></td><td><code>source .venv/bin/activate</code>, <code>python -m pip install -r requirements.txt</code></td></tr>
+        <tr><td><code>externally-managed-environment</code></td><td><span lang="de">pip ohne venv gegen das System-Python (PEP 668)</span><span lang="en">pip without venv against the system Python (PEP 668)</span></td><td><span lang="de">venv anlegen und aktivieren</span><span lang="en">Create and activate a venv</span></td></tr>
+        <tr><td><code>Requires-Python &gt;=3.12</code></td><td><span lang="de">venv mit 3.9 oder 3.13 angelegt</span><span lang="en">venv created with 3.9 or 3.13</span></td><td><span lang="de"><code>.venv</code> löschen, mit <code>python3.12</code> / <code>py -3.12</code> neu anlegen</span><span lang="en">Delete <code>.venv</code>, recreate with <code>python3.12</code> / <code>py -3.12</code></span></td></tr>
+        <tr><td><code>JSONDecodeError</code> <span lang="de">beim Laden des Embedding-Modells</span><span lang="en">while loading the embedding model</span></td><td><span lang="de">Modellcache über OneDrive synchronisiert; Snapshot-Dateien leer (Mac-Prüfung)</span><span lang="en">Model cache synchronised via OneDrive; snapshot files empty (Mac audit)</span></td><td><span lang="de">Projekt und <code>HF_HOME</code> außerhalb synchronisierter Ordner; Cache löschen und neu laden</span><span lang="en">Project and <code>HF_HOME</code> outside synchronised folders; delete cache and reload</span></td></tr>
+        <tr><td><code>RuntimeError: LOCAL_LLM_MODEL auf die genaue ID … setzen</code></td><td><span lang="de">Mehrere Chatmodelle geladen</span><span lang="en">Several chat models loaded</span></td><td><span lang="de">ID aus <code>curl …/v1/models</code> in <code>profiles/local/.env</code></span><span lang="en">ID from <code>curl …/v1/models</code> into <code>profiles/local/.env</code></span></td></tr>
+        <tr><td><code>openai.APIConnectionError: Connection error</code></td><td><span lang="de">LM Studio läuft nicht oder der Server ist aus</span><span lang="en">LM Studio not running or its server off</span></td><td><span lang="de">Server in LM Studio starten (Port 1234)</span><span lang="en">Start the server in LM Studio (port 1234)</span></td></tr>
+        <tr><td><code>OSError: [Errno 48] Address already in use</code></td><td><span lang="de">Port 3001 von einem alten Server belegt</span><span lang="en">Port 3001 taken by an old server</span></td><td><span lang="de">Alten Prozess beenden oder <code>PORT=3002</code> in <code>.env</code></span><span lang="en">Stop the old process or <code>PORT=3002</code> in <code>.env</code></span></td></tr>
+        <tr><td><code>UnicodeEncodeError: 'charmap' codec</code></td><td><span lang="de">Windows-Konsole mit cp1252 und Emoji in Ausgaben (behoben: Logging statt Print)</span><span lang="en">Windows console with cp1252 and emoji in output (fixed: logging instead of print)</span></td><td><span lang="de">Aktuellen Stand klonen</span><span lang="en">Clone the current state</span></td></tr>
+        <tr><td><span lang="de">Seite lädt, Fragen enden mit „Failed to fetch“</span><span lang="en">Page loads, questions end with “Failed to fetch”</span></td><td><span lang="de"><code>index.html</code> per <code>file://</code> geöffnet</span><span lang="en"><code>index.html</code> opened via <code>file://</code></span></td><td><code>http://127.0.0.1:3001</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="section-block" id="eigenes-dokument">
+    <h2><span lang="de">Ein eigenes Dokument</span><span lang="en">A document of your own</span></h2>
+    <p>
+      <span lang="de">Das Fallbeispiel ist auf ein Handbuch gebaut, aber nur an vier Stellen daran gebunden: die Wissensdatei <code>siemens_wissen.md</code>, die Fehlercode-Regex in <code>rag_engine.py</code>, die vier Verfahrensgruppen in <code>manual_context.py</code> und die zehn Fragen in <code>eval/questions.json</code>. Für ein anderes PDF: mit <code>parser.py</code> extrahieren (optionale Pakete), die Extraktion an Tabellen und Warnhinweisen gegen das PDF prüfen (Lab 03), die Wissensdatei ersetzen – der Fingerprint erzwingt den Neuaufbau (Lab 09) –, eigene Fragen mit Stichwörtern aus dem Dokument anlegen und <code>run_eval.py</code> laufen lassen (Lab 08). Die Verfahrensgruppen sind Handarbeit und gelten nur für dieses Handbuch; ohne sie läuft das System, nur ohne die ausgeweiteten Anleitungen.</span>
+      <span lang="en">The case study is built on one manual but bound to it in only four places: the knowledge file <code>siemens_wissen.md</code>, the error-code regex in <code>rag_engine.py</code>, the four procedure groups in <code>manual_context.py</code> and the ten questions in <code>eval/questions.json</code>. For another PDF: extract with <code>parser.py</code> (optional packages), check the extraction at tables and warnings against the PDF (lab 03), replace the knowledge file – the fingerprint forces the rebuild (lab 09) –, create your own questions with keywords from the document and run <code>run_eval.py</code> (lab 08). The procedure groups are handwork and apply only to this manual; without them the system runs, just without the expanded procedures.</span>
+    </p>
+    <pre class="code-block">python -m pip install -r requirements-optional.txt
+python parser.py --pdf mein-handbuch.pdf --output mein_wissen.md
+# erst prüfen, dann die aktive Wissensdatei ersetzen (der Dateiname ist im Code fest):
+mv mein_wissen.md siemens_wissen.md
+python eval/run_eval.py</pre>
+  </section>
+
+  <section class="section-block" id="terminal">
+    <h2><span lang="de">Freies Terminal</span><span lang="en">Free terminal</span></h2>
+    <p>
+      <span lang="de">Ohne Auftrag, mit allem, was die Übungen kennen: <code>git clone</code>, <code>cd</code>, <code>ls</code>, <code>python3.12 -m venv</code>, <code>source</code>, <code>pip install</code>, <code>cp</code>, <code>echo … &gt;&gt;</code>, <code>curl</code>, <code>lms</code>, <code>python lokale_ki.py</code>, <code>python server.py</code>, <code>python -m pytest</code>, <code>python eval/run_eval.py</code>. Der Schalter „LM Studio läuft“ simuliert einen abgeschalteten Server; „Zurücksetzen“ stellt den Anfang her. Der Zustand bleibt im Browser gespeichert.</span>
+      <span lang="en">Without a task, with everything the exercises know: <code>git clone</code>, <code>cd</code>, <code>ls</code>, <code>python3.12 -m venv</code>, <code>source</code>, <code>pip install</code>, <code>cp</code>, <code>echo … &gt;&gt;</code>, <code>curl</code>, <code>lms</code>, <code>python lokale_ki.py</code>, <code>python server.py</code>, <code>python -m pytest</code>, <code>python eval/run_eval.py</code>. The switch “LM Studio is running” simulates a stopped server; “Reset” restores the start. The state stays stored in the browser.</span>
+    </p>
+    <div data-werkzeug="terminal" data-parameter='{"id":"frei","os":"alle","szenario":{"geklont":false}}'></div>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Fünf Übungen: Voraussetzungen prüfen, im Terminal einrichten, im Terminal starten, Fehlerbilder zuordnen und ein eigenes Dokument einbinden.</span><span lang="en">Five exercises: check prerequisites, set up in the terminal, start in the terminal, assign failure modes and add your own document.</span></p>
     <div data-uebung="R10-01"></div>
     <div data-uebung="R10-02"></div>
     <div data-uebung="R10-03"></div>
@@ -58,11 +230,27 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Python 3.12, Git, LM Studio, Speicher, ein Ordner außerhalb der Cloud-Synchronisation – fünf Prüfungen vor dem ersten Befehl.</span><span lang="en">Python 3.12, Git, LM Studio, disk space, a folder outside cloud synchronisation – five checks before the first command.</span></li>
+      <li><span lang="de">Klonen, venv mit 3.12, aktivieren, installieren: fünf Befehle, in zsh und PowerShell.</span><span lang="en">Clone, venv with 3.12, activate, install: five commands, in zsh and PowerShell.</span></li>
+      <li><span lang="de">LM Studio: Modell laden, Server starten, exakte Modell-ID in <code>profiles/local/.env</code>.</span><span lang="en">LM Studio: load model, start server, exact model ID in <code>profiles/local/.env</code>.</span></li>
+      <li><span lang="de">Der erste Lauf lädt Modelle und baut den Index; pytest und run_eval bestätigen den Nachbau ohne Sprachmodell.</span><span lang="en">The first run loads models and builds the index; pytest and run_eval confirm the rebuild without a language model.</span></li>
+      <li><span lang="de">Die Phasen des Fallbeispiels beginnen mit der Messung; jede Verbesserung hat einen Commit und eine Zahl.</span><span lang="en">The case study's phases begin with measurement; every improvement has a commit and a number.</span></li>
+      <li><span lang="de">Fehlertexte zu Ende lesen: Die Fehlerbilder sind bekannt, und die Lösung steht meist in der Meldung.</span><span lang="en">Read error messages to the end: the failure modes are known, and the solution is usually in the message.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Python Software Foundation: venv – Creation of virtual environments; Python Launcher for Windows. <a href="https://docs.python.org/3/library/venv.html" rel="noopener">docs.python.org/3/library/venv.html</a>, <a href="https://docs.python.org/3/using/windows.html#python-launcher-for-windows" rel="noopener">…/using/windows.html</a> (19.09.2026)</li>
+      <li>pip documentation: Requirements File Format. <a href="https://pip.pypa.io/en/stable/reference/requirements-file-format/" rel="noopener">pip.pypa.io</a>; PEP 668 – Marking Python base environments as “externally managed”. <a href="https://peps.python.org/pep-0668/" rel="noopener">peps.python.org/pep-0668</a> (19.09.2026)</li>
+      <li>LM Studio Docs: Download an LLM; OpenAI Compatibility API; lms server start (Flag --cors); System Requirements. <a href="https://lmstudio.ai/docs/app/basics/download-model" rel="noopener">lmstudio.ai/docs</a>, <a href="https://lmstudio.ai/docs/developer/openai-compat" rel="noopener">…/openai-compat</a>, <a href="https://lmstudio.ai/docs/cli/server-start" rel="noopener">…/cli/server-start</a> (19.09.2026)</li>
+      <li>Hugging Face: Manage huggingface_hub cache-system (HF_HOME, HF_HUB_CACHE, Snapshot-Symlinks). <a href="https://huggingface.co/docs/huggingface_hub/guides/manage-cache" rel="noopener">huggingface.co/docs/huggingface_hub/guides/manage-cache</a> (19.09.2026)</li>
+      <li>Git: git-clone Documentation. <a href="https://git-scm.com/docs/git-clone" rel="noopener">git-scm.com/docs/git-clone</a>; Microsoft: about_Execution_Policies (PowerShell). <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies" rel="noopener">learn.microsoft.com</a> (19.09.2026)</li>
+      <li><span lang="de">Fallbeispiel: <code>README.md</code> (Start, Lokales Modell auf dem Mac, Prüfung und Weiterentwicklung), <code>requirements.txt</code>, <code>profiles/local/.env.example</code>, <code>docs/2026-07-07-optimization-design.md</code> (Umsetzungsstand mit Messwerten), <code>docs/evaluation/MAC-LIVE.md</code> und <code>docs/AUDIT.md</code> (Fehlerbilder), <code>git log</code> (<span data-wert="commits.anzahl">33</span> Commits), Stand 19.09.2026; Hashes und Phasenwerte in <code>data/betrieb.json</code>.</span><span lang="en">Case study: <code>README.md</code> (start, local model on the Mac, checking and further development), <code>requirements.txt</code>, <code>profiles/local/.env.example</code>, <code>docs/2026-07-07-optimization-design.md</code> (implementation status with measurements), <code>docs/evaluation/MAC-LIVE.md</code> and <code>docs/AUDIT.md</code> (failure modes), <code>git log</code> (<span data-wert="commits.anzahl">33</span> commits), as of 19 Sept 2026; hashes and phase values in <code>data/betrieb.json</code>.</span></li>
+    </ul>
   </section>
 
 </main>

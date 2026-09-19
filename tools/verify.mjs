@@ -15,6 +15,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { neueWelt, fuehreAus, schrittErfuellt, zustandTrifft } from '../assets/terminal.js'
 const HIER = dirname(fileURLToPath(import.meta.url)); const ROOT = join(HIER, '..')
 const { LABS } = await import('../assets/rag.js').catch(async () => {
   // rag.js importiert DOM-freie Module, braucht aber selbst kein DOM beim Laden.
@@ -141,6 +142,15 @@ const WERTE = {
   'betrieb.grenzen.kontextZeichen': () => bt.grenzen.kontextZeichen,
   'betrieb.grenzen.stunden': () => bt.grenzen.schluesselStunden,
   'betrieb.csp': () => bt.header['Content-Security-Policy'],
+  'phasen.recallVor': () => bt.phasen.recallVor,
+  'phasen.recallNach': () => bt.phasen.recallNach,
+  'phasen.mrrVor': () => bt.phasen.mrrVor,
+  'phasen.mrrNach': () => bt.phasen.mrrNach,
+  'phasen.hit1Vor': () => bt.phasen.hit1Vor,
+  'phasen.hit1Nach': () => bt.phasen.hit1Nach,
+  'commits.anzahl': () => bt.commits.length,
+  'commits.erster': () => bt.commits.at(-1).hash,
+  'commits.letzter': () => bt.commits[0].hash,
   'kosten.preisEin': () => bt.preise.einUsdJeMio,
   'kosten.preisAus': () => bt.preise.ausUsdJeMio,
   'kosten.jeAnfrageCent': () => kosten().je * 100,
@@ -228,7 +238,22 @@ for (const lab of LABS) {
       meld(Array.isArray(u.quellen) && u.quellen.length > 0 && u.quellen.every(q => q.chunk ? !!(ch && ch.chunks.some(c => c.id === q.chunk)) : (zwei(q.text) && zwei(q.titel))), `${u.id}: Quellen vorhanden`)
     }
     if (u.typ === 'checkliste') meld(Array.isArray(u.schritte) && u.schritte.every(s => zwei(s.text) && zwei(s.frage) && opt(s.optionen) && s.richtig >= 0 && s.richtig < s.optionen.length), `${u.id}: Schritte mit Prüffrage`)
-    if (u.typ === 'terminal') meld(Array.isArray(u.schritte) && u.schritte.every(s => zwei(s.text) && (s.muster || s.zustand)), `${u.id}: Terminalschritte`)
+    if (u.typ === 'terminal') {
+      meld(Array.isArray(u.schritte) && u.schritte.every(s => zwei(s.text) && (s.muster || s.zustand)), `${u.id}: Terminalschritte`)
+      // Die Musterlösung (loesung.mac / loesung.win) muss in der nachgebildeten Shell alle Schritte erfüllen.
+      for (const os of ['mac', 'win']) {
+        const zeilen = u.loesung && u.loesung[os]
+        if (!Array.isArray(zeilen)) { meld(false, `${u.id}: Musterlösung für ${os} fehlt`); continue }
+        const w = neueWelt(os, u.szenario || {}); const schritte = u.schritte.map(s => ({ ...s, fertig: false })); let fehler = null
+        for (const zeile of zeilen) {
+          const s = schritte.find(x => !x.fertig); const vorher = s ? zustandTrifft(w, s.zustand) : false
+          const r = fuehreAus(w, zeile)
+          if (r.zeilen.some(z => z.art === 'fehler') && !(s && s.erwarteterFehler)) fehler = zeile
+          if (s && schrittErfuellt(w, s, zeile, vorher, r)) s.fertig = true
+        }
+        meld(!fehler && schritte.every(s => s.fertig), `${u.id}: Musterlösung ${os} erfüllt alle ${schritte.length} Schritte${fehler ? ' (Fehler bei: ' + fehler + ')' : ''}`)
+      }
+    }
   })
   for (const m of html.matchAll(/data-werkzeug="([^"]+)"(?:[^>]*data-parameter='([^']*)')?/g)) {
     meld(WERKZEUGE.includes(m[1]), `${lab.id}: Werkzeug ${m[1]} bekannt`)
@@ -236,6 +261,12 @@ for (const lab of LABS) {
   }
   meld(!/TODO|TBD|Lorem ipsum/.test(html), `${lab.id}: keine Platzhaltertexte`)
   pruefeWerte(html, lab.id)
+}
+// Die Commit-Hashes im Phasendiagramm muessen in der echten Historie des Fallbeispiels stehen.
+{
+  const mmd = readFileSync(join(ROOT, 'diagramme/quellen/nachbau-phasen.mmd'), 'utf8')
+  const hashes = [...mmd.matchAll(/commit id: "([0-9a-f]{7})/g)].map(m => m[1])
+  meld(hashes.length >= 8 && hashes.every(h => bt.commits.some(c => c.hash === h)), `nachbau-phasen.mmd: ${hashes.length} Commit-Hashes in der Historie des Fallbeispiels`)
 }
 const index = readFileSync(join(ROOT, 'index.html'), 'utf8')
 for (const m of index.matchAll(/data-werkzeug="([^"]+)"/g)) meld(WERKZEUGE.includes(m[1]), `index: Werkzeug ${m[1]} bekannt`)

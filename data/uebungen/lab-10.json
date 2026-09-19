@@ -1,1 +1,620 @@
-[]
+[
+ {
+  "id": "R10-01",
+  "typ": "checkliste",
+  "titel": {
+   "de": "Voraussetzungen prüfen",
+   "en": "Check the prerequisites"
+  },
+  "aufgabe": {
+   "de": "<p>Gehen Sie die fünf Voraussetzungen auf Ihrem Rechner durch und beantworten Sie zu jeder die Prüffrage. Die Fragen sind auch ohne Rechner beantwortbar; sie fragen nach dem Warum.</p>",
+   "en": "<p>Go through the five prerequisites on your computer and answer the check question for each. The questions can be answered without a computer; they ask about the why.</p>"
+  },
+  "schritte": [
+   {
+    "text": {
+     "de": "Python 3.12 ist installiert (nicht 3.9 aus macOS, nicht 3.13).",
+     "en": "Python 3.12 is installed (not the 3.9 from macOS, not 3.13)."
+    },
+    "frage": {
+     "de": "Welcher Befehl zeigt, ob die richtige Version da ist?",
+     "en": "Which command shows whether the right version is there?"
+    },
+    "optionen": [
+     {
+      "de": "python3.12 --version (Mac) bzw. py -3.12 --version (Windows)",
+      "en": "python3.12 --version (Mac) or py -3.12 --version (Windows)"
+     },
+     {
+      "de": "python --version – das reicht immer.",
+      "en": "python --version – that always suffices."
+     },
+     {
+      "de": "pip --version",
+      "en": "pip --version"
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "Git ist installiert.",
+     "en": "Git is installed."
+    },
+    "frage": {
+     "de": "Wozu braucht der Nachbau Git?",
+     "en": "What does the rebuild need Git for?"
+    },
+    "optionen": [
+     {
+      "de": "Um das Repository mit git clone zu holen und die Phasen im git log nachzulesen.",
+      "en": "To fetch the repository with git clone and to read the phases in git log."
+     },
+     {
+      "de": "Um die Modelle herunterzuladen.",
+      "en": "To download the models."
+     },
+     {
+      "de": "Gar nicht; ein ZIP-Download wäre gleichwertig.",
+      "en": "Not at all; a ZIP download would be equivalent."
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "LM Studio ist installiert und ein Chatmodell geladen (oder ein OpenAI-Schlüssel liegt bereit).",
+     "en": "LM Studio is installed and a chat model loaded (or an OpenAI key is at hand)."
+    },
+    "frage": {
+     "de": "Was empfiehlt die LM-Studio-Dokumentation als Arbeitsspeicher?",
+     "en": "What does the LM Studio documentation recommend as RAM?"
+    },
+    "optionen": [
+     {
+      "de": "Mindestens 16 GB; mit 8 GB nur kleine Modelle und kleine Kontexte.",
+      "en": "At least 16 GB; with 8 GB only small models and small contexts."
+     },
+     {
+      "de": "4 GB reichen für jedes Modell.",
+      "en": "4 GB suffice for any model."
+     },
+     {
+      "de": "Arbeitsspeicher spielt keine Rolle, nur die Festplatte.",
+      "en": "RAM plays no role, only the disk."
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "Mehrere GB freier Speicher und beim ersten Lauf eine Internetverbindung.",
+     "en": "Several GB of free space and, for the first run, an internet connection."
+    },
+    "frage": {
+     "de": "Wofür werden die Gigabyte gebraucht?",
+     "en": "What are the gigabytes needed for?"
+    },
+    "optionen": [
+     {
+      "de": "Für die Python-Pakete (torch allein ist groß) und die Modellgewichte von e5 und dem Reranker im Hugging-Face-Cache.",
+      "en": "For the Python packages (torch alone is large) and the model weights of e5 and the reranker in the Hugging Face cache."
+     },
+     {
+      "de": "Für den Vektorspeicher: Er ist mehrere Gigabyte groß.",
+      "en": "For the vector store: it is several gigabytes in size."
+     },
+     {
+      "de": "Für das PDF des Handbuchs.",
+      "en": "For the PDF of the manual."
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "Ein Projektordner außerhalb von OneDrive, iCloud oder Dropbox.",
+     "en": "A project folder outside OneDrive, iCloud or Dropbox."
+    },
+    "frage": {
+     "de": "Warum?",
+     "en": "Why?"
+    },
+    "optionen": [
+     {
+      "de": "Die virtuelle Umgebung und der Modellcache sind nicht portabel; synchronisierte Symlinks kamen im Prüfprotokoll als leere Dateien an.",
+      "en": "The virtual environment and the model cache are not portable; synchronised symlinks arrived as empty files in the audit log."
+     },
+     {
+      "de": "Weil Git in synchronisierten Ordnern nicht funktioniert.",
+      "en": "Because Git does not work in synchronised folders."
+     },
+     {
+      "de": "Aus Datenschutzgründen: Das Handbuch ist geheim.",
+      "en": "For privacy reasons: the manual is secret."
+     }
+    ],
+    "richtig": 0
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Fünf Prüfungen vor dem ersten Befehl sparen die häufigsten Fehlerbilder aus Übung R10-04.",
+   "en": "Five checks before the first command save the most common failure modes of exercise R10-04."
+  }
+ },
+ {
+  "id": "R10-02",
+  "typ": "terminal",
+  "os": "alle",
+  "szenario": {
+   "geklont": false
+  },
+  "titel": {
+   "de": "Einrichten: klonen, venv, installieren",
+   "en": "Set up: clone, venv, install"
+  },
+  "aufgabe": {
+   "de": "<p>Sie stehen in <code>~/Projekte</code>. Holen Sie das Repository (<code>https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM.git</code>), wechseln Sie hinein, legen Sie eine virtuelle Umgebung mit Python 3.12 an, aktivieren Sie sie und installieren Sie die Pakete. Der Umschalter oben wählt zsh (Mac) oder PowerShell (Windows); die Aufgabe zählt in beiden.</p>",
+   "en": "<p>You are in <code>~/Projekte</code>. Fetch the repository (<code>https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM.git</code>), change into it, create a virtual environment with Python 3.12, activate it and install the packages. The switch at the top selects zsh (Mac) or PowerShell (Windows); the task counts in both.</p>"
+  },
+  "schritte": [
+   {
+    "text": {
+     "de": "Repository klonen",
+     "en": "Clone the repository"
+    },
+    "muster": "^git clone",
+    "zustand": {
+     "datei": "SiemensWashingMachineTroubleShooting_LocalLLM/requirements.txt"
+    }
+   },
+   {
+    "text": {
+     "de": "In den Projektordner wechseln",
+     "en": "Change into the project folder"
+    },
+    "muster": "^(cd|Set-Location)",
+    "zustand": {
+     "pfad": "~/Projekte/SiemensWashingMachineTroubleShooting_LocalLLM"
+    }
+   },
+   {
+    "text": {
+     "de": "Virtuelle Umgebung .venv mit Python 3.12 anlegen",
+     "en": "Create the virtual environment .venv with Python 3.12"
+    },
+    "muster": "-m venv",
+    "zustand": {
+     "venvVorhanden": true,
+     "venvPython": "3.12"
+    }
+   },
+   {
+    "text": {
+     "de": "Umgebung aktivieren",
+     "en": "Activate the environment"
+    },
+    "muster": "activate",
+    "zustand": {
+     "venvAktiv": true
+    }
+   },
+   {
+    "text": {
+     "de": "Pakete aus requirements.txt installieren",
+     "en": "Install the packages from requirements.txt"
+    },
+    "muster": "pip install",
+    "zustand": {
+     "pakete": true
+    }
+   }
+  ],
+  "loesung": {
+   "mac": [
+    "git clone https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM.git",
+    "cd SiemensWashingMachineTroubleShooting_LocalLLM",
+    "python3.12 -m venv .venv",
+    "source .venv/bin/activate",
+    "python -m pip install -r requirements.txt"
+   ],
+   "win": [
+    "git clone https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM.git",
+    "cd SiemensWashingMachineTroubleShooting_LocalLLM",
+    "py -3.12 -m venv .venv",
+    ".venv\\Scripts\\activate",
+    "python -m pip install -r requirements.txt"
+   ]
+  },
+  "hinweis": {
+   "de": "Reihenfolge wie im Start-Abschnitt der README: git clone, cd, python3.12 -m venv .venv (Windows: py -3.12 -m venv .venv), source .venv/bin/activate (Windows: .venv\\Scripts\\activate), python -m pip install -r requirements.txt.",
+   "en": "Order as in the README's start section: git clone, cd, python3.12 -m venv .venv (Windows: py -3.12 -m venv .venv), source .venv/bin/activate (Windows: .venv\\Scripts\\activate), python -m pip install -r requirements.txt."
+  },
+  "rueckmeldung": {
+   "de": "Fünf Befehle, und die Umgebung steht. Alles Weitere – Modelle, Index – passiert beim ersten Lauf von selbst.",
+   "en": "Five commands, and the environment stands. Everything else – models, index – happens by itself on the first run."
+  }
+ },
+ {
+  "id": "R10-03",
+  "typ": "terminal",
+  "os": "alle",
+  "szenario": {
+   "geklont": true,
+   "modelle": [
+    "gemma-4-12b-it-mlx",
+    "qwen3.5-27b-claude-4.6-opus-distilled-mlx",
+    "gemma-4-31b-it-mlx",
+    "text-embedding-nomic-embed-text-v1.5"
+   ]
+  },
+  "titel": {
+   "de": "Starten: Modell-ID, erste Frage, Server",
+   "en": "Start: model ID, first question, server"
+  },
+  "aufgabe": {
+   "de": "<p>Das Repository liegt schon unter <code>~/Projekte</code>, LM Studio läuft mit drei geladenen Chatmodellen. Richten Sie die Umgebung ein, kopieren Sie das Profil <code>profiles/local/.env.example</code> nach <code>profiles/local/.env</code>, fragen Sie LM Studio mit <code>curl http://127.0.0.1:1234/v1/models</code> nach den Modell-IDs, tragen Sie <code>LOCAL_LLM_MODEL=gemma-4-12b-it-mlx</code> ein (etwa mit <code>echo \"…\" &gt;&gt; profiles/local/.env</code>), stellen Sie über <code>python lokale_ki.py \"Was bedeutet E:18?\"</code> die erste Frage und starten Sie den Server. Probieren Sie ruhig, <code>lokale_ki.py</code> vor dem Eintrag zu starten.</p>",
+   "en": "<p>The repository already lies under <code>~/Projekte</code>, LM Studio is running with three loaded chat models. Set up the environment, copy the profile <code>profiles/local/.env.example</code> to <code>profiles/local/.env</code>, ask LM Studio for the model IDs with <code>curl http://127.0.0.1:1234/v1/models</code>, enter <code>LOCAL_LLM_MODEL=gemma-4-12b-it-mlx</code> (for instance with <code>echo \"…\" &gt;&gt; profiles/local/.env</code>), ask the first question via <code>python lokale_ki.py \"Was bedeutet E:18?\"</code> and start the server. Feel free to try <code>lokale_ki.py</code> before the entry.</p>"
+  },
+  "schritte": [
+   {
+    "text": {
+     "de": "In den Projektordner wechseln",
+     "en": "Change into the project folder"
+    },
+    "muster": "^(cd|Set-Location)",
+    "zustand": {
+     "pfad": "~/Projekte/SiemensWashingMachineTroubleShooting_LocalLLM"
+    }
+   },
+   {
+    "text": {
+     "de": "Virtuelle Umgebung mit Python 3.12 anlegen und aktivieren",
+     "en": "Create and activate a virtual environment with Python 3.12"
+    },
+    "zustand": {
+     "venvVorhanden": true,
+     "venvPython": "3.12",
+     "venvAktiv": true
+    }
+   },
+   {
+    "text": {
+     "de": "Pakete installieren",
+     "en": "Install the packages"
+    },
+    "muster": "pip install",
+    "zustand": {
+     "pakete": true
+    }
+   },
+   {
+    "text": {
+     "de": "Profil kopieren: profiles/local/.env.example → profiles/local/.env",
+     "en": "Copy the profile: profiles/local/.env.example → profiles/local/.env"
+    },
+    "zustand": {
+     "datei": "SiemensWashingMachineTroubleShooting_LocalLLM/profiles/local/.env"
+    }
+   },
+   {
+    "text": {
+     "de": "Modell-IDs bei LM Studio abfragen (curl …/v1/models)",
+     "en": "Query the model IDs from LM Studio (curl …/v1/models)"
+    },
+    "muster": "^curl",
+    "zustand": {
+     "modelleGeprueft": true
+    }
+   },
+   {
+    "text": {
+     "de": "LOCAL_LLM_MODEL=gemma-4-12b-it-mlx in profiles/local/.env eintragen",
+     "en": "Enter LOCAL_LLM_MODEL=gemma-4-12b-it-mlx in profiles/local/.env"
+    },
+    "zustand": {
+     "profil": "LOCAL_LLM_MODEL=gemma-4-12b-it-mlx"
+    }
+   },
+   {
+    "text": {
+     "de": "Erste Frage über lokale_ki.py stellen",
+     "en": "Ask the first question via lokale_ki.py"
+    },
+    "muster": "lokale_ki\\.py",
+    "zustand": {
+     "antwortErhalten": true
+    }
+   },
+   {
+    "text": {
+     "de": "Server starten: python server.py",
+     "en": "Start the server: python server.py"
+    },
+    "muster": "server\\.py",
+    "zustand": {
+     "serverLaeuft": true
+    }
+   }
+  ],
+  "loesung": {
+   "mac": [
+    "cd SiemensWashingMachineTroubleShooting_LocalLLM",
+    "python3.12 -m venv .venv",
+    "source .venv/bin/activate",
+    "python -m pip install -r requirements.txt",
+    "cp profiles/local/.env.example profiles/local/.env",
+    "curl http://127.0.0.1:1234/v1/models",
+    "echo \"LOCAL_LLM_MODEL=gemma-4-12b-it-mlx\" >> profiles/local/.env",
+    "python lokale_ki.py \"Was bedeutet E:18?\"",
+    "python server.py"
+   ],
+   "win": [
+    "cd SiemensWashingMachineTroubleShooting_LocalLLM",
+    "py -3.12 -m venv .venv",
+    ".venv\\Scripts\\activate",
+    "python -m pip install -r requirements.txt",
+    "copy profiles\\local\\.env.example profiles\\local\\.env",
+    "curl http://127.0.0.1:1234/v1/models",
+    "echo \"LOCAL_LLM_MODEL=gemma-4-12b-it-mlx\" >> profiles\\local\\.env",
+    "python lokale_ki.py \"Was bedeutet E:18?\"",
+    "python server.py"
+   ]
+  },
+  "hinweis": {
+   "de": "Mac: cp profiles/local/.env.example profiles/local/.env, dann echo \"LOCAL_LLM_MODEL=gemma-4-12b-it-mlx\" >> profiles/local/.env. Windows: copy profiles\\local\\.env.example profiles\\local\\.env und dieselbe echo-Zeile mit Backslashes. Die ID muss genau der aus curl entsprechen.",
+   "en": "Mac: cp profiles/local/.env.example profiles/local/.env, then echo \"LOCAL_LLM_MODEL=gemma-4-12b-it-mlx\" >> profiles/local/.env. Windows: copy profiles\\local\\.env.example profiles\\local\\.env and the same echo line with backslashes. The ID must match the one from curl exactly."
+  },
+  "rueckmeldung": {
+   "de": "Die Modell-ID war die Hürde der Mac-Prüfung: Drei Chatmodelle, keine eindeutige Autoauswahl. Der Fehlertext sagt, was zu tun ist – das ist gutes Fehlerdesign.",
+   "en": "The model ID was the hurdle of the Mac audit: three chat models, no unambiguous auto-selection. The error text says what to do – that is good error design."
+  }
+ },
+ {
+  "id": "R10-04",
+  "typ": "zuordnen",
+  "titel": {
+   "de": "Fehlerbild und Ursache",
+   "en": "Failure mode and cause"
+  },
+  "aufgabe": {
+   "de": "<p>Sechs Fehlerbilder aus den Prüfprotokollen und dem Terminal dieses Labs. Ordnen Sie jedem die Ursache zu.</p>",
+   "en": "<p>Six failure modes from the audit logs and this lab's terminal. Assign the cause to each.</p>"
+  },
+  "kategorien": [
+   {
+    "id": "venv",
+    "name": {
+     "de": "venv nicht aktiv oder Pakete nicht installiert",
+     "en": "venv not active or packages not installed"
+    }
+   },
+   {
+    "id": "sync",
+    "name": {
+     "de": "Modellcache über OneDrive synchronisiert, Dateien leer",
+     "en": "Model cache synchronised via OneDrive, files empty"
+    }
+   },
+   {
+    "id": "modell",
+    "name": {
+     "de": "Mehrere Chatmodelle geladen, Autoauswahl nicht eindeutig",
+     "en": "Several chat models loaded, auto-selection ambiguous"
+    }
+   },
+   {
+    "id": "port",
+    "name": {
+     "de": "Port 3001 von einem alten Server belegt",
+     "en": "Port 3001 taken by an old server"
+    }
+   },
+   {
+    "id": "cp1252",
+    "name": {
+     "de": "Windows-Konsole mit cp1252 kann Emoji nicht ausgeben",
+     "en": "Windows console with cp1252 cannot print emoji"
+    }
+   },
+   {
+    "id": "file",
+    "name": {
+     "de": "index.html direkt geöffnet statt über den Server",
+     "en": "index.html opened directly instead of via the server"
+    }
+   }
+  ],
+  "elemente": [
+   {
+    "text": {
+     "de": "ModuleNotFoundError: No module named 'flask'",
+     "en": "ModuleNotFoundError: No module named 'flask'"
+    },
+    "ziel": "venv"
+   },
+   {
+    "text": {
+     "de": "JSONDecodeError beim Laden von modules.json des Embedding-Modells",
+     "en": "JSONDecodeError while loading modules.json of the embedding model"
+    },
+    "ziel": "sync"
+   },
+   {
+    "text": {
+     "de": "RuntimeError: LOCAL_LLM_MODEL auf die genaue ID des geladenen Chatmodells setzen.",
+     "en": "RuntimeError: LOCAL_LLM_MODEL auf die genaue ID des geladenen Chatmodells setzen."
+    },
+    "ziel": "modell"
+   },
+   {
+    "text": {
+     "de": "OSError: [Errno 48] Address already in use",
+     "en": "OSError: [Errno 48] Address already in use"
+    },
+    "ziel": "port"
+   },
+   {
+    "text": {
+     "de": "UnicodeEncodeError: 'charmap' codec can't encode character",
+     "en": "UnicodeEncodeError: 'charmap' codec can't encode character"
+    },
+    "ziel": "cp1252"
+   },
+   {
+    "text": {
+     "de": "Die Seite lädt, aber jede Frage endet mit „Failed to fetch“; die Adresszeile beginnt mit file://",
+     "en": "The page loads, but every question ends with “Failed to fetch”; the address bar starts with file://"
+    },
+    "ziel": "file"
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Jedes dieser Fehlerbilder ist im Fallbeispiel dokumentiert und behoben oder mit einem klaren Hinweis versehen. Lesen Sie Fehlertexte zu Ende; meist steht die Lösung darin.",
+   "en": "Every one of these failure modes is documented in the case study and fixed or given a clear hint. Read error messages to the end; usually the solution is in them."
+  }
+ },
+ {
+  "id": "R10-05",
+  "typ": "checkliste",
+  "titel": {
+   "de": "Ein eigenes Dokument einbinden",
+   "en": "Add a document of your own"
+  },
+  "aufgabe": {
+   "de": "<p>Das Fallbeispiel ist auf ein Handbuch gebaut, aber nicht daran gebunden. Gehen Sie die Schritte für ein eigenes PDF durch und beantworten Sie die Prüffragen.</p>",
+   "en": "<p>The case study is built on one manual but not bound to it. Go through the steps for a PDF of your own and answer the check questions.</p>"
+  },
+  "schritte": [
+   {
+    "text": {
+     "de": "PDF in den Projektordner legen und mit dem Parser extrahieren (optionale Pakete: requirements-optional.txt).",
+     "en": "Put the PDF into the project folder and extract it with the parser (optional packages: requirements-optional.txt)."
+    },
+    "frage": {
+     "de": "Welcher Befehl erzeugt die Markdown-Datei?",
+     "en": "Which command produces the Markdown file?"
+    },
+    "optionen": [
+     {
+      "de": "python parser.py --pdf mein-handbuch.pdf --output mein_wissen.md",
+      "en": "python parser.py --pdf mein-handbuch.pdf --output mein_wissen.md"
+     },
+     {
+      "de": "python server.py --pdf mein-handbuch.pdf",
+      "en": "python server.py --pdf mein-handbuch.pdf"
+     },
+     {
+      "de": "Das PDF wird beim Start automatisch gelesen.",
+      "en": "The PDF is read automatically at start."
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "Die Extraktion gegen das PDF prüfen, bevor sie aktiv wird.",
+     "en": "Check the extraction against the PDF before it becomes active."
+    },
+    "frage": {
+     "de": "Was zuerst prüfen?",
+     "en": "What to check first?"
+    },
+    "optionen": [
+     {
+      "de": "Tabellen und Warnhinweise – dort verliert OCR am meisten (Lab 03).",
+      "en": "Tables and warnings – that is where OCR loses the most (lab 03)."
+     },
+     {
+      "de": "Die Dateigröße.",
+      "en": "The file size."
+     },
+     {
+      "de": "Nichts; Docling ist fehlerfrei.",
+      "en": "Nothing; Docling is error-free."
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "Die aktive Wissensdatei ersetzen und den Server neu starten.",
+     "en": "Replace the active knowledge file and restart the server."
+    },
+    "frage": {
+     "de": "Was passiert mit dem alten Index in storage/?",
+     "en": "What happens to the old index in storage/?"
+    },
+    "optionen": [
+     {
+      "de": "Der Fingerprint ändert sich, weil der Markdown-Inhalt eingeht; der Index wird beim nächsten Lauf neu gebaut (Lab 09).",
+      "en": "The fingerprint changes because the Markdown content goes into it; the index is rebuilt on the next run (lab 09)."
+     },
+     {
+      "de": "Nichts; er muss von Hand gelöscht werden.",
+      "en": "Nothing; it must be deleted by hand."
+     },
+     {
+      "de": "Er wird mit dem neuen Dokument zusammengeführt.",
+      "en": "It is merged with the new document."
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "eval/questions.json mit eigenen Fragen und erwarteten Stichwörtern füllen.",
+     "en": "Fill eval/questions.json with your own questions and expected keywords."
+    },
+    "frage": {
+     "de": "Woher sollen die Stichwörter stammen?",
+     "en": "Where should the keywords come from?"
+    },
+    "optionen": [
+     {
+      "de": "Aus dem Dokument selbst – Wörter, die in der richtigen Stelle vorkommen müssen.",
+      "en": "From the document itself – words that must occur in the right passage."
+     },
+     {
+      "de": "Aus der Frage.",
+      "en": "From the question."
+     },
+     {
+      "de": "Aus der Antwort des Sprachmodells.",
+      "en": "From the language model's answer."
+     }
+    ],
+    "richtig": 0
+   },
+   {
+    "text": {
+     "de": "python eval/run_eval.py laufen lassen und die vier Zahlen lesen.",
+     "en": "Run python eval/run_eval.py and read the four numbers."
+    },
+    "frage": {
+     "de": "Was misst der Lauf – und was nicht?",
+     "en": "What does the run measure – and what not?"
+    },
+    "optionen": [
+     {
+      "de": "Stichworttreffer der Suche in Sekunden; nicht die Korrektheit der generierten Antworten (Lab 08).",
+      "en": "Keyword hits of retrieval in seconds; not the correctness of the generated answers (lab 08)."
+     },
+     {
+      "de": "Die Antwortqualität des Sprachmodells.",
+      "en": "The answer quality of the language model."
+     },
+     {
+      "de": "Die Geschwindigkeit von LM Studio.",
+      "en": "The speed of LM Studio."
+     }
+    ],
+    "richtig": 0
+   }
+  ],
+  "rueckmeldung": {
+   "de": "Parser, Fingerprint, Testbestand, Messlauf: Die vier Stücke aus Lab 03, 09 und 08 sind zusammen der Weg zum eigenen Dokument. Die Verfahrensgruppen in manual_context.py bleiben handbuchspezifisch und müssten für ein anderes Dokument neu kuratiert werden.",
+   "en": "Parser, fingerprint, test set, evaluation run: the four pieces from labs 03, 09 and 08 together are the path to your own document. The procedure groups in manual_context.py remain manual-specific and would have to be curated anew for another document."
+  }
+ }
+]

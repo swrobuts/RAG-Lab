@@ -41,7 +41,17 @@ mac = (FALL / "docs/evaluation/MAC-LIVE.md").read_text(encoding="utf-8")
 laufzeit = re.search(r"E:23\?“: Antwort .*?Laufzeit etwa ([\d,]+) s", mac, re.S)
 ablehnung = re.search(r"E:999\?“: ausdrückliche Ablehnung .*?etwa ([\d,]+) s", mac, re.S)
 
+design = (FALL / "docs/2026-07-07-optimization-design.md").read_text(encoding="utf-8")
+ph = re.search(r"Recall (\d+) %→(\d+) %, MRR ([\d.]+)→([\d.]+),\s+hit@1 (\d+) %→(\d+) %", design)
+import subprocess
+log = subprocess.run(["git", "-C", str(FALL), "log", "--format=%h|%ad|%s", "--date=short"], capture_output=True, text=True, check=True).stdout
+commits = [dict(zip(("hash", "datum", "titel"), z.split("|", 2))) for z in log.strip().splitlines()]
+
 schreibe("betrieb.json", {
+    "phasen": {"datum": "2026-07-07", "recallVor": int(ph.group(1)), "recallNach": int(ph.group(2)), "mrrVor": float(ph.group(3)),
+               "mrrNach": float(ph.group(4)), "hit1Vor": int(ph.group(5)), "hit1Nach": int(ph.group(6)),
+               "quelle": "docs/2026-07-07-optimization-design.md, Umsetzungsstand"},
+    "commits": commits,
     "datum": "2026-09-19",
     "fingerprint": {
         "gespeichert": gespeichert, "nachgerechnet": nachgerechnet, "gleich": gespeichert == nachgerechnet,
@@ -66,4 +76,5 @@ schreibe("betrieb.json", {
                          "e999Ablehnung": float(ablehnung.group(1).replace(",", ".")) if ablehnung else None},
     "quelle": "Fallbeispiel: storage/.cache_key, rag_engine.compute_cache_key, server.py, docs/evaluation/LIVE.md und MAC-LIVE.md"
 })
+print("Phasen:", ph and ph.groups(), "| Commits:", len(commits))
 print("Fingerprint gleich:", gespeichert == nachgerechnet, "| Live-Tokens:", len(tokens), "| LM Studio s:", laufzeit and laufzeit.group(1), ablehnung and ablehnung.group(1))
