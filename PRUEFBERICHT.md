@@ -44,7 +44,7 @@ eingebauten Chromium-Browser der Claude-Desktop-App.
 Läufe:
 
 - `npm test`: 21 Tests bestanden (Prüflogik, Metriken gegen die drei Protokolle, Chunking-Port, Terminal in beiden Shells).
-- `npm run verify`: 986 Prüfungen ohne Befund – Labs und Übungen (55, neun Typen), Werkzeuge (16), Datendateien, 173 `data-wert`-Marker in DE und EN, Rechenlösungen gegen die Daten (R09-04), Terminal-Musterlösungen in zsh und PowerShell, Commit-Hashes des Phasendiagramms gegen die Historie des Fallbeispiels.
+- `npm run verify`: 986 Prüfungen ohne Befund – Labs und Übungen (55, neun Typen), Werkzeuge (16), Datendateien, 235 `data-wert`-Marker und 3 `data-wert-text`-Blöcke in DE und EN, Rechenlösungen gegen die Daten (R09-04), Terminal-Musterlösungen in zsh und PowerShell, Commit-Hashes des Phasendiagramms gegen die Historie des Fallbeispiels.
 - `tools/pruefung/durchlauf.js` auf allen zehn Lab-Seiten: 55 von 55 Übungen mit der Musterlösung „Richtig“; die beiden Terminal-Übungen zusätzlich in PowerShell.
 - `tools/pruefung/audit.js` auf allen elf Seiten: keine Befunde (Überschriftenfolge, Alternativtexte, Beschriftungen, interne Links und Anker, Überlauf, Sprachumschaltung, deutsche Reste im EN-Modus, Werkzeuge, Prüfen-Knöpfe).
 - Elf Seiten in DE und EN bei 390, 768 und 1 440 px Breite: kein horizontaler Überlauf.
