@@ -1,0 +1,11 @@
+flowchart TB
+  Z1["siemens_wissen.md<br/>[[Inhalt, 114 695 Bytes|content, 114,695 bytes]]"] --> H
+  Z2["intfloat/multilingual-e5-small<br/>[[Modellname|model name]]"] --> H
+  Z3["md-v5-procedure-context<br/>[[Parser-Version|parser version]]"] --> H
+  Z4["[1600, 440, 40, &quot;e5-prefix-v1&quot;]<br/>MAX_NODE_CHARS, CHUNK_TOKENS, CHUNK_OVERLAP, [[Präfixlogik|prefix logic]]"] --> H
+  H["SHA-256<br/>compute_cache_key(…)"] --> K["882619029fc3…f93007"]
+  K --> F{"[[gleich|equal to]] storage/.cache_key ?"}
+  F -- "[[ja|yes]]" --> L["[[Index laden|Load index]]<br/>load_index_from_storage"]
+  F -- "[[nein oder Datei fehlt|no, or file missing]]" --> N["[[Index neu bauen|Rebuild index]]<br/>prepare_nodes → VectorStoreIndex → persist<br/>[[.cache_key schreiben|write .cache_key]]"]
+  L -. "[[Ladefehler (OSError, ValueError, KeyError)|load error (OSError, ValueError, KeyError)]]" .-> N
+  FL["FileLock storage/.build.lock<br/>[[timeout 600 s, ein Prozess baut|timeout 600 s, one process builds]]"] -.- F

@@ -1,0 +1,28 @@
+flowchart TB
+  subgraph B["[[Browser|Browser]]"]
+    GUI["index.html<br/>[[Anbieter- und Suchumschalter, SSE lesen, Quellen anzeigen|provider and search toggle, read SSE, show sources]]"]
+  end
+  subgraph D["[[Daten · einmal gebaut, per Fingerprint geprüft|Data · built once, checked by fingerprint]]"]
+    MD["siemens_wissen.md"] --> E["multilingual-e5-small<br/>[[Embeddings|embeddings]]"] --> V["storage/*.json<br/>SimpleVectorStore + .cache_key"]
+    MD --> T["pageindex_tree.json<br/>187 [[Abschnitte|sections]]"]
+  end
+  subgraph S["[[Lokaler Server · Flask · 127.0.0.1:3001|Local server · Flask · 127.0.0.1:3001]]"]
+    API["server.py<br/>[[Validierung, Loopback/Origin, Kontextbudget, SSE|validation, loopback/origin, context budget, SSE]]"]
+    H["rag_engine.py<br/>[[Hybrid-Retrieval + Reranker|hybrid retrieval + reranker]]"]
+    P["pageindex_engine.py<br/>[[Abschnittsauswahl (experimentell)|section selection (experimental)]]"]
+    KEYS["session_keys.py<br/>[[Schlüssel nur im RAM, 8 h|keys only in RAM, 8 h]]"]
+    LC["llm_client.py<br/>[[ein Client, zwei Profile|one client, two profiles]]"]
+  end
+  subgraph M["[[Sprachmodell|Language model]]"]
+    LM["LM Studio<br/>http://127.0.0.1:1234/v1"]
+    OA["OpenAI API<br/>https://api.openai.com/v1"]
+  end
+  GUI <-- "POST /api/ask_stream ↓ &nbsp; SSE: status · meta · token · result · [DONE] ↑" --> API
+  V --> H
+  T --> P
+  API <-- "[[Frage ↓ &nbsp; Kontext, Quellen ↑|question ↓ &nbsp; context, sources ↑]]" --> H
+  API <-.-> P
+  API -. "sid → key" .-> KEYS
+  API -- "messages<br/>system + user(JSON)" --> LC
+  LC --> LM
+  LC -- "HTTPS, key" --> OA

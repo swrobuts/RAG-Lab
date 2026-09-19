@@ -28,6 +28,13 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#komponenten"><span lang="de">Komponenten</span><span lang="en">Components</span></a>
+  <a class="sidebar-link" href="#anfrage"><span lang="de">Eine Anfrage</span><span lang="en">One request</span></a>
+  <a class="sidebar-link" href="#cache"><span lang="de">Index und Fingerprint</span><span lang="en">Index and fingerprint</span></a>
+  <a class="sidebar-link" href="#schluessel"><span lang="de">Der Schlüssel</span><span lang="en">The key</span></a>
+  <a class="sidebar-link" href="#netz"><span lang="de">Loopback und Header</span><span lang="en">Loopback and headers</span></a>
+  <a class="sidebar-link" href="#kosten"><span lang="de">Kosten</span><span lang="en">Cost</span></a>
+  <a class="sidebar-link" href="#grenzen"><span lang="de">Grenzen</span><span lang="en">Limits</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +47,188 @@
     <span lang="en">Architecture, operations, security</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">Sieben Dateien, ein Prozess, kein Datenbankserver: Das Fallbeispiel ist klein genug, um jede Zuständigkeit zu benennen. Dieses Lab geht die Komponenten durch, verfolgt eine Anfrage von <code>POST /api/ask_stream</code> bis <code>[DONE]</code>, rechnet den SHA-256-Fingerprint nach, der den Index an Quelle, Modell und Parameter bindet, und erklärt, warum der OpenAI-Schlüssel nur im Arbeitsspeicher liegt und der Server nur Loopback annimmt. Am Ende steht eine Kostenrechnung mit gemessenen Tokenzahlen: <span data-wert="kosten.monat">2,01</span> USD im Monat in der Cloud gegen <span data-wert="kosten.lokal">57,08</span> USD lokal – und warum die Entscheidung trotzdem für lokal fallen kann.</span>
+    <span lang="en">Seven files, one process, no database server: the case study is small enough to name every responsibility. This lab walks through the components, follows one request from <code>POST /api/ask_stream</code> to <code>[DONE]</code>, recomputes the SHA-256 fingerprint that binds the index to source, model and parameters, and explains why the OpenAI key lives only in memory and the server accepts loopback only. At the end comes a cost calculation with measured token counts: USD <span data-wert="kosten.monat">2.01</span> a month in the cloud against USD <span data-wert="kosten.lokal">57.08</span> locally – and why the decision can still go to local.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip"><span lang="de">Komponenten</span><span lang="en">Components</span></span>
+    <span class="lernziel-chip">API · SSE</span>
+    <span class="lernziel-chip">SHA-256 · FileLock</span>
+    <span class="lernziel-chip">SessionKeys · CSRF</span>
+    <span class="lernziel-chip">Loopback · CSP</span>
+    <span class="lernziel-chip"><span lang="de">Kosten</span><span lang="en">Cost</span></span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="komponenten">
+    <h2><span lang="de">Komponenten: wer macht was</span><span lang="en">Components: who does what</span></h2>
+    <p>
+      <span lang="de">Die Trennung ist die wichtigste Entscheidung der Architektur: <code>rag_engine.py</code> kennt keine HTTP-Anfragen, <code>server.py</code> kennt keine Vektoren. Deshalb konnte Lab 08 die Suche ohne Server messen, und deshalb kann der Server Eingaben prüfen, bevor irgendein Modell läuft. Der LLM-Client ist derselbe für LM Studio und OpenAI; nur das Profil unterscheidet sich. Klicken Sie im Werkzeug jede Komponente an: Jede hat eine Aufgabe und ein „Darf nie“.</span>
+      <span lang="en">The separation is the most important decision of the architecture: <code>rag_engine.py</code> knows no HTTP requests, <code>server.py</code> knows no vectors. That is why lab 08 could measure retrieval without the server, and why the server can check inputs before any model runs. The LLM client is the same for LM Studio and OpenAI; only the profile differs. Click every component in the tool: each has a task and a “must never”.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Komponente</span><span lang="en">Component</span></th><th><span lang="de">Datei</span><span lang="en">File</span></th><th><span lang="de">Aufgabe</span><span lang="en">Task</span></th></tr></thead>
+      <tbody>
+        <tr><td>GUI</td><td><code>index.html</code></td><td><span lang="de">Anbieterauswahl, Suchverfahren, Streaming und Quelltexte; maskiert alle Modell- und Nutzertexte</span><span lang="en">Provider selection, search method, streaming and source texts; escapes all model and user text</span></td></tr>
+        <tr><td>Web-App</td><td><code>server.py</code></td><td><span lang="de">Validierung, Retrieval-Aufruf, Kontextbudget, Antwortformat, SSE, Schutz-Header</span><span lang="en">Validation, retrieval call, context budget, answer format, SSE, protective headers</span></td></tr>
+        <tr><td><span lang="de">Modellzugang</span><span lang="en">Model access</span></td><td><code>llm_client.py</code></td><td><span lang="de">Ein OpenAI-kompatibler Client, getrennte Profile für local und openai</span><span lang="en">One OpenAI-compatible client, separate profiles for local and openai</span></td></tr>
+        <tr><td>Hybrid-RAG</td><td><code>rag_engine.py</code></td><td><span lang="de">Chunking, Embeddings, Index, Fehlercode-Lookup, Reranking, Fingerprint</span><span lang="en">Chunking, embeddings, index, error-code lookup, reranking, fingerprint</span></td></tr>
+        <tr><td><span lang="de">Sitzungsschlüssel</span><span lang="en">Session keys</span></td><td><code>session_keys.py</code></td><td><span lang="de">API-Schlüssel je Sitzung im Arbeitsspeicher, acht Stunden</span><span lang="en">API key per session in memory, eight hours</span></td></tr>
+        <tr><td>PDF-Parser</td><td><code>parser.py</code></td><td><span lang="de">Docling-Export mit Seitenmarkern (Lab 03)</span><span lang="en">Docling export with page markers (lab 03)</span></td></tr>
+        <tr><td>PageIndex</td><td><code>pageindex_engine.py</code></td><td><span lang="de">Vektorlose Abschnittsauswahl durch das Sprachmodell, experimentell</span><span lang="en">Vectorless section selection by the language model, experimental</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div data-werkzeug="architektur" data-parameter='{}'></div>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/architektur-de.svg" alt="Architekturdiagramm: Browser (index.html) sendet POST /api/ask_stream an server.py und empfängt SSE-Ereignisse; server.py ruft rag_engine.py (Hybrid-Retrieval + Reranker) und pageindex_engine.py, holt den Sitzungsschlüssel aus session_keys.py und baut messages für llm_client.py, der LM Studio unter 127.0.0.1:1234 oder die OpenAI-API anspricht. Die Daten – siemens_wissen.md, e5-Embeddings, storage/*.json mit .cache_key, pageindex_tree.json – werden einmal gebaut und per Fingerprint geprüft." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/architektur-en.svg" alt="Architecture diagram: browser (index.html) sends POST /api/ask_stream to server.py and receives SSE events; server.py calls rag_engine.py (hybrid retrieval + reranker) and pageindex_engine.py, fetches the session key from session_keys.py and builds messages for llm_client.py, which talks to LM Studio at 127.0.0.1:1234 or the OpenAI API. The data – siemens_wissen.md, e5 embeddings, storage/*.json with .cache_key, pageindex_tree.json – is built once and checked by fingerprint." loading="lazy"></span>
+      <figcaption><span lang="de">Ein Prozess, drei Zonen: Browser, lokaler Server mit Daten, Sprachmodell. Nur die Verbindung zur OpenAI-API verlässt den Rechner, und nur mit Schlüssel aus der Oberfläche.</span><span lang="en">One process, three zones: browser, local server with data, language model. Only the connection to the OpenAI API leaves the machine, and only with a key from the interface.</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="section-block" id="anfrage">
+    <h2><span lang="de">Eine Anfrage von Anfang bis Ende</span><span lang="en">One request from start to finish</span></h2>
+    <p>
+      <span lang="de">Die API hat acht Routen. Die Oberfläche braucht drei davon: <code>GET /api/modes</code> beim Laden (Verfahren, Sitzungsstatus, CSRF-Token), <code>POST /api/openai_key</code> nur bei Cloud-Betrieb und <code>POST /api/ask_stream</code> für jede Frage. <code>POST /api/ask</code> liefert dieselbe Antwort ohne Streaming; die Kommandozeile <code>lokale_ki.py</code> und die Tests benutzen sie.</span>
+      <span lang="en">The API has eight routes. The interface needs three of them: <code>GET /api/modes</code> on load (methods, session status, CSRF token), <code>POST /api/openai_key</code> only for cloud operation and <code>POST /api/ask_stream</code> for every question. <code>POST /api/ask</code> delivers the same answer without streaming; the command line <code>lokale_ki.py</code> and the tests use it.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Route</span><span lang="en">Route</span></th><th><span lang="de">Funktion</span><span lang="en">Function</span></th><th><span lang="de">Antwort bei Fehler</span><span lang="en">Response on error</span></th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /</code></td><td><span lang="de">Benutzeroberfläche</span><span lang="en">User interface</span></td><td>–</td></tr>
+        <tr><td><code>GET /api/health</code></td><td><span lang="de">Prozess erreichbar; keine Modellprüfung</span><span lang="en">Process reachable; no model check</span></td><td>–</td></tr>
+        <tr><td><code>GET /api/modes</code></td><td><span lang="de">Verfahren, Sitzungsstatus, CSRF-Token</span><span lang="en">Methods, session status, CSRF token</span></td><td>–</td></tr>
+        <tr><td><code>POST /api/openai_key</code></td><td><span lang="de">Schlüssel für diese Sitzung setzen oder entfernen</span><span lang="en">Set or remove the key for this session</span></td><td><span lang="de">403 ohne gültigen CSRF-Token, 400 bei ungültigem Schlüssel</span><span lang="en">403 without valid CSRF token, 400 for an invalid key</span></td></tr>
+        <tr><td><code>POST /api/ask</code></td><td><span lang="de">Vollständige JSON-Antwort</span><span lang="en">Complete JSON answer</span></td><td rowspan="2"><span lang="de">400 bei ungültiger Eingabe, 503 ohne Schlüssel oder bei Modellfehler; im Stream <code>event: error</code></span><span lang="en">400 for invalid input, 503 without key or on model error; in the stream <code>event: error</code></span></td></tr>
+        <tr><td><code>POST /api/ask_stream</code></td><td><span lang="de">SSE über fetch mit POST (Lab 07)</span><span lang="en">SSE via fetch with POST (lab 07)</span></td></tr>
+        <tr><td><code>GET /mobile/…</code>, <code>GET /siemens-logo.png</code>, <code>GET /assets/qrcode.min.js</code></td><td><span lang="de">Nur ausdrücklich freigegebene statische Dateien</span><span lang="en">Only explicitly released static files</span></td><td>404</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">Die Reihenfolge innerhalb einer Anfrage folgt einer Regel: Jeder billige Schritt steht vor jedem teuren. Erst <code>before_request</code> (Loopback, Origin – kostet nichts), dann <code>validate()</code> (Länge <span data-wert="betrieb.grenzen.frageZeichen">2000</span> Zeichen, Modus, Anbieter, Schlüssel), dann das Retrieval (eine Sekunde Embedding und Reranker), dann erst das Sprachmodell (<span data-wert="betrieb.lms.e23s">21,5</span> Sekunden mit gemma-4-12b auf dem Mac; eine Ablehnung ohne Modell dauert <span data-wert="betrieb.lms.e999s">1,4</span> Sekunden). Der Body ist auf <span data-wert="betrieb.grenzen.bodyKiB">16</span> KiB begrenzt, bevor Flask ihn überhaupt liest; eine Frage mit 50 000 Zeichen kommt gar nicht bis zur Validierung.</span>
+      <span lang="en">The order within a request follows one rule: every cheap step precedes every expensive one. First <code>before_request</code> (loopback, origin – costs nothing), then <code>validate()</code> (length <span data-wert="betrieb.grenzen.frageZeichen">2,000</span> characters, mode, provider, key), then retrieval (one second of embedding and reranker), only then the language model (<span data-wert="betrieb.lms.e23s">21.5</span> seconds with gemma-4-12b on the Mac; a refusal without model takes <span data-wert="betrieb.lms.e999s">1.4</span> seconds). The body is limited to <span data-wert="betrieb.grenzen.bodyKiB">16</span> KiB before Flask even reads it; a question with 50,000 characters never reaches validation.</span>
+    </p>
+    <pre class="code-block">{"frage": "Was bedeutet E:18?", "mode": "hybrid", "provider": "local"}</pre>
+  </section>
+
+  <section class="section-block" id="cache">
+    <h2><span lang="de">Index und Fingerprint</span><span lang="en">Index and fingerprint</span></h2>
+    <p>
+      <span lang="de">Die 346 Chunks mit ihren Vektoren liegen als JSON in <code>storage/</code>: <span data-wert="betrieb.vektorMB">3,0</span> MB Vektorspeicher, <span data-wert="betrieb.docstoreKB">364</span> KB Chunk-Texte, zusammen <span data-wert="betrieb.speicherMB">3,4</span> MB. Kein Datenbankserver, keine Cloud; LlamaIndex lädt die Dateien in den Prozess. Für ein Handbuch reicht das. Die Dokumentation nennt pgvector, Qdrant und Chroma als Wege für mehr Dokumente und sagt dazu, dass keines installiert ist.</span>
+      <span lang="en">The 346 chunks with their vectors lie as JSON in <code>storage/</code>: <span data-wert="betrieb.vektorMB">3.0</span> MB of vector store, <span data-wert="betrieb.docstoreKB">364</span> KB of chunk texts, <span data-wert="betrieb.speicherMB">3.4</span> MB in total. No database server, no cloud; LlamaIndex loads the files into the process. For one manual that suffices. The documentation names pgvector, Qdrant and Chroma as paths for more documents and says that none is installed.</span>
+    </p>
+    <p>
+      <span lang="de">Der gefährliche Fall ist ein alter Index, der still weiterlebt: Wer das Embedding-Modell wechselt oder die Präfixe einführt und den alten Index behält, vergleicht Fragenvektoren aus dem neuen Modell mit Chunk-Vektoren aus dem alten – die Suche liefert Unsinn, ohne Fehlermeldung. Genau das war der erste Fehler der Baseline (Lab 05). Seitdem bindet <code>compute_cache_key</code> den Index an alles, wovon er abhängt: den Inhalt der Markdown-Datei (<span data-wert="betrieb.markdownBytes">114 695</span> Bytes), den Modellnamen, die Parser-Version und die Chunk-Parameter. SHA-256 macht daraus 64 Hexadezimalzeichen; der Wert in <code>storage/.cache_key</code> lautet heute:</span>
+      <span lang="en">The dangerous case is an old index that quietly lives on: whoever switches the embedding model or introduces the prefixes and keeps the old index compares question vectors from the new model with chunk vectors from the old one – retrieval delivers nonsense, without an error message. That was exactly the first bug of the baseline (lab 05). Since then <code>compute_cache_key</code> binds the index to everything it depends on: the content of the Markdown file (<span data-wert="betrieb.markdownBytes">114,695</span> bytes), the model name, the parser version and the chunk parameters. SHA-256 turns that into 64 hexadecimal characters; the value in <code>storage/.cache_key</code> today reads:</span>
+    </p>
+    <pre class="code-block" data-wert-text="betrieb.fingerprint">882619029fc3436327d4f122760f824018cdf79498aaddc832b152b525f93007</pre>
+    <p>
+      <span lang="de">Das Skript <code>tools/betrieb.py</code> dieses Labs rechnet den Wert mit <code>hashlib.sha256</code> nach und erhält denselben. Mit <code>multilingual-e5-base</code> statt <code>-small</code> beginnt der Hash mit <span data-wert="betrieb.anderesModellKurz">023b8f5e9fa5…</span>; ein einziges Leerzeichen mehr im Handbuch ergibt <span data-wert="betrieb.leerzeichenKurz">fd8a931ef0d3…</span>. Es gibt keine Ähnlichkeit zwischen den Werten – das ist die Eigenschaft einer kryptografischen Hashfunktion, und hier ist sie erwünscht: gleich oder verschieden, nichts dazwischen.</span>
+      <span lang="en">This lab's script <code>tools/betrieb.py</code> recomputes the value with <code>hashlib.sha256</code> and gets the same one. With <code>multilingual-e5-base</code> instead of <code>-small</code> the hash starts with <span data-wert="betrieb.anderesModellKurz">023b8f5e9fa5…</span>; a single extra space in the manual yields <span data-wert="betrieb.leerzeichenKurz">fd8a931ef0d3…</span>. There is no similarity between the values – that is the property of a cryptographic hash function, and here it is desired: equal or different, nothing in between.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/cache-fingerprint-de.svg" alt="Flussdiagramm: Markdown-Inhalt, Modellname, Parser-Version und Chunk-Parameter gehen in SHA-256 ein; der Hash wird mit storage/.cache_key verglichen. Gleich: Index laden. Ungleich oder Datei fehlt: Index neu bauen, persistieren, .cache_key schreiben. Ein Ladefehler führt ebenfalls zum Neuaufbau. Ein FileLock auf storage/.build.lock sorgt dafür, dass nur ein Prozess baut." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/cache-fingerprint-en.svg" alt="Flowchart: Markdown content, model name, parser version and chunk parameters go into SHA-256; the hash is compared with storage/.cache_key. Equal: load index. Different or file missing: rebuild index, persist, write .cache_key. A load error also leads to a rebuild. A FileLock on storage/.build.lock ensures that only one process builds." loading="lazy"></span>
+      <figcaption><span lang="de"><code>build_or_load_index</code> in <code>rag_engine.py</code>: Der Fingerprint entscheidet, der FileLock (Zeitlimit 600 Sekunden) verhindert, dass Server und Messlauf gleichzeitig bauen.</span><span lang="en"><code>build_or_load_index</code> in <code>rag_engine.py</code>: the fingerprint decides, the FileLock (timeout 600 seconds) prevents server and evaluation run from building at the same time.</span></figcaption>
+    </figure>
+    <div class="warn-box">
+      <strong><span lang="de">Aus dem Prüfprotokoll:</span><span lang="en">From the audit log:</span></strong>
+      <span lang="de">Auf dem Mac brach die Suche mit <code>JSONDecodeError</code> ab. Ursache: Der Modellcache lag im Projektordner, der Projektordner wird über OneDrive synchronisiert, und die Snapshot-Symlinks des Hugging-Face-Caches kamen als leere Dateien an – <code>modules.json</code>, Tokenizer, Gewichte. Seitdem liegen die Modelle im Benutzer-Cache (<code>~/.cache/huggingface/hub</code>, über <code>HF_HOME</code> konfigurierbar). Modell-Caches und virtuelle Umgebungen sind keine Projektdateien.</span>
+      <span lang="en">On the Mac retrieval aborted with <code>JSONDecodeError</code>. Cause: the model cache lay in the project folder, the project folder is synchronised via OneDrive, and the snapshot symlinks of the Hugging Face cache arrived as empty files – <code>modules.json</code>, tokenizer, weights. Since then the models live in the user cache (<code>~/.cache/huggingface/hub</code>, configurable via <code>HF_HOME</code>). Model caches and virtual environments are not project files.</span>
+    </div>
+  </section>
+
+  <section class="section-block" id="schluessel">
+    <h2><span lang="de">Der Schlüssel: nur im Arbeitsspeicher</span><span lang="en">The key: in memory only</span></h2>
+    <p>
+      <span lang="de">Ein OpenAI-Schlüssel ist Geld: Wer ihn hat, kann auf fremde Rechnung Anfragen stellen. Das Fallbeispiel behandelt ihn deshalb wie ein Passwort, das nie gespeichert wird. Die Oberfläche nimmt ihn in einem Passwortfeld entgegen, schickt ihn einmal an <code>POST /api/openai_key</code> und leert das Feld. Der Server legt ihn in <code>SessionKeys</code> ab – ein Python-Dictionary hinter einem Lock, nichts weiter. Kein Cookie, kein localStorage, keine Datei, keine Umgebungsvariable enthält ihn. Nach <span data-wert="betrieb.grenzen.stunden">8</span> Stunden verfällt er; „Entfernen“ oder ein Neustart des Servers löschen ihn sofort. Der OpenAI-Client wird je Anfrage erzeugt und danach geschlossen.</span>
+      <span lang="en">An OpenAI key is money: whoever has it can make requests on someone else's bill. The case study therefore treats it like a password that is never stored. The interface accepts it in a password field, sends it once to <code>POST /api/openai_key</code> and clears the field. The server puts it into <code>SessionKeys</code> – a Python dictionary behind a lock, nothing more. No cookie, no localStorage, no file, no environment variable contains it. After <span data-wert="betrieb.grenzen.stunden">8</span> hours it expires; “remove” or a server restart deletes it immediately. The OpenAI client is created per request and closed afterwards.</span>
+    </p>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">rag_session</span><span class="befehl-was"><span lang="de">Das einzige Cookie – und was darin steht</span><span lang="en">The only cookie – and what is in it</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><span lang="de">Inhalt</span><span lang="en">Content</span><span><span lang="de">Zufällige Sitzungs-ID <code>sid</code> und CSRF-Token <code>csrf</code>, beide 32 Bytes aus <code>secrets.token_urlsafe</code>; signiert mit einem Serverschlüssel, der bei jedem Start neu erzeugt wird.</span><span lang="en">Random session ID <code>sid</code> and CSRF token <code>csrf</code>, both 32 bytes from <code>secrets.token_urlsafe</code>; signed with a server secret regenerated at every start.</span></span></li>
+          <li><code>HttpOnly</code><span><span lang="de">JavaScript im Browser kann das Cookie nicht lesen – auch nicht eingeschleustes.</span><span lang="en">JavaScript in the browser cannot read the cookie – injected script included.</span></span></li>
+          <li><code>SameSite=Strict</code><span><span lang="de">Der Browser schickt das Cookie nur mit, wenn die Anfrage von derselben Site ausgeht; ein Formular auf einer fremden Seite kommt ohne Sitzung an.</span><span lang="en">The browser sends the cookie only when the request originates from the same site; a form on a foreign page arrives without a session.</span></span></li>
+          <li><code>X-CSRF-Token</code><span><span lang="de">Die Schlüssel-Route verlangt das Token zusätzlich als Header und vergleicht mit <code>secrets.compare_digest</code> (konstante Zeit). Zwei Schlösser für die eine Route, die Geld bewegt.</span><span lang="en">The key route additionally demands the token as a header and compares with <code>secrets.compare_digest</code> (constant time). Two locks for the one route that moves money.</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Der Schlüssel darf nie in den Prompt. Das Fallbeispiel baut ihn nur in den HTTP-Header <code>Authorization</code> des OpenAI-Clients ein; Antworten und Fehlerprotokolle geben weder Schlüssel noch vollständige Anbieter-Exceptions aus.</span><span lang="en">The key must never enter the prompt. The case study only puts it into the HTTP header <code>Authorization</code> of the OpenAI client; answers and error logs output neither the key nor complete provider exceptions.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="netz">
+    <h2><span lang="de">Loopback, Origin und Schutz-Header</span><span lang="en">Loopback, origin and protective headers</span></h2>
+    <p>
+      <span lang="de">Der Server hört auf <code>127.0.0.1:3001</code> und prüft trotzdem jede Anfrage in <code>before_request</code>: Ist die Absenderadresse eine Loopback-Adresse (<code>ipaddress.ip_address(...).is_loopback</code>, ohne <code>X-Forwarded-For</code> zu vertrauen)? Stimmt ein mitgeschickter <code>Origin</code>-Header mit der eigenen Adresse überein? Meldet der Browser <code>Sec-Fetch-Site: cross-site</code>? Jede Abweichung ergibt 403. Das schützt vor dem klassischen Angriff auf lokale Dienste: Eine fremde Webseite im selben Browser ruft <code>http://127.0.0.1:3001/api/ask</code> auf – die Adresse ist ja erreichbar. Der Browser setzt den Origin-Header der fremden Seite, und der Server lehnt ab.</span>
+      <span lang="en">The server listens on <code>127.0.0.1:3001</code> and still checks every request in <code>before_request</code>: is the sender address a loopback address (<code>ipaddress.ip_address(...).is_loopback</code>, without trusting <code>X-Forwarded-For</code>)? Does a supplied <code>Origin</code> header match the server's own address? Does the browser report <code>Sec-Fetch-Site: cross-site</code>? Any deviation yields 403. That protects against the classic attack on local services: a foreign web page in the same browser calls <code>http://127.0.0.1:3001/api/ask</code> – the address is reachable, after all. The browser sets the Origin header of the foreign page, and the server refuses.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>Header</th><th><span lang="de">Wert</span><span lang="en">Value</span></th><th><span lang="de">Wirkung</span><span lang="en">Effect</span></th></tr></thead>
+      <tbody>
+        <tr><td><code>Cache-Control</code></td><td><code>no-store</code></td><td><span lang="de">Keine Antwort landet im Browser- oder Proxy-Cache</span><span lang="en">No response ends up in a browser or proxy cache</span></td></tr>
+        <tr><td><code>X-Content-Type-Options</code></td><td><code>nosniff</code></td><td><span lang="de">Der Browser rät keinen anderen Inhaltstyp</span><span lang="en">The browser does not guess another content type</span></td></tr>
+        <tr><td><code>Referrer-Policy</code></td><td><code>no-referrer</code></td><td><span lang="de">Keine lokale URL wandert in fremde Logs</span><span lang="en">No local URL travels into foreign logs</span></td></tr>
+        <tr><td><code>X-Frame-Options</code></td><td><code>DENY</code></td><td><span lang="de">Die Oberfläche lässt sich nicht in fremde Seiten einbetten (Clickjacking)</span><span lang="en">The interface cannot be embedded in foreign pages (clickjacking)</span></td></tr>
+        <tr><td><code>Content-Security-Policy</code></td><td><code class="umbruch" data-wert="betrieb.csp">default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'</code></td><td><span lang="de">Skripte, Stile, Bilder und Verbindungen nur von der eigenen Adresse; keine Plugins, keine Einbettung, Formulare nur an sich selbst</span><span lang="en">Scripts, styles, images and connections only from its own address; no plugins, no embedding, forms only to itself</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">Ehrlich gelesen hat die CSP eine Lücke: <code>script-src 'self' 'unsafe-inline'</code> erlaubt Inline-Skripte, weil <code>index.html</code> sein Skript inline trägt. Gegen eingeschleustes Skript schützt deshalb nicht die CSP, sondern die Maskierung: Die Oberfläche setzt Modell- und Nutzertexte mit <code>textContent</code>, nie mit <code>innerHTML</code>. Eine strengere CSP mit Nonces wäre der nächste Schritt; die Dokumentation orientiert sich an der Flask-Sicherheitsdoku und sagt, was sie umsetzt und was nicht.</span>
+      <span lang="en">Read honestly, the CSP has a gap: <code>script-src 'self' 'unsafe-inline'</code> allows inline scripts because <code>index.html</code> carries its script inline. Against injected script it is therefore not the CSP that protects but the escaping: the interface sets model and user text with <code>textContent</code>, never with <code>innerHTML</code>. A stricter CSP with nonces would be the next step; the documentation follows the Flask security docs and says what it implements and what not.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="kosten">
+    <h2><span lang="de">Kosten: Cloud gegen lokal</span><span lang="en">Cost: cloud versus local</span></h2>
+    <p>
+      <span lang="de">Die Tokenzahlen stammen aus dem Live-Protokoll vom 19.09.2026 mit gpt-4.1-mini; das Modell meldet sie selbst (<code>usage</code>). Sie umfassen nur die Antwortgenerierung, nicht das Embedding und nicht den Reranker – die laufen lokal und kostenlos.</span>
+      <span lang="en">The token counts come from the live log of 19 Sept 2026 with gpt-4.1-mini; the model reports them itself (<code>usage</code>). They cover only the answer generation, not the embedding and not the reranker – those run locally and free of charge.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Frage</span><span lang="en">Question</span></th><th><span lang="de">Modus</span><span lang="en">Mode</span></th><th><span lang="de">Tokens Eingang / Ausgang</span><span lang="en">Tokens in / out</span></th></tr></thead>
+      <tbody>
+        <tr><td><span lang="de">Wie reinige ich die Laugenpumpe? Welche Sicherheitsmaßnahmen sind vorher nötig?</span><span lang="en">How do I clean the drain pump? Which safety measures are needed first?</span></td><td>Hybrid</td><td><span data-wert="betrieb.live.pumpe">646/375</span></td></tr>
+        <tr><td><span lang="de">Fehler E:18</span><span lang="en">Error E:18</span></td><td>Hybrid</td><td><span data-wert="betrieb.live.e18">355/121</span></td></tr>
+        <tr><td><span lang="de">Fehler E:23</span><span lang="en">Error E:23</span></td><td>Hybrid</td><td><span data-wert="betrieb.live.e23">341/107</span></td></tr>
+        <tr><td><span lang="de">Was bedeutet der Fehler E:23?</span><span lang="en">What does error E:23 mean?</span></td><td>PageIndex</td><td><span data-wert="betrieb.live.pageindexE23">1227/102</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">Mit der E:18-Frage als Muster (<span data-wert="betrieb.live.e18ein">355</span> Eingabe-, <span data-wert="betrieb.live.e18aus">121</span> Ausgabetokens) und den Standardpreisen von gpt-4.1-mini (<span data-wert="kosten.preisEin">0,40</span> USD je Million Eingabe-, <span data-wert="kosten.preisAus">1,60</span> USD je Million Ausgabetokens, OpenAI-Preisliste, abgerufen am 19.09.2026) kostet eine Antwort <span data-wert="kosten.jeAnfrageCent">0,034</span> Cent. 200 Anfragen am Tag sind <span data-wert="kosten.monat">2,01</span> USD im Monat. Ein lokaler Rechner für 2 500 USD über 48 Monate plus 5 USD Strom kostet <span data-wert="kosten.lokal">57,08</span> USD im Monat – das <span data-wert="kosten.faktor">28</span>-Fache. Gleich teuer wären beide erst bei rund <span data-wert="kosten.gleichstand">5 670</span> Anfragen am Tag. Die Rechnung sagt: Wer lokal betreibt, tut es nicht wegen der Kosten, sondern weil Frage und Handbuchauszüge den Rechner nicht verlassen – oder weil kein Anbieter erreichbar sein soll. Alle Felder des Rechners sind editierbar; PageIndex mit 1 227 Eingabetokens je Frage verdreifacht den Cloud-Betrag.</span>
+      <span lang="en">With the E:18 question as pattern (<span data-wert="betrieb.live.e18ein">355</span> input, <span data-wert="betrieb.live.e18aus">121</span> output tokens) and the standard prices of gpt-4.1-mini (USD <span data-wert="kosten.preisEin">0.40</span> per million input, USD <span data-wert="kosten.preisAus">1.60</span> per million output tokens, OpenAI price list, retrieved 19 Sept 2026) one answer costs <span data-wert="kosten.jeAnfrageCent">0.034</span> cents. 200 requests a day are USD <span data-wert="kosten.monat">2.01</span> a month. A local machine for USD 2,500 over 48 months plus USD 5 of electricity costs USD <span data-wert="kosten.lokal">57.08</span> a month – <span data-wert="kosten.faktor">28</span> times as much. Both would cost the same only at roughly <span data-wert="kosten.gleichstand">5,670</span> requests a day. The calculation says: whoever runs locally does not do so because of cost but because question and manual excerpts never leave the machine – or because no provider is supposed to be reachable. All fields of the calculator are editable; PageIndex with 1,227 input tokens per question triples the cloud amount.</span>
+    </p>
+    <div data-werkzeug="kosten" data-parameter='{}'></div>
+    <p>
+      <span lang="de">Was lokal nötig ist, sagt die LM-Studio-Dokumentation (Stand 19.09.2026): Apple Silicon mit macOS 14 oder neuer und mindestens 16 GB RAM empfohlen; unter Windows x64 mit AVX2, 16 GB RAM und 4 GB Grafikspeicher empfohlen. Das Modell des Fallbeispiels, gemma-4-12b-it in 6-Bit-Quantisierung, belegt rund 10 GB; der Rechner der Prüfung war ein Mac mit Apple Silicon, und eine Antwort dauerte dort <span data-wert="betrieb.lms.e23s">21,5</span> Sekunden.</span>
+      <span lang="en">What is needed locally, the LM Studio documentation says (as of 19 Sept 2026): Apple Silicon with macOS 14 or newer and at least 16 GB of RAM recommended; on Windows x64 with AVX2, 16 GB of RAM and 4 GB of graphics memory recommended. The case study's model, gemma-4-12b-it in 6-bit quantisation, occupies about 10 GB; the machine of the audit was a Mac with Apple Silicon, and one answer took <span data-wert="betrieb.lms.e23s">21.5</span> seconds there.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="grenzen">
+    <h2><span lang="de">Grenzen, die die Dokumentation selbst nennt</span><span lang="en">Limits the documentation names itself</span></h2>
+    <ul>
+      <li><span lang="de"><strong>Ein Benutzer, ein Prozess.</strong> Keine Anmeldung, kein gehärteter Mehrbenutzerbetrieb; die Sitzungsschlüssel leben im Speicher eines einzigen Prozesses. Ein zweiter Worker hätte sie nicht.</span><span lang="en"><strong>One user, one process.</strong> No login, no hardened multi-user operation; the session keys live in the memory of a single process. A second worker would not have them.</span></li>
+      <li><span lang="de"><strong>Keine Folgefragen.</strong> Jede Frage steht allein; es gibt keinen Chatverlauf. „Und was kostet das?“ nach einer E:18-Antwort findet nichts.</span><span lang="en"><strong>No follow-up questions.</strong> Every question stands alone; there is no chat history. “And what does that cost?” after an E:18 answer finds nothing.</span></li>
+      <li><span lang="de"><strong>Nur lokal erreichbar.</strong> Ein QR-Link mit <code>localhost</code> funktioniert auf keinem anderen Gerät. Deshalb gibt es eine statische Leseseite auf GitHub Pages: Die Antwort wird komprimiert in das URL-Fragment gepackt, das der Browser nicht an den Server sendet; die Seite ruft keine API auf. Wer den Link hat, kann lesen – das ist Weitergabe, kein Zugriffsschutz.</span><span lang="en"><strong>Reachable locally only.</strong> A QR link with <code>localhost</code> works on no other device. Hence a static reading page on GitHub Pages: the answer is compressed into the URL fragment, which the browser does not send to the server; the page calls no API. Whoever has the link can read – that is sharing, not access control.</span></li>
+      <li><span lang="de"><strong>Kleiner Testbestand, Stichwort-Proxys</strong> (Lab 08) und OCR-Reste im Markdown (Lab 03).</span><span lang="en"><strong>Small test set, keyword proxies</strong> (lab 08) and OCR remnants in the Markdown (lab 03).</span></li>
+    </ul>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Fünf Übungen: Komponenten befragen, Bedrohungen Maßnahmen zuordnen, die Fingerprint-Signatur vervollständigen, die Cloud-Kosten rechnen und eine Anfrage in Reihenfolge bringen.</span><span lang="en">Five exercises: question the components, assign threats to countermeasures, complete the fingerprint signature, compute the cloud cost and put one request in order.</span></p>
     <div data-uebung="R09-01"></div>
     <div data-uebung="R09-02"></div>
     <div data-uebung="R09-03"></div>
@@ -58,11 +238,28 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Suche und Server sind getrennt; deshalb ist die Suche messbar und der Server prüfbar.</span><span lang="en">Retrieval and server are separated; hence retrieval is measurable and the server checkable.</span></li>
+      <li><span lang="de">In einer Anfrage steht jeder billige Schritt vor jedem teuren: Loopback, Validierung, Retrieval, Modell.</span><span lang="en">In one request every cheap step precedes every expensive one: loopback, validation, retrieval, model.</span></li>
+      <li><span lang="de">Der SHA-256-Fingerprint bindet den Index an Quelle, Modell, Parser-Version und Parameter; ein alter Index kann nie still weiterleben.</span><span lang="en">The SHA-256 fingerprint binds the index to source, model, parser version and parameters; an old index can never quietly live on.</span></li>
+      <li><span lang="de">Der API-Schlüssel liegt nur im Arbeitsspeicher, acht Stunden; das Cookie trägt nur Sitzungs-ID und CSRF-Token, HttpOnly und SameSite=Strict.</span><span lang="en">The API key lives only in memory, eight hours; the cookie carries only session ID and CSRF token, HttpOnly and SameSite=Strict.</span></li>
+      <li><span lang="de">Loopback-, Origin- und Sec-Fetch-Site-Prüfung schließen fremde Webseiten aus; die Schutz-Header ergänzen die Maskierung, ersetzen sie aber nicht.</span><span lang="en">Loopback, Origin and Sec-Fetch-Site checks exclude foreign web pages; the protective headers complement the escaping but do not replace it.</span></li>
+      <li><span lang="de">Bei 200 Anfragen am Tag ist die Cloud rund 28-mal günstiger; lokal wird mit Datenhoheit begründet, nicht mit Geld.</span><span lang="en">At 200 requests a day the cloud is about 28 times cheaper; local is justified by data sovereignty, not by money.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Pallets Projects: Flask Documentation – Security Considerations. <a href="https://flask.palletsprojects.com/en/stable/web-security/" rel="noopener">flask.palletsprojects.com/en/stable/web-security/</a> (<span lang="de">abgerufen</span><span lang="en">retrieved</span> 19.09.2026)</li>
+      <li>OWASP Cheat Sheet Series: Cross-Site Request Forgery Prevention Cheat Sheet. <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html" rel="noopener">cheatsheetseries.owasp.org</a> (19.09.2026)</li>
+      <li>MDN Web Docs: Content Security Policy (CSP); Sec-Fetch-Site; Origin; Using HTTP cookies. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP" rel="noopener">developer.mozilla.org/…/CSP</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Site" rel="noopener">…/Sec-Fetch-Site</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin" rel="noopener">…/Origin</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies" rel="noopener">…/Cookies</a> (19.09.2026)</li>
+      <li>Python Software Foundation: hashlib – Secure hashes and message digests. <a href="https://docs.python.org/3/library/hashlib.html" rel="noopener">docs.python.org/3/library/hashlib.html</a>; filelock – platform-independent file locking. <a href="https://py-filelock.readthedocs.io/en/latest/" rel="noopener">py-filelock.readthedocs.io</a> (19.09.2026)</li>
+      <li>LM Studio: System Requirements. <a href="https://lmstudio.ai/docs/app/system-requirements" rel="noopener">lmstudio.ai/docs/app/system-requirements</a> (19.09.2026)</li>
+      <li>OpenAI: API Pricing, gpt-4.1-mini Standard (0,40 / 1,60 USD je 1 Mio. Tokens). <a href="https://openai.com/api/pricing/" rel="noopener">openai.com/api/pricing</a> (<span lang="de">abgerufen</span><span lang="en">retrieved</span> 19.09.2026; <span lang="de">Preise ändern sich, Datum beachten</span><span lang="en">prices change, mind the date</span>)</li>
+      <li><span lang="de">Fallbeispiel: <code>server.py</code> (create_app, before_request, after_request, validate, SSE), <code>session_keys.py</code>, <code>rag_engine.py</code> (compute_cache_key, build_or_load_index), <code>storage/.cache_key</code>, <code>docs/TECHNICAL.md</code> (Architektur, Routen, Konfiguration, Schutz des API-Schlüssels, Grenzen), <code>docs/evaluation/LIVE.md</code> (Tokenzahlen) und <code>MAC-LIVE.md</code> (Cache-Fehler, Laufzeiten), Stand 19.09.2026; Nachrechnung in <code>data/betrieb.json</code> über <code>tools/betrieb.py</code>.</span><span lang="en">Case study: <code>server.py</code> (create_app, before_request, after_request, validate, SSE), <code>session_keys.py</code>, <code>rag_engine.py</code> (compute_cache_key, build_or_load_index), <code>storage/.cache_key</code>, <code>docs/TECHNICAL.md</code> (architecture, routes, configuration, key protection, limits), <code>docs/evaluation/LIVE.md</code> (token counts) and <code>MAC-LIVE.md</code> (cache error, run times), as of 19 Sept 2026; recomputation in <code>data/betrieb.json</code> via <code>tools/betrieb.py</code>.</span></li>
+    </ul>
   </section>
 
 </main>

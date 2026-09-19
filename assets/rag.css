@@ -102,6 +102,8 @@ code {
 @media (max-width: 1000px) {
   code { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
+/* Lange Werte (eine CSP, ein Hash) duerfen immer umbrechen. */
+code.umbruch { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* Sprachumschaltung: nur der aktive Sprachzweig ist sichtbar. */
 [data-lang="de"] [lang="en"], [data-lang="en"] [lang="de"] { display: none; }

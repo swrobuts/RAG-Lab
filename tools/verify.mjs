@@ -58,7 +58,10 @@ meld(existsSync(join(ROOT, 'assets/seite-33.png')), 'assets/seite-33.png vorhand
 /* --------------------------------------------------------- Zahlen im Text */
 // Jede Zahl aus dem Fallbeispiel steht im HTML als <span data-wert="schluessel">…</span>.
 // Hier steht, woher der Wert kommt; die Pruefung akzeptiert deutsche und englische Schreibweise.
-const um = daten('umgebung.json'); const ev = (n) => daten('eval/' + n)
+const um = daten('umgebung.json'); const ev = (n) => daten('eval/' + n); const bt = daten('betrieb.json')
+meld(!!bt && bt.fingerprint.gleich && bt.liveTokens.length === 4, 'betrieb.json: Fingerprint nachgerechnet, vier Live-Tokenzeilen')
+const live = (frage) => (bt && bt.liveTokens.find(t => t.frage === frage)) || {}
+const kosten = () => { const e = live('Fehler E:18'); const p = bt.preise; const a = bt.annahmen; const je = (e.ein * p.einUsdJeMio + e.aus * p.ausUsdJeMio) / 1e6; return { je, monat: a.anfragenJeTag * a.tage * je, lokal: a.rechnerUsd / a.monate + a.stromUsdJeMonat } }
 meld(!!um && um.lmStudioModelle.some(m => m.id === 'gemma-4-12b-it-mlx' && m.maxKontext > 0), 'umgebung.json: LM-Studio-Modelle mit Kontextfenster')
 const lmsModell = (id) => (um && um.lmStudioModelle.find(m => m.id === id)) || {}
 const frage = (id) => fr && fr.fragen.find(f => f.id === id)
@@ -116,8 +119,38 @@ const WERTE = {
   'antworten.e18.tokens': () => { const e = an.eintraege.find(x => x.id === 'e18-rag'); return `${e.usage.ein}/${e.usage.aus}` },
   'antworten.e18nackt.tokens': () => { const e = an.eintraege.find(x => x.id === 'e18-nackt'); return `${e.usage.ein}/${e.usage.aus}` },
   'antworten.e18.sekunden': () => an.eintraege.find(x => x.id === 'e18-rag').sekunden,
-  'antworten.modell': () => an.eintraege[0].modell
+  'antworten.modell': () => an.eintraege[0].modell,
+  'betrieb.fingerprint': () => bt.fingerprint.gespeichert,
+  'betrieb.fingerprintKurz': () => bt.fingerprint.gespeichert.slice(0, 12) + '…' + bt.fingerprint.gespeichert.slice(-6),
+  'betrieb.anderesModellKurz': () => bt.fingerprint.anderesModell.slice(0, 12) + '…',
+  'betrieb.leerzeichenKurz': () => bt.fingerprint.einLeerzeichenMehr.slice(0, 12) + '…',
+  'betrieb.markdownBytes': () => bt.fingerprint.zutaten.markdownBytes,
+  'betrieb.speicherMB': () => bt.speicher.gesamtBytes / 1e6,
+  'betrieb.vektorMB': () => bt.speicher.dateien['default__vector_store.json'] / 1e6,
+  'betrieb.docstoreKB': () => bt.speicher.dateien['docstore.json'] / 1e3,
+  'betrieb.live.pumpe': () => `${live('Wie reinige ich die Laugenpumpe? Welche Sicherheitsmaßnahmen sind vorher nötig?').ein}/${live('Wie reinige ich die Laugenpumpe? Welche Sicherheitsmaßnahmen sind vorher nötig?').aus}`,
+  'betrieb.live.e18': () => `${live('Fehler E:18').ein}/${live('Fehler E:18').aus}`,
+  'betrieb.live.e23': () => `${live('Fehler E:23').ein}/${live('Fehler E:23').aus}`,
+  'betrieb.live.pageindexE23': () => `${live('Was bedeutet der Fehler E:23?').ein}/${live('Was bedeutet der Fehler E:23?').aus}`,
+  'betrieb.live.e18ein': () => live('Fehler E:18').ein,
+  'betrieb.live.e18aus': () => live('Fehler E:18').aus,
+  'betrieb.lms.e23s': () => bt.lmStudioSekunden.e23,
+  'betrieb.lms.e999s': () => bt.lmStudioSekunden.e999Ablehnung,
+  'betrieb.grenzen.frageZeichen': () => bt.grenzen.frageZeichen,
+  'betrieb.grenzen.bodyKiB': () => bt.grenzen.bodyBytes / 1024,
+  'betrieb.grenzen.kontextZeichen': () => bt.grenzen.kontextZeichen,
+  'betrieb.grenzen.stunden': () => bt.grenzen.schluesselStunden,
+  'betrieb.csp': () => bt.header['Content-Security-Policy'],
+  'kosten.preisEin': () => bt.preise.einUsdJeMio,
+  'kosten.preisAus': () => bt.preise.ausUsdJeMio,
+  'kosten.jeAnfrageCent': () => kosten().je * 100,
+  'kosten.monat': () => kosten().monat,
+  'kosten.lokal': () => kosten().lokal,
+  'kosten.faktor': () => Math.round(kosten().lokal / kosten().monat),
+  'kosten.gleichstand': () => Math.round(kosten().lokal / bt.annahmen.tage / kosten().je / 10) * 10
 }
+// Rechenübungen, deren Lösungen aus den Daten folgen: Übungs-ID -> WERTE-Schlüssel je Feld
+const LOESUNGEN = { 'R09-04': ['kosten.jeAnfrageCent', 'kosten.monat', 'kosten.lokal'] }
 const NBSP = /[\s   ]/g
 const fmtZahl = (v) => {
   if (typeof v !== 'number') return [String(v)]
@@ -136,8 +169,8 @@ function pruefeWerte (html, name) {
     const ist = m[2].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim()
     meld(soll != null && String(soll).trim() === ist, `${name}: Textmarker ${m[1]} zeichengleich`)
   }
-  for (const m of html.matchAll(/<span data-wert="([^"]+)">([\s\S]*?)<\/span>/g)) {
-    const key = m[1]; const text = m[2].replace(/<[^>]+>/g, '').replace(NBSP, '').trim()
+  for (const m of html.matchAll(/<(span|code)(?: class="[^"]*")? data-wert="([^"]+)">([\s\S]*?)<\/\1>/g)) {
+    const key = m[2]; const text = m[3].replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(NBSP, '').trim()
     if (!WERTE[key]) { meld(false, `${name}: unbekannter Marker ${key}`); continue }
     let soll; try { soll = WERTE[key]() } catch (e) { meld(false, `${name}: ${key} nicht berechenbar (${e.message})`); continue }
     const ok = fmtZahl(soll).some(k => k.replace(NBSP, '') === text.replace(/\.(?=\d{3}\b)/g, '').replace(/^(\d{1,3})(?:[.,](\d{3}))+$/, (x) => x.replace(/[.,]/g, '')) || k === text)
@@ -182,6 +215,8 @@ for (const lab of LABS) {
     }
     if (u.typ === 'sortieren') meld(Array.isArray(u.elemente) && u.elemente.length >= 3 && u.elemente.every(e => zwei(e.text)), `${u.id}: Elemente`)
     if (u.typ === 'rechnen') meld(Array.isArray(u.felder) && u.felder.length > 0 && u.felder.every(f => zwei(f.name) && Number.isFinite(f.loesung) && Number.isFinite(f.toleranz ?? 0)), `${u.id}: Rechenfelder`)
+    // Rechenlösungen, die aus den Daten folgen, müssen zu den Daten passen (Schlüssel wie bei data-wert).
+    if (u.typ === 'rechnen' && LOESUNGEN[u.id]) LOESUNGEN[u.id].forEach((key, i) => { const f = u.felder[i]; const soll = WERTE[key](); meld(!!f && Math.abs(f.loesung - soll) <= (f.toleranz ?? 0), `${u.id}: Feld ${i + 1} ${f && f.loesung} ≈ ${key} ${fmtZahl(soll)[16]}`) })
     if (u.typ === 'luecken') {
       const n = (s) => new Set(String(s).match(/___\d+___/g) || []).size
       const folge = (s) => [...new Set(String(s).match(/___(\d+)___/g) || [])].map(x => +x.replace(/_/g, '')).sort((a, b) => a - b).every((x, i) => x === i + 1)

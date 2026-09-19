@@ -22,4 +22,10 @@ export function baue (wrap, p, ctx) {
     wrap.dataset.cloud = cloud.toFixed(2); wrap.dataset.lokal = lokal.toFixed(2)
   }
   for (const i of Object.values(f)) i.addEventListener('input', zeige); document.addEventListener('rag:sprache', zeige); zeige(); k.status(L.status, '')
+  // Voreinstellungen aus data/betrieb.json (Live-Protokoll E:18, recherchierte Preise, Annahmen), sofern die Seite keine Parameter setzt
+  ctx.daten('betrieb.json').then((b) => {
+    const e18 = b.liveTokens.find(t => t.frage === 'Fehler E:18'); const soll = { ein: e18.ein, aus: e18.aus, tag: b.annahmen.anfragenJeTag, pEin: b.preise.einUsdJeMio, pAus: b.preise.ausUsdJeMio, hw: b.annahmen.rechnerUsd, monate: b.annahmen.monate, strom: b.annahmen.stromUsdJeMonat }
+    for (const [key, v] of Object.entries(soll)) if (p[key] == null) f[key].value = v
+    zeige(); k.status(L.status, 'vorberechnet')
+  }).catch(() => {})
 }
