@@ -77,3 +77,19 @@ GitHub Pages aus `main` (Wurzel), Live-Adresse <https://swrobuts.github.io/RAG-L
 - Der erste Push wurde vom Push-Schutz von GitHub abgewiesen: Der Secret-Scanner hielt den Klassennamen `Mistral3ForConditionalGeneration` (32 Zeichen) in der mitgelieferten `assets/transformers/transformers.min.js` für einen Mistral-API-Schlüssel. Nach Rücksprache wurde der Treffer über die API als Fehlalarm freigegeben (`push-protection-bypasses`, Grund `false_positive`); der Push-Schutz des Repositorys ist wieder eingeschaltet.
 - SHA-256 lokal gegen live gleich für `assets/rag.js`, `data/chunks.json`, `data/uebungen/lab-06.json`, `lab-06-retrieval.html`, `assets/transformers/ort-wasm-simd-threaded.asyncify.wasm`, `assets/diagramme/architektur-de.svg`.
 - Live geprüft (Chromium der Desktop-App): Startseite mit Kennzahlen 10 · 55 · 346 · 24; Lab 06 lädt das Modell vom Hub in 16,5 s, Selbsttest 0,9966, eigene Frage läuft durch die Vektorstufe; Lab 07 gegen LM Studio ohne CORS zeigt den Fehlertext (Chromium erlaubt den Aufruf von HTTPS an `http://localhost`, LM Studio antwortet ohne CORS-Header); Lab 10 Terminal mit dem Fehlerbild „venv mit Python 3.9“.
+
+## Textdurchsicht, zweiter Lauf (20.09.2026, nach der Abnahme)
+
+Derselbe Lauf wie oben über 1 407 Texte (708 DE, 699 EN; die Zählung ist kleiner, weil der
+erste Lauf jeden Abschnittsabsatz doppelt einsammelte): 8 Mustertreffer, alle bereits als
+Ausnahmen begründet (R05-04, Lab 07 „Diese Seite“, R01-03, R07-06); 0 doppelte Einleitungen;
+alle 87 Einleitungen erneut gelesen, die seit dem ersten Lauf geänderten Stellen einzeln.
+
+Geändert:
+
+- Lab 03, Einleitung · Satzrest aus dem ersten Lauf („… und warum das Fallbeispiel eine neue Extraktion erst prüft“ hing ohne Hauptsatz) · „…: Symbole, Bilder, eine zerschossene Überschrift. Deshalb prüft das Fallbeispiel jede neue Extraktion gegen das PDF, bevor es die aktive Wissensdatei ersetzt.“ (DE und EN)
+- Lab 07, Abschnitt „Eigenes Modell“ · „einmal je Seite um Erlaubnis“ · „einmal je Website“ (die Chrome-Berechtigung gilt je Website, nicht je Seite)
+- Lab 07 und LLM-Werkzeug · Hinweis zum CORS-Schalter · Zusatz „wirkt erst nach einem Neustart des Servers“ (Befund der Abnahme)
+
+Keine weiteren Rahmensätze, Bildbeschreibungen, Wichtigkeitsbehauptungen oder Metaphern;
+die 20 Übungszahlen („Fünf/Sechs Übungen“) stimmen mit den Übungsdateien überein.
