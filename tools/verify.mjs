@@ -36,6 +36,24 @@ if (ch) {
   meld(ch.chunks.every(c => c.v.length === 384 && typeof c.text === 'string' && /^c\d{3}$/.test(c.id)), 'chunks.json: 384 Dimensionen, Text, IDs')
   meld(ch.chunks.some(c => c.text.includes('Anzeige: E:18;')), 'chunks.json: E:18-Zeile als eigener Chunk')
 }
+const fr = daten('fragen.json')
+meld(!!fr && fr.fragen.length >= 24, 'fragen.json: mindestens 24 Fragen')
+if (fr) {
+  meld(fr.fragen.every(f => f.vMit.length === 384 && f.vOhne.length === 384 && f.vektor.length === 12 && f.vektorOhne.length === 12 && f.hybrid.length >= 12 && f.rerank.length >= 12 && Array.isArray(f.kontext) && typeof f.gedeckt === 'boolean' && typeof f.obersterScore === 'number'), 'fragen.json: alle Stufen je Frage')
+  meld(fr.fragen.filter(f => f.art === 'eval').length === 10 && fr.fragen.filter(f => f.art === 'negativ').length === 4, 'fragen.json: 10 Eval, 4 Negativ')
+}
+const pr = daten('projektion.json')
+meld(!!pr && pr.komponenten.length === 2 && pr.komponenten[0].length === 384 && pr.mittel.length === 384 && pr.punkte.length === 346, 'projektion.json: Matrix und Punkte')
+const an = daten('antworten.json')
+meld(!!an && an.eintraege.some(e => e.id === 'e18-nackt') && an.eintraege.some(e => e.id === 'e18-rag' && e.geparst && e.geparst.summary) && an.eintraege.some(e => e.id === 'e180-rag' && e.abgelehnt), 'antworten.json: E:18 nackt und RAG, E:180 abgelehnt')
+const lg = daten('logits.json')
+meld(!!lg && lg.prompts.length >= 6 && lg.prompts.every(p => p.tokens.length === 20 && typeof p.restLogsumexp === 'number' && p.fortsetzungen['0']), 'logits.json: sechs Prompts, Top-20, Fortsetzungen')
+const tk = daten('tokens.json')
+meld(!!tk && tk.beispiele.e18 && tk.zaehlungen.systemprompt > 0 && tk.zaehlungen.maxChunkTokens <= 440 && tk.vokabular > 0, 'tokens.json: Beispiele und Zählungen')
+const co = daten('chunks-ohne-praefix.json')
+meld(!!co && co.chunks.length === 346 && co.chunks.every(c => c.v.length === 384), 'chunks-ohne-praefix.json: 346 × 384')
+for (const n of ['handbuch.md', 'seite-33.md', 'eval/vector.json', 'eval/hybrid-no-rerank.json', 'eval/hybrid-rerank.json', 'eval/negative-checks.json', 'eval/questions.json']) meld(existsSync(join(ROOT, 'data', n)), `data/${n} vorhanden`)
+meld(existsSync(join(ROOT, 'assets/seite-33.png')), 'assets/seite-33.png vorhanden')
 
 /* --------------------------------------------------------- Labs und Uebungen */
 console.log('Labs und Übungen')

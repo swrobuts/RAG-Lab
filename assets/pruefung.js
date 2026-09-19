@@ -112,7 +112,7 @@ export function metriken (faelle) {
 
 /* ------------------------------------------------------------- Tokens */
 
-export const ZEICHEN_JE_TOKEN = 3.8   // gemessener Wert aus data/tokens.json (tools/tokens.py)
+export const ZEICHEN_JE_TOKEN = 4.72  // gemessener Wert aus data/tokens.json (tools/tokens.py)
 export function schaetzeTokens (text) { return Math.ceil(String(text || '').length / ZEICHEN_JE_TOKEN) }
 export function softmax (logits, temperatur) {
   if (temperatur <= 0) { const i = logits.indexOf(Math.max(...logits)); return logits.map((_, j) => (j === i ? 1 : 0)) }
