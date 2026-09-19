@@ -1,0 +1,6 @@
+flowchart TB
+  A["siemens_wissen.md<br/>[[187 Abschnitte, 12 218 Wörter|187 sections, 12,218 words]]"] --> B["<b>1 · MarkdownNodeParser</b><br/>[[ein Node je Überschrift|one node per heading]]"]
+  B --> C["<b>2 · [[Kontextgruppen|Context groups]]</b> (manual_context.py)<br/>[[Präfix „Dokumentkontext: …“ für vier Verfahren|prefix “Dokumentkontext: …” for four procedures]]"]
+  C --> D["<b>3 · [[Tabellen-Explosion|Table explosion]]</b><br/>[[Abschnitte über 1 600 Zeichen mit Tabelle:<br/>je Zeile ein Node mit Überschrift und Spaltenköpfen|sections over 1,600 characters with a table:<br/>one node per row with heading and column labels]]"]
+  D --> E["<b>4 · SentenceSplitter</b><br/>440 Tokens, 40 [[Überlappung|overlap]], e5-Tokenizer"]
+  E --> F["346 Nodes<br/>[[Metadaten: section, pdf_page, context_group –<br/>vom Embedding ausgeschlossen|metadata: section, pdf_page, context_group –<br/>excluded from the embedding]]"]

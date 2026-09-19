@@ -1,1 +1,87 @@
-[]
+[
+  {
+    "id": "R04-01", "typ": "experiment", "werkzeug": "chunking", "parameter": { "abschnitt": "Hinweise im Anzeigefeld", "strategie": "fest", "groesse": 500, "overlap": 50 },
+    "titel": { "de": "Wo die E:18-Zeile landet", "en": "Where the E:18 row ends up" },
+    "aufgabe": { "de": "<p>Der Abschnitt „Hinweise im Anzeigefeld“ ist vorgewählt. Lassen Sie die Strategie „Feste Länge“ mit 500 Zeichen stehen und suchen Sie den Chunk, der E:18 enthält. Wechseln Sie dann auf „Fallbeispiel: Markdown → Tabellenzeilen → Tokens“.</p>", "en": "<p>The section “Hinweise im Anzeigefeld” is preselected. Keep the strategy “fixed length” at 500 characters and find the chunk that contains E:18. Then switch to “case study: Markdown → table rows → tokens”.</p>" },
+    "fragen": [
+      { "frage": { "de": "Bei fester Länge von 500 Zeichen: Was steht mit E:18 im selben Chunk?", "en": "With a fixed length of 500 characters: what shares the chunk with E:18?" },
+        "optionen": [ { "de": "Teile benachbarter Tabellenzeilen, mitten im Satz abgeschnitten; der Chunk beschreibt mehrere Anzeigen zugleich.", "en": "Parts of neighbouring table rows, cut mid-sentence; the chunk describes several displays at once." }, { "de": "Genau die Tabellenzeile zu E:18 und sonst nichts.", "en": "Exactly the table row for E:18 and nothing else." }, { "de": "Die Überschrift des Kapitels und die Seitenzahl.", "en": "The chapter heading and the page number." } ], "richtig": [0],
+        "erklaerung": { "de": "Feste Längen kennen keine Zeilen. Der Vektor eines solchen Chunks ist ein Mittelwert aus mehreren Fehlercodes und passt zu keinem richtig.", "en": "Fixed lengths know no rows. The vector of such a chunk is an average over several error codes and matches none of them properly." } },
+      { "frage": { "de": "Was macht die Pipeline des Fallbeispiels aus der Tabelle?", "en": "What does the case study's pipeline do with the table?" },
+        "optionen": [ { "de": "Je Zeile einen eigenen Chunk mit Überschrift und Spaltenköpfen: „## Hinweise im Anzeigefeld / Anzeige: E:18; Ursache/Abhilfe: …“.", "en": "One chunk per row with heading and column labels: “## Hinweise im Anzeigefeld / Anzeige: E:18; Ursache/Abhilfe: …”." }, { "de": "Sie lässt die Tabelle als einen Chunk von 6 389 Zeichen stehen.", "en": "It leaves the table as one chunk of 6,389 characters." }, { "de": "Sie löscht Tabellen, weil Embeddings nur Fließtext verstehen.", "en": "It deletes tables because embeddings only understand prose." } ], "richtig": [0],
+        "erklaerung": { "de": "_explode_markdown_tables() in rag_engine.py greift bei Abschnitten über 1 600 Zeichen mit mindestens drei Tabellenzeilen. Aus der einen Tabelle werden zehn Chunks, einer davon nur zu E:18.", "en": "_explode_markdown_tables() in rag_engine.py kicks in for sections over 1,600 characters with at least three table lines. The one table becomes ten chunks, one of them about E:18 only." } },
+      { "frage": { "de": "Warum verbessert die eigene Zeile die Suche?", "en": "Why does the row of its own improve search?" },
+        "optionen": [ { "de": "Der Vektor beschreibt genau einen Fehlercode mit seiner Abhilfe; die Frage nach E:18 hat damit einen eindeutigen Partner.", "en": "The vector describes exactly one error code with its remedy; the question about E:18 thus has an unambiguous partner." }, { "de": "Kürzere Chunks brauchen weniger Speicher.", "en": "Shorter chunks need less memory." }, { "de": "Das Modell liest Tabellen schneller.", "en": "The model reads tables faster." } ], "richtig": [0],
+        "erklaerung": { "de": "Das Fallbeispiel notiert im Code: Die 6-Kilobyte-Tabelle embeddet als „unspezifischer Brei“ und wird für konkrete Fragen nicht gefunden. Nach der Explosion findet der Fehlercode-Zuschlag (Lab 06) die Zeile sogar exakt.", "en": "The case study notes in its code: the 6-kilobyte table embeds as an “unspecific mush” and is not found for concrete questions. After the explosion, the error-code boost (lab 06) even finds the row exactly." } }
+    ],
+    "rueckmeldung": { "de": "Ein Chunk soll eine Sache sagen. Die Tabellenzeile ist die natürliche Einheit einer Fehlercode-Tabelle.", "en": "A chunk should say one thing. The table row is the natural unit of an error-code table." }
+  },
+  {
+    "id": "R04-02", "typ": "quiz",
+    "titel": { "de": "Warum in Tokens messen", "en": "Why measure in tokens" },
+    "aufgabe": { "de": "<p>Das Fallbeispiel begrenzt Chunks auf 440 Tokens mit 40 Tokens Überlappung, gezählt mit dem Tokenizer des Embedding-Modells. Warum nicht einfach 2 000 Zeichen?</p>", "en": "<p>The case study limits chunks to 440 tokens with 40 tokens overlap, counted with the embedding model's tokenizer. Why not simply 2,000 characters?</p>" },
+    "fragen": [
+      { "frage": { "de": "Welche Begründung trifft zu?", "en": "Which reasoning is correct?" },
+        "optionen": [ { "de": "Das Embedding-Modell verarbeitet höchstens 512 Tokens; was darüber liegt, wird abgeschnitten und geht für die Suche verloren. 440 plus Präfix und Sondertokens bleibt sicher darunter, und nur der eigene Tokenizer zählt richtig.", "en": "The embedding model processes at most 512 tokens; anything beyond is truncated and lost for search. 440 plus prefix and special tokens stays safely below, and only the model's own tokenizer counts correctly." }, { "de": "Tokens sind immer genau vier Zeichen lang.", "en": "Tokens are always exactly four characters long." }, { "de": "Zeichen lassen sich in Python nicht zählen.", "en": "Characters cannot be counted in Python." } ], "richtig": [0],
+        "erklaerung": { "de": "build_or_load_index() prüft das sogar: CHUNK_TOKENS muss unter max_seq_length − 8 liegen, sonst bricht der Aufbau mit einem Fehler ab. Deutsch braucht bei diesem Tokenizer rund 4,7 Zeichen je Token; 2 000 Zeichen wären etwa 424 Tokens, ein englischer Text derselben Länge weniger.", "en": "build_or_load_index() even checks this: CHUNK_TOKENS must stay below max_seq_length − 8, otherwise the build stops with an error. German needs about 4.7 characters per token with this tokenizer; 2,000 characters would be about 424 tokens, an English text of the same length fewer." } },
+      { "frage": { "de": "Wozu dient die Überlappung von 40 Tokens?", "en": "What is the 40-token overlap for?" },
+        "optionen": [ { "de": "Ein Satz an der Schnittstelle steht in beiden Nachbarchunks und geht nicht verloren, wenn die Frage genau ihn braucht.", "en": "A sentence at the cut appears in both neighbouring chunks and is not lost if the question needs exactly it." }, { "de": "Sie macht den Index kleiner.", "en": "It makes the index smaller." }, { "de": "Sie verhindert, dass zwei Chunks denselben Vektor bekommen.", "en": "It prevents two chunks from getting the same vector." } ], "richtig": [0],
+        "erklaerung": { "de": "Überlappung kostet Speicher (doppelte Texte) und Trefferplätze (zwei Kandidaten für dieselbe Stelle). 40 von 440 Tokens, also rund 9 Prozent, ist ein sparsamer Wert.", "en": "Overlap costs storage (duplicated text) and result slots (two candidates for the same spot). 40 of 440 tokens, about 9 percent, is a frugal value." } }
+    ],
+    "rueckmeldung": { "de": "Die Chunk-Größe folgt dem Embedding-Modell, nicht dem Chatmodell.", "en": "Chunk size follows the embedding model, not the chat model." }
+  },
+  {
+    "id": "R04-03", "typ": "rechnen",
+    "titel": { "de": "Wie viele Chunks?", "en": "How many chunks?" },
+    "aufgabe": { "de": "<p>Ein Text hat 12 000 Tokens. Er wird mit fester Länge in Chunks von 440 Tokens zerlegt, mit 40 Tokens Überlappung, also einem Schritt von 400 Tokens zwischen zwei Chunk-Anfängen. Wie viele Chunks entstehen? Und wie viele Tokens liegen insgesamt in den Chunks, doppelte mitgezählt?</p>", "en": "<p>A text has 12,000 tokens. It is split at fixed length into chunks of 440 tokens with 40 tokens overlap, i.e. a step of 400 tokens between two chunk starts. How many chunks arise? And how many tokens lie in the chunks in total, duplicates counted?</p>" },
+    "felder": [
+      { "name": { "de": "Anzahl Chunks", "en": "Number of chunks" }, "loesung": 30, "toleranz": 0, "einheit": "" },
+      { "name": { "de": "Tokens in allen Chunks", "en": "Tokens across all chunks" }, "loesung": 13160, "toleranz": 0, "einheit": "Tokens" }
+    ],
+    "loesungsweg": { "de": "Der erste Chunk deckt Token 1 bis 440, jeder weitere beginnt 400 Tokens später. Nach dem ersten bleiben 12 000 − 440 = 11 560 Tokens, dafür braucht es 11 560 ÷ 400 = 28,9, aufgerundet 29 weitere Chunks: 30 Chunks. 29 der 30 Chunks haben 440 Tokens, der letzte deckt den Rest: 12 000 − 29 × 400 = 400 Tokens. Zusammen 29 × 440 + 400 = 13 160 Tokens, also 1 160 Tokens (rund 10 Prozent) mehr als der Text – der Preis der Überlappung.", "en": "The first chunk covers tokens 1 to 440, every further one starts 400 tokens later. After the first, 12,000 − 440 = 11,560 tokens remain, needing 11,560 ÷ 400 = 28.9, rounded up 29 further chunks: 30 chunks. 29 of the 30 chunks have 440 tokens, the last covers the rest: 12,000 − 29 × 400 = 400 tokens. Together 29 × 440 + 400 = 13,160 tokens, i.e. 1,160 tokens (about 10 percent) more than the text – the price of the overlap." },
+    "hinweis": { "de": "Anzahl = 1 + ⌈(Text − Größe) ÷ Schritt⌉. Der letzte Chunk ist kürzer.", "en": "Count = 1 + ⌈(text − size) ÷ step⌉. The last chunk is shorter." },
+    "rueckmeldung": { "de": "Überlappung ist ein Aufpreis von rund zehn Prozent, den man für die Sätze an den Schnittstellen zahlt.", "en": "Overlap is a surcharge of about ten percent paid for the sentences at the cuts." }
+  },
+  {
+    "id": "R04-04", "typ": "zuordnen",
+    "titel": { "de": "In den Text oder in die Metadaten?", "en": "Into the text or into the metadata?" },
+    "aufgabe": { "de": "<p>Das Fallbeispiel führt zu jedem Chunk Angaben mit. Manche stehen im Text, der eingebettet wird; andere nur in den Metadaten, die vom Embedding ausgeschlossen sind (<code>excluded_embed_metadata_keys</code>). Ordnen Sie zu.</p>", "en": "<p>The case study carries information with every chunk. Some is in the text that gets embedded; some only in the metadata excluded from the embedding (<code>excluded_embed_metadata_keys</code>). Assign.</p>" },
+    "kategorien": [
+      { "id": "text", "name": { "de": "Im Embedding-Text", "en": "In the embedding text" } },
+      { "id": "meta", "name": { "de": "Nur Metadaten", "en": "Metadata only" } }
+    ],
+    "elemente": [
+      { "text": { "de": "Die Überschrift des Abschnitts als erste Zeile des Chunks („## Hinweise im Anzeigefeld“)", "en": "The section heading as the first line of the chunk (“## Hinweise im Anzeigefeld”)" }, "ziel": "text" },
+      { "text": { "de": "section: der Abschnittstitel als Feld für die Quellenangabe", "en": "section: the section title as a field for the source reference" }, "ziel": "meta" },
+      { "text": { "de": "pdf_page: die physische Seite aus dem Seitenmarker", "en": "pdf_page: the physical page from the page marker" }, "ziel": "meta" },
+      { "text": { "de": "Das Präfix „Dokumentkontext: Laugenpumpe verstopft, Notentleerung“ vor Chunks einer Verfahrensgruppe", "en": "The prefix “Dokumentkontext: Laugenpumpe verstopft, Notentleerung” before chunks of a procedure group" }, "ziel": "text" },
+      { "text": { "de": "context_group: die Kennung der Verfahrensgruppe (pump, door, first_wash, transport)", "en": "context_group: the identifier of the procedure group (pump, door, first_wash, transport)" }, "ziel": "meta" },
+      { "text": { "de": "Die Spaltenköpfe einer Tabellenzeile („Anzeige: E:18; Ursache/Abhilfe: …“)", "en": "The column labels of a table row (“Anzeige: E:18; Ursache/Abhilfe: …”)" }, "ziel": "text" },
+      { "text": { "de": "exact_code_match: die Markierung, dass ein Chunk per Fehlercode gefunden wurde", "en": "exact_code_match: the flag that a chunk was found via error code" }, "ziel": "meta" }
+    ],
+    "rueckmeldung": { "de": "In den Text gehört, was die Bedeutung des Chunks trägt; in die Metadaten, was seine Herkunft beschreibt.", "en": "Into the text goes what carries the chunk's meaning; into the metadata, what describes its origin." }
+  },
+  {
+    "id": "R04-05", "typ": "luecken",
+    "titel": { "de": "Die drei Stellschrauben", "en": "The three dials" },
+    "aufgabe": { "de": "<p>Tragen Sie die Standardwerte des Fallbeispiels ein, wie sie in <code>rag_engine.py</code> stehen und per <code>.env</code> überschrieben werden können.</p>", "en": "<p>Enter the case study's default values as they appear in <code>rag_engine.py</code> and can be overridden via <code>.env</code>.</p>" },
+    "text": { "de": "# Tokenbezogene Zerlegung mit dem e5-Tokenizer\nCHUNK_TOKENS=___1___\nCHUNK_OVERLAP=___2___\n# Ab dieser Zeichenzahl werden Tabellenabschnitte zeilenweise aufgeteilt\nMAX_NODE_CHARS=___3___", "en": "# Token-based splitting with the e5 tokenizer\nCHUNK_TOKENS=___1___\nCHUNK_OVERLAP=___2___\n# From this character count, table sections are split row by row\nMAX_NODE_CHARS=___3___" },
+    "luecken": [ { "loesung": ["440"] }, { "loesung": ["40"] }, { "loesung": ["1600", "1 600"] } ],
+    "hinweis": { "de": "Die drei Werte stehen im Abschnitt „Tokens statt Zeichen“ und in der Konfigurationstabelle von Lab 09.", "en": "The three values appear in the section “Tokens instead of characters” and in the configuration table of lab 09." },
+    "rueckmeldung": { "de": "Alle drei Werte fließen in den Cache-Fingerprint ein: Wer sie ändert, löst einen Neuaufbau des Index aus (Lab 09).", "en": "All three values feed into the cache fingerprint: whoever changes them triggers a rebuild of the index (lab 09)." }
+  },
+  {
+    "id": "R04-06", "typ": "quiz",
+    "titel": { "de": "Die Pumpenreinigung", "en": "Cleaning the pump" },
+    "aufgabe": { "de": "<p>Im Live-Test des Fallbeispiels trennte die Suche bei „Wie reinige ich die Laugenpumpe?“ den Warnhinweis (heiße Lauge, Netzstecker ziehen) von den Arbeitsschritten und mischte Schritte aus der Transportvorbereitung hinein. Was war die Ursache, und was die Abhilfe?</p>", "en": "<p>In the case study's live test, for “Wie reinige ich die Laugenpumpe?” retrieval separated the warning (hot suds, unplug) from the work steps and mixed in steps from the transport preparation. What was the cause, and what the remedy?</p>" },
+    "fragen": [
+      { "frage": { "de": "Die Ursache:", "en": "The cause:" },
+        "optionen": [ { "de": "Die flache Markdown-Struktur macht aus jeder Zwischenüberschrift einen eigenen Abschnitt; Warnung und Schritte lagen in getrennten Chunks, und ein Chunk der Transportvorbereitung war der Frage ähnlicher als der Warnhinweis.", "en": "The flat Markdown structure makes every subheading its own section; warning and steps sat in separate chunks, and a chunk of the transport preparation was more similar to the question than the warning." }, { "de": "Das Sprachmodell hat die Warnung absichtlich weggelassen.", "en": "The language model deliberately omitted the warning." }, { "de": "Die Tabellen-Explosion hat den Warnhinweis gelöscht.", "en": "The table explosion deleted the warning." } ], "richtig": [0],
+        "erklaerung": { "de": "Der Prüfbericht nennt den Fall „Fehlender Arbeitskontext“. Chunking nach Überschriften trennt, was im Handbuch zusammengehört, sobald die Überschriften flach sind.", "en": "The audit report calls the case “missing procedure context”. Chunking by headings separates what belongs together in the manual as soon as the headings are flat." } },
+      { "frage": { "de": "Die Abhilfe im Fallbeispiel:", "en": "The remedy in the case study:" },
+        "optionen": [ { "de": "Vier kuratierte Verfahrensgruppen in manual_context.py: Jeder Chunk der Gruppe trägt das Präfix „Dokumentkontext: …“, und ein Treffer wird vor der Antwort durch den vollständigen Verfahrenstext ersetzt, Warnung eingeschlossen.", "en": "Four curated procedure groups in manual_context.py: every chunk of the group carries the prefix “Dokumentkontext: …”, and a hit is replaced by the complete procedure text before answering, warning included." }, { "de": "Größere Chunks für das ganze Handbuch.", "en": "Larger chunks for the whole manual." }, { "de": "Ein zweites Sprachmodell, das Warnungen ergänzt.", "en": "A second language model that adds warnings." } ], "richtig": [0],
+        "erklaerung": { "de": "Das ist kuratierte Metadatenarbeit für genau dieses Handbuch, keine allgemeine Lösung; die Autoren schreiben das ausdrücklich dazu. Anthropic (2024) beschreibt mit „Contextual Retrieval“ den allgemeinen Weg: Ein Modell erzeugt je Chunk einen kurzen Kontextsatz, der vorangestellt wird.", "en": "This is curated metadata work for exactly this manual, not a general solution; the authors say so explicitly. Anthropic (2024) describes the general path as “contextual retrieval”: a model generates a short context sentence per chunk that is prepended." } }
+    ],
+    "rueckmeldung": { "de": "Chunking entscheidet, was zusammen gefunden wird. Sicherheitshinweise gehören zu ihren Schritten, nicht in den Nachbarchunk.", "en": "Chunking decides what is found together. Safety notes belong with their steps, not in the neighbouring chunk." }
+  }
+]

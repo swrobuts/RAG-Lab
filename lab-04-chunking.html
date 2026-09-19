@@ -28,6 +28,13 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#warum"><span lang="de">Warum zerlegen</span><span lang="en">Why split</span></a>
+  <a class="sidebar-link" href="#strategien"><span lang="de">Strategien</span><span lang="en">Strategies</span></a>
+  <a class="sidebar-link" href="#tokens"><span lang="de">Tokens statt Zeichen</span><span lang="en">Tokens instead of characters</span></a>
+  <a class="sidebar-link" href="#tabellen"><span lang="de">Tabellenzeilen</span><span lang="en">Table rows</span></a>
+  <a class="sidebar-link" href="#metadaten"><span lang="de">Metadaten</span><span lang="en">Metadata</span></a>
+  <a class="sidebar-link" href="#kontextgruppen"><span lang="de">Kontextgruppen</span><span lang="en">Context groups</span></a>
+  <a class="sidebar-link" href="#spielplatz"><span lang="de">Spielplatz</span><span lang="en">Playground</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +47,124 @@
     <span lang="en">Chunking</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">Das Markdown des Handbuchs hat <span data-wert="tokens.handbuch">23 925</span> Tokens; ein Embedding-Modell verarbeitet 512. Der Text muss in Stücke, und wie geschnitten wird, entscheidet, ob die Zeile zu <strong>E:18</strong> später gefunden wird. In einem 6-Kilobyte-Tabellenchunk geht sie unter; als eigener Chunk mit Überschrift und Spaltenköpfen ist sie das beste Stück im Index. Dieses Lab vergleicht Strategien am echten Handbuch, begründet die 440 Tokens des Fallbeispiels, zeigt die Tabellen-Explosion im Code und erklärt, warum Sicherheitshinweise zu ihren Arbeitsschritten gehören.</span>
+    <span lang="en">The manual's Markdown has <span data-wert="tokens.handbuch">23,925</span> tokens; an embedding model processes 512. The text has to be cut into pieces, and how it is cut decides whether the row for <strong>E:18</strong> is found later. In a 6-kilobyte table chunk it drowns; as a chunk of its own with heading and column labels it is the best piece in the index. This lab compares strategies on the real manual, justifies the case study's 440 tokens, shows the table explosion in code and explains why safety notes belong with their work steps.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip"><span lang="de">Strategien</span><span lang="en">Strategies</span></span>
+    <span class="lernziel-chip">440 / 40 Tokens</span>
+    <span class="lernziel-chip"><span lang="de">Tabellen-Explosion</span><span lang="en">Table explosion</span></span>
+    <span class="lernziel-chip"><span lang="de">Metadaten</span><span lang="en">Metadata</span></span>
+    <span class="lernziel-chip"><span lang="de">Kontextgruppen</span><span lang="en">Context groups</span></span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="warum">
+    <h2><span lang="de">Warum zerlegen</span><span lang="en">Why split</span></h2>
+    <p>
+      <span lang="de">Zwei Grenzen zwingen zum Schneiden. Das Embedding-Modell <code>multilingual-e5-small</code> liest höchstens 512 Tokens; was länger ist, wird stillschweigend abgeschnitten und fehlt im Vektor. Und das Kontextbudget der Antwort ist begrenzt: Das Fallbeispiel übergibt höchstens 14 000 Zeichen, also nur die passenden Stücke, nicht das Handbuch. Ein <strong>Chunk</strong> ist ein solches Stück: ein zusammenhängender Text, der einen eigenen Vektor bekommt, mit Metadaten zu seiner Herkunft. Im Fallbeispiel sind es <span data-wert="chunks.anzahl">346</span> Chunks mit im Mittel <span data-wert="tokens.mittelChunkTokens">75,7</span> Tokens; der längste hat <span data-wert="tokens.maxChunkTokens">439</span>.</span>
+      <span lang="en">Two limits force the cut. The embedding model <code>multilingual-e5-small</code> reads at most 512 tokens; anything longer is silently truncated and missing from the vector. And the answer's context budget is limited: the case study passes at most 14,000 characters, i.e. only the matching pieces, not the manual. A <strong>chunk</strong> is such a piece: a contiguous text that gets a vector of its own, with metadata about its origin. In the case study there are <span data-wert="chunks.anzahl">346</span> chunks with <span data-wert="tokens.mittelChunkTokens">75.7</span> tokens on average; the longest has <span data-wert="tokens.maxChunkTokens">439</span>.</span>
+    </p>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">Chunk</span><span class="befehl-was"><span lang="de">Die Einheit, die gesucht, gefunden und übergeben wird</span><span lang="en">The unit that is searched, found and passed on</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li><span lang="de">Zu klein</span><span lang="en">Too small</span><span><span lang="de">Ein halber Satz trägt keine Bedeutung; der Vektor passt zu vielem und nichts, die Antwort bekommt Fragmente.</span><span lang="en">Half a sentence carries no meaning; the vector fits many things and nothing, the answer gets fragments.</span></span></li>
+          <li><span lang="de">Zu groß</span><span lang="en">Too large</span><span><span lang="de">Der Vektor mittelt über mehrere Themen; die eine gesuchte Zeile geht unter, und der Kontext füllt sich mit Beifang.</span><span lang="en">The vector averages over several topics; the one line sought drowns, and the context fills with bycatch.</span></span></li>
+          <li><span lang="de">Richtig</span><span lang="en">Right</span><span><span lang="de">Eine Sache je Chunk, an natürlichen Grenzen: Überschrift, Absatz, Tabellenzeile, Verfahren.</span><span lang="en">One thing per chunk, at natural boundaries: heading, paragraph, table row, procedure.</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">Es gibt keine beste Chunk-Größe. Sie hängt vom Dokument (Tabellen, Anleitungen, Fließtext) und von den Fragen ab, und sie wird gemessen (Lab 08), nicht geraten.</span><span lang="en">There is no best chunk size. It depends on the document (tables, instructions, prose) and on the questions, and it is measured (lab 08), not guessed.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="strategien">
+    <h2><span lang="de">Vier Strategien</span><span lang="en">Four strategies</span></h2>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Strategie</span><span lang="en">Strategy</span></th><th><span lang="de">Schnitt</span><span lang="en">Cut</span></th><th><span lang="de">Stärke</span><span lang="en">Strength</span></th><th><span lang="de">Schwäche</span><span lang="en">Weakness</span></th></tr></thead>
+      <tbody>
+        <tr><td><span lang="de">Feste Länge</span><span lang="en">Fixed length</span></td><td><span lang="de">alle n Zeichen oder Tokens, mit Überlappung</span><span lang="en">every n characters or tokens, with overlap</span></td><td><span lang="de">einfach, vorhersagbare Größe</span><span lang="en">simple, predictable size</span></td><td><span lang="de">schneidet mitten in Satz, Zeile und Anleitung</span><span lang="en">cuts mid-sentence, mid-row, mid-instruction</span></td></tr>
+        <tr><td><span lang="de">Sätze</span><span lang="en">Sentences</span></td><td><span lang="de">ganze Sätze bis zur Zielgröße</span><span lang="en">whole sentences up to the target size</span></td><td><span lang="de">lesbare Chunks</span><span lang="en">readable chunks</span></td><td><span lang="de">kennt keine Tabellen, keine Überschriften</span><span lang="en">knows no tables, no headings</span></td></tr>
+        <tr><td><span lang="de">Struktur</span><span lang="en">Structure</span></td><td><span lang="de">an Überschriften (Markdown), Absätzen</span><span lang="en">at headings (Markdown), paragraphs</span></td><td><span lang="de">Chunks entsprechen Abschnitten des Dokuments</span><span lang="en">chunks correspond to document sections</span></td><td><span lang="de">ungleich groß; flache Überschriften trennen Zusammengehöriges</span><span lang="en">unequal in size; flat headings separate what belongs together</span></td></tr>
+        <tr><td><span lang="de">Tabellenzeile</span><span lang="en">Table row</span></td><td><span lang="de">je Datenzeile ein Chunk mit Kopfzeile</span><span lang="en">one chunk per data row with header</span></td><td><span lang="de">ein Fehlercode, eine Störung je Chunk</span><span lang="en">one error code, one fault per chunk</span></td><td><span lang="de">braucht eine erkannte Tabelle; Fließtext bleibt Struktur-Chunk</span><span lang="en">needs a recognised table; prose stays a structure chunk</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">Das Fallbeispiel kombiniert die letzten drei in <code>prepare_nodes()</code>: zuerst Abschnitte je Überschrift (<code>MarkdownNodeParser</code> aus LlamaIndex), dann Tabellenzeilen für große Tabellen, dann eine Längenbegrenzung mit dem <code>SentenceSplitter</code>, der an Satzgrenzen schneidet. Von den <span data-wert="chunks.anzahl">346</span> Chunks stammen <span data-wert="chunks.zeilen">130</span> aus Tabellenzeilen.</span>
+      <span lang="en">The case study combines the last three in <code>prepare_nodes()</code>: first sections per heading (<code>MarkdownNodeParser</code> from LlamaIndex), then table rows for large tables, then a length limit with the <code>SentenceSplitter</code>, which cuts at sentence boundaries. Of the <span data-wert="chunks.anzahl">346</span> chunks, <span data-wert="chunks.zeilen">130</span> come from table rows.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/chunking-fluss-de.svg" alt="Vier Stufen: MarkdownNodeParser, Kontextgruppen, Tabellen-Explosion, SentenceSplitter mit 440 Tokens und 40 Überlappung; Ergebnis 346 Nodes mit Metadaten, die vom Embedding ausgeschlossen sind." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/chunking-fluss-en.svg" alt="Four stages: MarkdownNodeParser, context groups, table explosion, SentenceSplitter with 440 tokens and 40 overlap; result 346 nodes with metadata excluded from the embedding." loading="lazy"></span>
+      <figcaption><span lang="de">Die vier Stufen von <code>prepare_nodes()</code> in <code>rag_engine.py</code>.</span><span lang="en">The four stages of <code>prepare_nodes()</code> in <code>rag_engine.py</code>.</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="section-block" id="tokens">
+    <h2><span lang="de">Tokens statt Zeichen</span><span lang="en">Tokens instead of characters</span></h2>
+    <p>
+      <span lang="de">Die Grenze des Embedding-Modells ist in Tokens definiert, also misst das Fallbeispiel in Tokens: <code>CHUNK_TOKENS=440</code> und <code>CHUNK_OVERLAP=40</code>, gezählt mit dem Tokenizer des e5-Modells, den <code>build_or_load_index()</code> dem Splitter übergibt. 440 statt 512, weil das Modell zwei Sondertokens und das Präfix <code>passage:</code> anhängt und der Splitter Satzgrenzen bevorzugt, also etwas Spiel braucht; der Code prüft <code>CHUNK_TOKENS &lt; max_seq_length − 8</code> und bricht sonst ab. Die Überlappung wiederholt die letzten 40 Tokens eines Chunks am Anfang des nächsten, damit ein Satz an der Schnittstelle nicht verloren geht; das kostet rund zehn Prozent mehr Text im Index. Ein Zeichenmaß wäre sprachabhängig: Deutsch braucht mit diesem Tokenizer <span data-wert="tokens.zeichenJeToken">4,72</span> Zeichen je Token, Englisch weniger.</span>
+      <span lang="en">The embedding model's limit is defined in tokens, so the case study measures in tokens: <code>CHUNK_TOKENS=440</code> and <code>CHUNK_OVERLAP=40</code>, counted with the e5 model's tokenizer, which <code>build_or_load_index()</code> hands to the splitter. 440 instead of 512 because the model appends two special tokens and the prefix <code>passage:</code> and the splitter prefers sentence boundaries, so it needs some slack; the code checks <code>CHUNK_TOKENS &lt; max_seq_length − 8</code> and stops otherwise. The overlap repeats the last 40 tokens of a chunk at the start of the next, so that a sentence at the cut is not lost; that costs about ten percent more text in the index. A character measure would be language-dependent: German needs <span data-wert="tokens.zeichenJeToken">4.72</span> characters per token with this tokenizer, English fewer.</span>
+    </p>
+    <pre class="code-block">splitter = SentenceSplitter(chunk_size=CHUNK_TOKENS, chunk_overlap=CHUNK_OVERLAP, tokenizer=tokenizer)
+for node in nodes:
+    for part in splitter.split_text(node.text):
+        result.append(TextNode(text=part, metadata=metadata,
+                               excluded_embed_metadata_keys=list(metadata),
+                               excluded_llm_metadata_keys=list(metadata)))</pre>
+    <p class="line-hilfe"><span lang="de">Aus <code>prepare_nodes()</code>: Der Splitter bekommt den echten Tokenizer; die Metadaten werden mitgeführt, aber vom Embedding und vom Modelltext ausgeschlossen.</span><span lang="en">From <code>prepare_nodes()</code>: the splitter gets the real tokenizer; the metadata are carried along but excluded from the embedding and the model text.</span></p>
+  </section>
+
+  <section class="section-block" id="tabellen">
+    <h2><span lang="de">Tabellenzeilen: die E:18-Zeile wird ein Chunk</span><span lang="en">Table rows: the E:18 row becomes a chunk</span></h2>
+    <p>
+      <span lang="de">Der Abschnitt „Hinweise im Anzeigefeld“ ist eine Tabelle von <span data-wert="handbuch.anzeigeZeichen">6 389</span> Zeichen. Als ein Chunk embeddet sie, wie der Code sagt, als „unspezifischer Brei“ und wird für die Frage nach E:18 nicht gefunden. <code>_explode_markdown_tables()</code> zerlegt deshalb jeden Abschnitt über <code>MAX_NODE_CHARS=1600</code> Zeichen mit mindestens drei Tabellenzeilen: Der Fließtext bleibt ein Chunk, und jede Datenzeile wird ein eigener Chunk aus Überschrift, Spaltenköpfen und Zellen. Leere erste Zellen einer Fortsetzungszeile übernehmen den Betreff der Zeile darüber. So sieht der E:18-Chunk im Index aus, <span data-wert="tokens.e18Chunk">61</span> Tokens lang:</span>
+      <span lang="en">The section “Hinweise im Anzeigefeld” is a table of <span data-wert="handbuch.anzeigeZeichen">6,389</span> characters. As one chunk it embeds, as the code says, as an “unspecific mush” and is not found for the question about E:18. <code>_explode_markdown_tables()</code> therefore splits every section over <code>MAX_NODE_CHARS=1600</code> characters with at least three table lines: the prose stays one chunk, and every data row becomes a chunk of its own from heading, column labels and cells. Empty first cells of a continuation row take over the subject of the row above. This is what the E:18 chunk looks like in the index, <span data-wert="tokens.e18Chunk">61</span> tokens long:</span>
+    </p>
+    <pre class="code-block" data-wert-text="chunks.e18Text">## Hinweise im Anzeigefeld
+Anzeige: E:18; Ursache/Abhilfe: ■ Laugenpumpe verstopft. Laugenpumpe reinigen. ~ Seite 30 ■ Ablaufschlauch/Abflussrohr verstopft. Ablaufschlauch am Siphon reinigen. ~ Seite 31</pre>
+    <p>
+      <span lang="de">Die Überschrift bleibt Teil des Texts, damit der Vektor weiß, dass es um Anzeigen geht; die Spaltenköpfe „Anzeige“ und „Ursache/Abhilfe“ machen aus den Zellen einen lesbaren Satz. Elf Abschnitte des Handbuchs werden so zerlegt, darunter die Programmübersicht und die Störungstabelle; <span data-wert="chunks.zeilen">130</span> der <span data-wert="chunks.anzahl">346</span> Chunks sind Tabellenzeilen. Dieselbe Logik läuft in diesem Lab in JavaScript (<code>assets/chunking.js</code>); ein Test prüft, dass sie den E:18-Chunk zeichengleich reproduziert.</span>
+      <span lang="en">The heading stays part of the text so that the vector knows this is about displays; the column labels “Anzeige” and “Ursache/Abhilfe” turn the cells into a readable sentence. Eleven sections of the manual are split this way, including the programme overview and the fault table; <span data-wert="chunks.zeilen">130</span> of the <span data-wert="chunks.anzahl">346</span> chunks are table rows. The same logic runs in this lab in JavaScript (<code>assets/chunking.js</code>); a test checks that it reproduces the E:18 chunk character for character.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="metadaten">
+    <h2><span lang="de">Metadaten: mitreisen, nicht mitrechnen</span><span lang="en">Metadata: travel along, do not count in</span></h2>
+    <p>
+      <span lang="de">Jeder Chunk trägt Metadaten: <code>file_name</code>, <code>section</code> (die Überschrift), <code>pdf_page</code> (aus dem Seitenmarker, in der aktiven Datei leer) und für Chunks einer Verfahrensgruppe <code>context_group</code> und <code>procedure_title</code>. LlamaIndex hängt Metadaten standardmäßig an den Text an, der eingebettet wird. Das Fallbeispiel schaltet das mit <code>excluded_embed_metadata_keys</code> ab: Ein Dateiname oder eine Seitenzahl im Embedding würde alle Chunks derselben Seite im Vektorraum zusammenrücken lassen, ohne dass ihr Inhalt ähnlicher wäre. Was hingegen Bedeutung trägt, steht im Text selbst: die Überschrift, die Spaltenköpfe und bei Verfahrensgruppen das Präfix „Dokumentkontext: …“.</span>
+      <span lang="en">Every chunk carries metadata: <code>file_name</code>, <code>section</code> (the heading), <code>pdf_page</code> (from the page marker, empty in the active file) and, for chunks of a procedure group, <code>context_group</code> and <code>procedure_title</code>. By default LlamaIndex appends metadata to the text that gets embedded. The case study switches that off with <code>excluded_embed_metadata_keys</code>: a file name or a page number in the embedding would pull all chunks of the same page together in vector space without their content being any more similar. What does carry meaning, however, sits in the text itself: the heading, the column labels and, for procedure groups, the prefix “Dokumentkontext: …”.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="kontextgruppen">
+    <h2><span lang="de">Kontextgruppen: Warnung und Schritte zusammenhalten</span><span lang="en">Context groups: keeping warning and steps together</span></h2>
+    <p>
+      <span lang="de">Der Live-Test des Fallbeispiels fand einen Fehler, den kein Chunking nach Überschriften vermeidet: Bei „Wie reinige ich die Laugenpumpe?“ lag der Warnhinweis (heiße Lauge, Netzstecker ziehen) in einem anderen Chunk als die Arbeitsschritte, und ein ähnlicher Chunk aus der Transportvorbereitung rutschte in die Antwort. Die Überschriften des Handbuchs sind flach; jede Zwischenüberschrift wird ein eigener Abschnitt. Die Abhilfe heißt <code>manual_context.py</code>: vier kuratierte <strong>Verfahrensgruppen</strong> (Pumpenreinigung, Notentriegelung, erster Waschgang, Transport), jeweils definiert durch Anfangs- und Endüberschrift. Jeder Chunk einer Gruppe erhält das Präfix „Dokumentkontext: Laugenpumpe verstopft, Notentleerung“ in den Embedding-Text, und ein Treffer aus der Gruppe wird vor der Antwort durch den vollständigen Verfahrenstext ersetzt, Warnung eingeschlossen. Im Index tragen <span data-wert="chunks.mitGruppe">21</span> Chunks dieses Präfix.</span>
+      <span lang="en">The case study's live test found an error that no chunking by headings avoids: for “Wie reinige ich die Laugenpumpe?” the warning (hot suds, unplug) sat in a different chunk than the work steps, and a similar chunk from the transport preparation slipped into the answer. The manual's headings are flat; every subheading becomes a section of its own. The remedy is <code>manual_context.py</code>: four curated <strong>procedure groups</strong> (pump cleaning, emergency release, first wash, transport), each defined by a start and an end heading. Every chunk of a group receives the prefix “Dokumentkontext: Laugenpumpe verstopft, Notentleerung” in the embedding text, and a hit from the group is replaced by the complete procedure text before answering, warning included. In the index, <span data-wert="chunks.mitGruppe">21</span> chunks carry this prefix.</span>
+    </p>
+    <div class="concept-box">
+      <h3><span lang="de">Der allgemeine Weg: Contextual Retrieval</span><span lang="en">The general path: contextual retrieval</span></h3>
+      <p><span lang="de">Die Gruppen des Fallbeispiels sind Handarbeit für genau dieses Handbuch. Anthropic beschrieb im September 2024 die allgemeine Fassung: Ein Sprachmodell erzeugt zu jedem Chunk einen kurzen Satz, der ihn im Dokument einordnet, und dieser Satz wird dem Chunk vor dem Embedding vorangestellt. In der veröffentlichten Messung sank die Fehlerquote des Retrievals von 5,7 auf 3,7 Prozent, mit zusätzlicher BM25-Suche auf 2,9 und mit Reranking auf 1,9 Prozent. Das Präfix „Dokumentkontext: …“ ist dieselbe Idee mit vier handgeschriebenen Sätzen.</span><span lang="en">The case study's groups are handwork for exactly this manual. In September 2024, Anthropic described the general version: a language model produces a short sentence for every chunk that places it within the document, and this sentence is prepended to the chunk before embedding. In the published measurement, the retrieval failure rate fell from 5.7 to 3.7 percent, with additional BM25 search to 2.9 and with reranking to 1.9 percent. The prefix “Dokumentkontext: …” is the same idea with four handwritten sentences.</span></p>
+    </div>
+  </section>
+
+  <section class="section-block" id="spielplatz">
+    <h2><span lang="de">Spielplatz: das Handbuch selbst zerlegen</span><span lang="en">Playground: split the manual yourself</span></h2>
+    <p>
+      <span lang="de">Wählen Sie einen Abschnitt oder das ganze Handbuch, eine Strategie und die Regler. Chunks mit E:18 sind hervorgehoben; die Zusammenfassung sagt, ob die E:18-Zeile allein in einem Chunk steht. Die Tokenzahlen sind geschätzt (<span data-wert="tokens.zeichenJeToken">4,72</span> Zeichen je Token), bis Sie im Werkzeug „Tokenizer“ von Lab 01 den Tokenizer geladen haben; dann zählt das Werkzeug exakt.</span>
+      <span lang="en">Choose a section or the whole manual, a strategy and the sliders. Chunks containing E:18 are highlighted; the summary says whether the E:18 row stands alone in a chunk. Token counts are estimated (<span data-wert="tokens.zeichenJeToken">4.72</span> characters per token) until you have loaded the tokenizer in lab 01's “Tokenizer” tool; then the tool counts exactly.</span>
+    </p>
+    <div data-werkzeug="chunking" data-parameter='{"abschnitt":"Hinweise im Anzeigefeld","strategie":"fest","groesse":500,"overlap":50}'></div>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Sechs Übungen: die E:18-Zeile in zwei Strategien verfolgen, das Tokenmaß begründen, Chunks zählen, Text von Metadaten trennen, die Stellschrauben eintragen und den Fall der Pumpenreinigung deuten.</span><span lang="en">Six exercises: follow the E:18 row through two strategies, justify the token measure, count chunks, separate text from metadata, enter the dials and interpret the pump-cleaning case.</span></p>
     <div data-uebung="R04-01"></div>
     <div data-uebung="R04-02"></div>
     <div data-uebung="R04-03"></div>
@@ -59,11 +175,25 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Chunks sind nötig, weil das Embedding-Modell 512 Tokens liest und die Antwort ein Budget hat; ein Chunk soll eine Sache sagen.</span><span lang="en">Chunks are necessary because the embedding model reads 512 tokens and the answer has a budget; a chunk should say one thing.</span></li>
+      <li><span lang="de">Struktur schlägt feste Länge: Überschriften, Absätze und Tabellenzeilen sind die natürlichen Grenzen.</span><span lang="en">Structure beats fixed length: headings, paragraphs and table rows are the natural boundaries.</span></li>
+      <li><span lang="de">Gemessen wird in Tokens des Embedding-Modells: 440 mit 40 Überlappung, unter der Grenze von 512.</span><span lang="en">Measured in tokens of the embedding model: 440 with 40 overlap, below the limit of 512.</span></li>
+      <li><span lang="de">Große Tabellen werden zeilenweise zerlegt; die E:18-Zeile wird ein eigener Chunk mit Überschrift und Spaltenköpfen.</span><span lang="en">Large tables are split row by row; the E:18 row becomes a chunk of its own with heading and column labels.</span></li>
+      <li><span lang="de">Metadaten reisen mit, werden aber nicht eingebettet; was Bedeutung trägt, steht im Text.</span><span lang="en">Metadata travel along but are not embedded; what carries meaning sits in the text.</span></li>
+      <li><span lang="de">Warnung und Schritte gehören zusammen: kuratierte Gruppen im Fallbeispiel, Contextual Retrieval als allgemeiner Weg.</span><span lang="en">Warning and steps belong together: curated groups in the case study, contextual retrieval as the general path.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>LlamaIndex-Dokumentation: Node Parser Modules (MarkdownNodeParser, SentenceSplitter, TokenTextSplitter), <a href="https://developers.llamaindex.ai/python/framework/module_guides/loading/node_parsers/modules/" rel="noopener">developers.llamaindex.ai</a>, abgerufen 19.09.2026</li>
+      <li>Wang, L. et al. (2024): Multilingual E5 Text Embeddings: A Technical Report. <a href="https://arxiv.org/abs/2402.05672" rel="noopener">arXiv:2402.05672</a>; Modellkarte <a href="https://huggingface.co/intfloat/multilingual-e5-small" rel="noopener">intfloat/multilingual-e5-small</a> (max_position_embeddings 512), abgerufen 19.09.2026</li>
+      <li>Anthropic (2024): Introducing Contextual Retrieval, 19.09.2024, <a href="https://www.anthropic.com/news/contextual-retrieval" rel="noopener">anthropic.com/news/contextual-retrieval</a>, abgerufen 19.09.2026</li>
+      <li><span lang="de">Fallbeispiel: <code>rag_engine.py</code> (prepare_nodes, _explode_markdown_tables, CHUNK_TOKENS, CHUNK_OVERLAP, MAX_NODE_CHARS), <code>manual_context.py</code> (BOUNDARIES, expand_sources), <code>docs/AUDIT.md</code> („Fehlender Arbeitskontext“), Stand 19.09.2026; Chunks in <code>data/chunks.json</code>, Zählungen in <code>data/tokens.json</code>.</span><span lang="en">Case study: <code>rag_engine.py</code> (prepare_nodes, _explode_markdown_tables, CHUNK_TOKENS, CHUNK_OVERLAP, MAX_NODE_CHARS), <code>manual_context.py</code> (BOUNDARIES, expand_sources), <code>docs/AUDIT.md</code> (“missing procedure context”), as of 19 Sept 2026; chunks in <code>data/chunks.json</code>, counts in <code>data/tokens.json</code>.</span></li>
+    </ul>
   </section>
 
 </main>

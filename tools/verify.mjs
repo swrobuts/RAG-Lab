@@ -67,6 +67,9 @@ const e18Chunk = ch && ch.chunks.find(c => c.text.includes('Anzeige: E:18;'))
 const WERTE = {
   'chunks.anzahl': () => ch.anzahl,
   'chunks.e18Text': () => e18Chunk.text,
+  'chunks.zeilen': () => ch.chunks.filter(c => /^## .*\n[^\n|]+: [^\n]+; /.test(c.text)).length,
+  'chunks.mitGruppe': () => ch.chunks.filter(c => c.text.startsWith('Dokumentkontext:')).length,
+  'handbuch.anzeigeZeichen': () => { const md = readFileSync(join(ROOT, 'data/handbuch.md'), 'utf8'); const s = md.split(/(?=^## )/m).find(x => x.startsWith('## Hinweise im Anzeigefeld')); return s.length },
   'tokens.vokabular': () => tk.vokabular,
   'tokens.e18': () => tk.beispiele.e18.tokens.length,
   'tokens.satzDe': () => tk.beispiele['satz-de'].tokens.length,
@@ -127,6 +130,11 @@ const fmtZahl = (v) => {
   return aus
 }
 function pruefeWerte (html, name) {
+  for (const m of html.matchAll(/<pre[^>]*data-wert-text="([^"]+)"[^>]*>([\s\S]*?)<\/pre>/g)) {
+    const soll = WERTE[m[1]] ? WERTE[m[1]]() : null
+    const ist = m[2].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim()
+    meld(soll != null && String(soll).trim() === ist, `${name}: Textmarker ${m[1]} zeichengleich`)
+  }
   for (const m of html.matchAll(/<span data-wert="([^"]+)">([\s\S]*?)<\/span>/g)) {
     const key = m[1]; const text = m[2].replace(/<[^>]+>/g, '').replace(NBSP, '').trim()
     if (!WERTE[key]) { meld(false, `${name}: unbekannter Marker ${key}`); continue }
