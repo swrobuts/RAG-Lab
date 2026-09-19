@@ -821,3 +821,10 @@ blockquote.warn-box p, blockquote.concept-box p { margin: 0; font-style: italic;
 ul.quellen { font-size: 0.88rem; }
 ul.quellen li { margin-bottom: 0.45rem; }
 .lab-intro strong { color: var(--accent); }
+
+/* ---------------------------------------------------------- Ablationsbalken */
+.ablation-balken { display: grid; gap: 0.4rem; margin: 0.8rem 0 1.2rem; max-width: 640px; }
+.ab-zeile { display: grid; grid-template-columns: 110px 1fr 56px; gap: 0.6rem; align-items: center; font-size: 0.85rem; }
+.ab-zeile .balken { height: 14px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.ab-zeile .balken i { display: block; height: 100%; background: var(--signal); }
+.ab-wert { font-family: var(--mono); text-align: right; }

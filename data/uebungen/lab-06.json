@@ -1,1 +1,92 @@
-[]
+[
+  {
+    "id": "R06-01", "typ": "experiment", "werkzeug": "suche", "parameter": { "frage": "fehler-e18" },
+    "titel": { "de": "E:18 durch die Stufen", "en": "E:18 through the stages" },
+    "aufgabe": { "de": "<p>Verfolgen Sie „Was bedeutet der Fehlercode E:18?“ durch die fünf Stufen. Achten Sie darauf, in welcher Stufe der Chunk mit der E:18-Zeile zum ersten Mal erscheint und welchen Score der Reranker ihm gibt.</p>", "en": "<p>Follow “Was bedeutet der Fehlercode E:18?” through the five stages. Note in which stage the chunk with the E:18 row appears for the first time and which score the reranker gives it.</p>" },
+    "fragen": [
+      { "frage": { "de": "In welcher Stufe erscheint der E:18-Chunk zum ersten Mal auf Rang 1?", "en": "In which stage does the E:18 chunk first appear at rank 1?" },
+        "optionen": [ { "de": "Stufe 2, Fehlercode-Zuschlag: Die Vektorsuche hat ihn gar nicht unter den zwölf Kandidaten; erst die Regex holt ihn mit Score 1 nach vorn.", "en": "Stage 2, error-code boost: vector search does not have it among the twelve candidates at all; only the regex brings it to the front with score 1." }, { "de": "Stufe 1, Vektorsuche, mit einer Kosinusähnlichkeit von 0,84.", "en": "Stage 1, vector search, with a cosine similarity of 0.84." }, { "de": "Stufe 3, weil der Reranker ihn aus den zwölf Kandidaten hochzieht.", "en": "Stage 3, because the reranker pulls it up from the twelve candidates." } ], "richtig": [0],
+        "erklaerung": { "de": "Der Reranker kann nur sortieren, was ihm vorliegt. Ohne den Zuschlag wäre der richtige Chunk nicht unter den Kandidaten – das ist der Grund, warum der Hybrid-Schritt vor dem Reranker steht.", "en": "The reranker can only sort what it is given. Without the boost, the right chunk would not be among the candidates – that is why the hybrid step comes before the reranker." } },
+      { "frage": { "de": "Welchen Score gibt der Reranker dem E:18-Chunk, und was den übrigen Kandidaten?", "en": "Which score does the reranker give the E:18 chunk, and what the remaining candidates?" },
+        "optionen": [ { "de": "0,562 für den E:18-Chunk; alle anderen liegen unter 0,002, weit unter der Schwelle von 0,15.", "en": "0.562 for the E:18 chunk; all others lie below 0.002, far below the threshold of 0.15." }, { "de": "Alle zwölf Kandidaten bekommen Werte zwischen 0,8 und 0,9.", "en": "All twelve candidates get values between 0.8 and 0.9." }, { "de": "Der Reranker gibt keine Scores, nur eine Reihenfolge.", "en": "The reranker gives no scores, only an order." } ], "richtig": [0],
+        "erklaerung": { "de": "Anders als die Kosinuswerte spreizt der Cross-Encoder die Kandidaten weit auseinander. Deshalb taugt sein Score als Schwelle, der Kosinus nicht.", "en": "Unlike the cosine values, the cross-encoder spreads the candidates far apart. That is why its score works as a threshold and the cosine does not." } }
+    ],
+    "rueckmeldung": { "de": "Kandidaten breit sammeln, exakte Treffer sichern, dann streng sortieren: drei Stufen, drei Aufgaben.", "en": "Collect candidates broadly, secure exact hits, then sort strictly: three stages, three jobs." }
+  },
+  {
+    "id": "R06-02", "typ": "quiz",
+    "titel": { "de": "Was die Regex trifft", "en": "What the regex matches" },
+    "aufgabe": { "de": "<p>Der Fehlercode-Zuschlag nutzt das Muster <code>(?:\\bE\\s*:?\\s*|\\bfehler(?:code)?\\s*:?\\s*)(\\d{1,3})\\b</code> ohne Beachtung der Groß- und Kleinschreibung und normalisiert jeden Treffer auf die Formen E:NN und ENN. Welche Eingaben liefern den Code E:18?</p>", "en": "<p>The error-code boost uses the pattern <code>(?:\\bE\\s*:?\\s*|\\bfehler(?:code)?\\s*:?\\s*)(\\d{1,3})\\b</code>, case-insensitive, and normalises every hit to the forms E:NN and ENN. Which inputs yield the code E:18?</p>" },
+    "fragen": [
+      { "frage": { "de": "Wählen Sie alle Eingaben, die E:18 ergeben.", "en": "Select all inputs that yield E:18." }, "mehrfach": true,
+        "optionen": [ { "de": "E18", "en": "E18" }, { "de": "e:18", "en": "e:18" }, { "de": "Fehler 18", "en": "Fehler 18" }, { "de": "Fehlercode: 18", "en": "Fehlercode: 18" }, { "de": "E:180", "en": "E:180" }, { "de": "Programm 18", "en": "Programm 18" } ], "richtig": [0, 1, 2, 3],
+        "erklaerung": { "de": "E:180 ergibt E:180, nicht E:18: Die Wortgrenze \\b nach den Ziffern verhindert Teiltreffer. „Programm 18“ trifft nicht, weil weder E noch Fehler davorsteht. Der Prüfbericht des Fallbeispiels nennt genau diesen Fall: Vorher traf der Lookup Teilzeichenfolgen.", "en": "E:180 yields E:180, not E:18: the word boundary \\b after the digits prevents partial matches. “Programm 18” does not match because neither E nor Fehler precedes it. The case study's audit report names exactly this case: previously the lookup matched substrings." } },
+      { "frage": { "de": "Was passiert, wenn die Frage einen Code enthält, der in keinem Chunk vorkommt (E:999)?", "en": "What happens if the question contains a code that occurs in no chunk (E:999)?" },
+        "optionen": [ { "de": "Der Zuschlag liefert nichts; die Vektorsuche liefert ähnliche Chunks, aber die Antwort wird abgelehnt, weil der gefragte Code im Kontext fehlt.", "en": "The boost yields nothing; vector search yields similar chunks, but the answer is refused because the requested code is missing from the context." }, { "de": "Der nächstähnliche Code (E:23) übernimmt die Antwort.", "en": "The closest similar code (E:23) takes over the answer." }, { "de": "Der Server stürzt ab.", "en": "The server crashes." } ], "richtig": [0],
+        "erklaerung": { "de": "server.py prüft: Alle gefragten Codes müssen in den Kontextchunks vorkommen (asked ⊆ known), sonst gilt die Frage als nicht gedeckt. Im Mac-Protokoll dauerte die Ablehnung von E:999 1,4 Sekunden.", "en": "server.py checks: all requested codes must occur in the context chunks (asked ⊆ known), otherwise the question counts as not grounded. In the Mac log, refusing E:999 took 1.4 seconds." } }
+    ],
+    "rueckmeldung": { "de": "Eine Regex ist kein Ersatz für Suche, aber ein Anker für Dinge, die im Vektorraum keine Bedeutung haben.", "en": "A regex is no substitute for search, but an anchor for things that carry no meaning in vector space." }
+  },
+  {
+    "id": "R06-03", "typ": "sortieren",
+    "titel": { "de": "Die Pipeline in Reihenfolge", "en": "The pipeline in order" },
+    "aufgabe": { "de": "<p>Bringen Sie die Schritte in die Reihenfolge, in der das Fallbeispiel eine Frage verarbeitet, von der Eingabe bis zum Kontext für das Sprachmodell.</p>", "en": "<p>Put the steps into the order in which the case study processes a question, from input to the context for the language model.</p>" },
+    "elemente": [
+      { "text": { "de": "Frage mit Präfix „query: “ einbetten", "en": "Embed the question with the prefix “query: ”" } },
+      { "text": { "de": "Zwölf Chunks mit höchster Kosinusähnlichkeit holen (RETRIEVE_K)", "en": "Fetch the twelve chunks with the highest cosine similarity (RETRIEVE_K)" } },
+      { "text": { "de": "Chunks mit exakt passendem Fehlercode mit Score 1 voranstellen", "en": "Prepend chunks with an exactly matching error code at score 1" } },
+      { "text": { "de": "Reranker bewertet jedes Paar aus Frage und Kandidat", "en": "Reranker scores every pair of question and candidate" } },
+      { "text": { "de": "Die besten fünf behalten (FINAL_K)", "en": "Keep the best five (FINAL_K)" } },
+      { "text": { "de": "Schwelle 0,15 und Boden 0,5 × bester Score anwenden", "en": "Apply threshold 0.15 and floor 0.5 × best score" } },
+      { "text": { "de": "Treffer aus Verfahrensgruppen durch den vollständigen Verfahrenstext ersetzen", "en": "Replace hits from procedure groups with the complete procedure text" } },
+      { "text": { "de": "Kontext (höchstens 14 000 Zeichen) mit der Frage an das Modell geben", "en": "Pass the context (at most 14,000 characters) with the question to the model" } }
+    ],
+    "rueckmeldung": { "de": "Von 346 Chunks über 12 Kandidaten zu höchstens 5 Belegen: Jede Stufe macht die Menge kleiner und die Auswahl teurer.", "en": "From 346 chunks via 12 candidates to at most 5 pieces of evidence: every stage makes the set smaller and the selection more expensive." }
+  },
+  {
+    "id": "R06-04", "typ": "rechnen",
+    "titel": { "de": "Der Boden", "en": "The floor" },
+    "aufgabe": { "de": "<p>Nach dem Reranker haben die fünf Kandidaten die Scores 0,98 · 0,60 · 0,40 · 0,20 · 0,10. Schwelle GUARDRAIL_MIN_SCORE = 0,15, Verhältnis CONTEXT_SCORE_RATIO = 0,5. Wie hoch liegt der Boden, und wie viele Kandidaten kommen in den Kontext?</p>", "en": "<p>After the reranker, the five candidates have the scores 0.98 · 0.60 · 0.40 · 0.20 · 0.10. Threshold GUARDRAIL_MIN_SCORE = 0.15, ratio CONTEXT_SCORE_RATIO = 0.5. How high is the floor, and how many candidates enter the context?</p>" },
+    "felder": [
+      { "name": { "de": "Boden", "en": "Floor" }, "loesung": 0.49, "toleranz": 0.001, "einheit": "" },
+      { "name": { "de": "Kandidaten im Kontext", "en": "Candidates in the context" }, "loesung": 2, "toleranz": 0, "einheit": "" }
+    ],
+    "loesungsweg": { "de": "Boden = max(0,15; 0,5 × 0,98) = max(0,15; 0,49) = 0,49. Es bleiben 0,98 und 0,60, also zwei Kandidaten. Der relative Boden verhindert, dass viel schwächere Treffer aus anderen Themen die Antwort auffüllen; die absolute Schwelle greift nur, wenn schon der beste Treffer schwach ist.", "en": "Floor = max(0.15; 0.5 × 0.98) = max(0.15; 0.49) = 0.49. 0.98 and 0.60 remain, i.e. two candidates. The relative floor prevents much weaker hits from other topics from padding the answer; the absolute threshold only bites when even the best hit is weak." },
+    "hinweis": { "de": "Boden = max(Schwelle, Verhältnis × bester Score). Es bleiben alle Kandidaten mit Score ≥ Boden.", "en": "Floor = max(threshold, ratio × best score). All candidates with score ≥ floor remain." },
+    "rueckmeldung": { "de": "Zwei Zahlen, zwei Zwecke: Die Schwelle entscheidet, ob überhaupt geantwortet wird; das Verhältnis, wie viel Beifang mitkommt.", "en": "Two numbers, two purposes: the threshold decides whether to answer at all; the ratio, how much bycatch comes along." }
+  },
+  {
+    "id": "R06-05", "typ": "zuordnen",
+    "titel": { "de": "Vier Verfahren", "en": "Four methods" },
+    "aufgabe": { "de": "<p>Ordnen Sie jede Eigenschaft dem Verfahren zu: BM25 (Stichwortsuche), Dense Retrieval (Vektorsuche mit Bi-Encoder), Cross-Encoder (Reranker) oder Reciprocal Rank Fusion (RRF).</p>", "en": "<p>Assign every property to the method: BM25 (keyword search), dense retrieval (vector search with bi-encoder), cross-encoder (reranker) or reciprocal rank fusion (RRF).</p>" },
+    "kategorien": [
+      { "id": "bm25", "name": { "de": "BM25", "en": "BM25" } },
+      { "id": "dense", "name": { "de": "Dense Retrieval", "en": "Dense retrieval" } },
+      { "id": "cross", "name": { "de": "Cross-Encoder", "en": "Cross-encoder" } },
+      { "id": "rrf", "name": { "de": "Reciprocal Rank Fusion", "en": "Reciprocal rank fusion" } }
+    ],
+    "elemente": [
+      { "text": { "de": "Zählt exakte Wortübereinstimmungen und gewichtet seltene Wörter höher (Robertson und Zaragoza 2009)", "en": "Counts exact word matches and weights rare words higher (Robertson and Zaragoza 2009)" }, "ziel": "bm25" },
+      { "text": { "de": "Findet Umschreibungen und Synonyme über die Nähe im Vektorraum", "en": "Finds paraphrases and synonyms via closeness in vector space" }, "ziel": "dense" },
+      { "text": { "de": "Liest Frage und Passage gemeinsam und gibt einen Score je Paar; genau, aber je Paar ein eigener Durchlauf", "en": "Reads question and passage together and gives one score per pair; precise, but a separate pass per pair" }, "ziel": "cross" },
+      { "text": { "de": "Verschmilzt zwei Ranglisten über die Summe von 1 ÷ (k + Rang), ohne die Scores zu vergleichen (Cormack et al. 2009)", "en": "Merges two ranked lists via the sum of 1 ÷ (k + rank), without comparing the scores (Cormack et al. 2009)" }, "ziel": "rrf" },
+      { "text": { "de": "Braucht keinen Vektorindex, nur einen invertierten Index über Wörter", "en": "Needs no vector index, only an inverted index over words" }, "ziel": "bm25" },
+      { "text": { "de": "Ist im Fallbeispiel die zweite Stufe und liefert die Zahl, auf der die Schwelle liegt", "en": "Is the second stage in the case study and delivers the number the threshold sits on" }, "ziel": "cross" }
+    ],
+    "rueckmeldung": { "de": "Das Fallbeispiel nutzt Dense Retrieval, eine Fehlercode-Regex und einen Cross-Encoder; BM25 und RRF bewusst nicht. Der Prüfbericht schreibt das ausdrücklich dazu.", "en": "The case study uses dense retrieval, an error-code regex and a cross-encoder; BM25 and RRF deliberately not. The audit report says so explicitly." }
+  },
+  {
+    "id": "R06-06", "typ": "experiment", "werkzeug": "suche", "parameter": { "frage": "wasser-schiesst" },
+    "titel": { "de": "Eine Frage, die abgelehnt wird", "en": "A question that is refused" },
+    "aufgabe": { "de": "<p>„Wasser schießt aus der Maschine“ wird abgelehnt, „Wasser läuft aus“ wird beantwortet. Sehen Sie sich für beide Fragen Stufe 3 und Stufe 5 an. Schieben Sie dann bei „Wasser schießt aus der Maschine“ die Schwelle so weit nach unten, bis die Frage angenommen wird.</p>", "en": "<p>“Wasser schießt aus der Maschine” is refused, “Wasser läuft aus” is answered. Look at stage 3 and stage 5 for both questions. Then, for “Wasser schießt aus der Maschine”, push the threshold down until the question is accepted.</p>" },
+    "fragen": [
+      { "frage": { "de": "Warum wird „Wasser schießt aus der Maschine“ abgelehnt?", "en": "Why is “Wasser schießt aus der Maschine” refused?" },
+        "optionen": [ { "de": "Der beste Reranker-Score liegt bei 0,0365 und damit unter der Schwelle von 0,15; die Vektorsuche hatte dieselben Wasser-Chunks gefunden wie bei „Wasser läuft aus“, aber der Cross-Encoder hält keinen davon für eine Antwort auf diese Formulierung.", "en": "The best reranker score is 0.0365, below the threshold of 0.15; vector search had found the same water chunks as for “Wasser läuft aus”, but the cross-encoder considers none of them an answer to this phrasing." }, { "de": "Die Regex erkennt „schießt“ als Fehlercode.", "en": "The regex recognises “schießt” as an error code." }, { "de": "Die Frage ist zu lang für das Embedding-Modell.", "en": "The question is too long for the embedding model." } ], "richtig": [0],
+        "erklaerung": { "de": "„Wasser läuft aus“ erreicht 0,979, weil die Störungszeile genau so heißt. Der Reranker ist empfindlich gegenüber der Formulierung; das Mac-Protokoll des Fallbeispiels nennt das eine bekannte Grenze und hat die Schwelle bewusst nicht gesenkt.", "en": "“Wasser läuft aus” reaches 0.979 because the fault row is worded exactly like that. The reranker is sensitive to phrasing; the case study's Mac log calls this a known limit and deliberately did not lower the threshold." } },
+      { "frage": { "de": "Was wäre die Folge, die Schwelle auf 0,03 zu senken, damit die Frage angenommen wird?", "en": "What would be the consequence of lowering the threshold to 0.03 so that the question is accepted?" },
+        "optionen": [ { "de": "Auch schwache Treffer zu Fremdfragen kämen näher an die Annahme; die Bosch-Spülmaschinen-Frage hat 0,0274. Die Abwägung zwischen falscher Ablehnung und Halluzinationsrisiko ist Thema von Lab 08.", "en": "Weak hits for off-topic questions would also come closer to acceptance; the Bosch dishwasher question has 0.0274. The trade-off between false rejection and hallucination risk is the topic of lab 08." }, { "de": "Keine; die Schwelle betrifft nur diese eine Frage.", "en": "None; the threshold affects only this one question." }, { "de": "Das Modell würde schneller antworten.", "en": "The model would answer faster." } ], "richtig": [0],
+        "erklaerung": { "de": "Die Schwelle ist ein Projektparameter, keine kalibrierte Wahrscheinlichkeit; das steht so im Code. Sie wird an einem Testbestand eingestellt, nicht an einer einzelnen Frage.", "en": "The threshold is a project parameter, not a calibrated probability; the code says so. It is set on a test set, not on a single question." } }
+    ],
+    "rueckmeldung": { "de": "Eine Ablehnung ist kein Fehler des Systems, sondern eine Entscheidung mit Preis: hier eine berechtigte Frage, die unbeantwortet bleibt.", "en": "A refusal is not a system error but a decision with a price: here a legitimate question that stays unanswered." }
+  }
+]

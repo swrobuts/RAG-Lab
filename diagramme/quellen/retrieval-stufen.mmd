@@ -1,0 +1,9 @@
+flowchart TB
+  Q["„Was bedeutet der Fehlercode E:18?“"] --> E["<b>1 · Embedding</b><br/>„query: …“ → 384 [[Zahlen|numbers]]"]
+  E --> V["<b>2 · [[Vektorsuche|Vector search]]</b><br/>[[Kosinus gegen 346 Chunks, Top 12|cosine against 346 chunks, top 12]]<br/>[[E:18-Zeile: nicht dabei|E:18 row: not among them]]"]
+  V --> H["<b>3 · [[Fehlercode-Zuschlag|Error-code boost]]</b><br/>[[Regex findet E:18 in genau einem Chunk → Score 1, ganz vorn|regex finds E:18 in exactly one chunk → score 1, in front]]"]
+  H --> R["<b>4 · Reranker</b> bge-reranker-v2-m3<br/>[[liest Frage + Chunk gemeinsam, Sigmoid-Score|reads question + chunk together, sigmoid score]]<br/>E:18-Chunk: 0,562 · [[Rest|rest]] &lt; 0,002"]
+  R --> T{"<b>5 · [[Schwelle|Threshold]]</b><br/>[[bester Score ≥ 0,15 und Boden 0,5 × bester|best score ≥ 0.15 and floor 0.5 × best]]"}
+  T -- "[[ja|yes]]" --> K["<b>6 · [[Kontext|Context]]</b><br/>[[Verfahrensgruppen ausweiten, höchstens 14 000 Zeichen|expand procedure groups, at most 14,000 characters]]"]
+  T -- "[[nein|no]]" --> A["„[[Dazu finde ich in dieser Bedienungsanleitung leider keine Information.|Nothing on that in this manual.]]“<br/>[[kein Modellaufruf|no model call]]"]
+  K --> L["[[Sprachmodell|Language model]] (Lab 07)"]

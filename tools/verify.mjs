@@ -120,9 +120,8 @@ const WERTE = {
 const NBSP = /[\s   ]/g
 const fmtZahl = (v) => {
   if (typeof v !== 'number') return [String(v)]
-  const ganzzahl = Number.isInteger(v) || Math.abs(v - Math.round(v)) < 1e-9
   const aus = []
-  for (const st of ganzzahl ? [0] : [1, 2, 3, 4]) {
+  for (const st of [0, 1, 2, 3, 4]) {
     aus.push(v.toLocaleString('de-DE', { minimumFractionDigits: st, maximumFractionDigits: st }).replace(NBSP, ''))
     aus.push(v.toLocaleString('de-DE', { minimumFractionDigits: st, maximumFractionDigits: st, useGrouping: false }))
     aus.push(v.toLocaleString('en-GB', { minimumFractionDigits: st, maximumFractionDigits: st }).replace(NBSP, ''))

@@ -28,6 +28,13 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#topk"><span lang="de">Top-k-Suche</span><span lang="en">Top-k search</span></a>
+  <a class="sidebar-link" href="#speicher"><span lang="de">Vektorspeicher</span><span lang="en">Vector stores</span></a>
+  <a class="sidebar-link" href="#hybrid"><span lang="de">Hybrid</span><span lang="en">Hybrid</span></a>
+  <a class="sidebar-link" href="#reranker"><span lang="de">Reranker</span><span lang="en">Reranker</span></a>
+  <a class="sidebar-link" href="#schwelle"><span lang="de">Schwelle</span><span lang="en">Threshold</span></a>
+  <a class="sidebar-link" href="#ablation"><span lang="de">Ablation</span><span lang="en">Ablation</span></a>
+  <a class="sidebar-link" href="#stepper"><span lang="de">Such-Stepper</span><span lang="en">Search stepper</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +47,134 @@
     <span lang="en">Retrieval and reranking</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">Die Vektorsuche findet für „Was bedeutet <strong>E:18</strong>?“ zwölf Chunks über Anzeigen und Warnhinweise – die E:18-Zeile ist nicht dabei. Drei Stufen retten die Frage: Ein Fehlercode-Zuschlag holt die Zeile exakt, ein Reranker gibt ihr <span data-wert="fragen.e18.rerankScore">0,562</span> und allen anderen Kandidaten unter 0,002, und eine Schwelle entscheidet, ob überhaupt geantwortet wird. Dieses Lab erklärt jede Stufe, ordnet BM25 und Reciprocal Rank Fusion ein und zeigt an den Messwerten des Fallbeispiels, was jede Stufe bringt: von <span data-wert="eval.vector.hit5">80</span> über <span data-wert="eval.hybrid.hit5">90</span> auf <span data-wert="eval.rerank.hit5">100</span> Prozent Trefferquote.</span>
+    <span lang="en">For “Was bedeutet <strong>E:18</strong>?” vector search finds twelve chunks about displays and warnings – the E:18 row is not among them. Three stages rescue the question: an error-code boost fetches the row exactly, a reranker gives it <span data-wert="fragen.e18.rerankScore">0.562</span> and all other candidates below 0.002, and a threshold decides whether to answer at all. This lab explains every stage, places BM25 and reciprocal rank fusion and shows on the case study's measurements what every stage contributes: from <span data-wert="eval.vector.hit5">80</span> via <span data-wert="eval.hybrid.hit5">90</span> to <span data-wert="eval.rerank.hit5">100</span> percent hit rate.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Top-k · Overfetch</span>
+    <span class="lernziel-chip"><span lang="de">Hybrid · Fehlercode-Regex</span><span lang="en">Hybrid · error-code regex</span></span>
+    <span class="lernziel-chip">Cross-Encoder</span>
+    <span class="lernziel-chip"><span lang="de">Schwelle 0,15</span><span lang="en">Threshold 0.15</span></span>
+    <span class="lernziel-chip">BM25 · RRF · HNSW</span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="topk">
+    <h2><span lang="de">Top-k-Suche: zwölf Kandidaten aus 346</span><span lang="en">Top-k search: twelve candidates out of 346</span></h2>
+    <p>
+      <span lang="de">Die erste Stufe ist die Vektorsuche aus Lab 05: Die Frage wird mit <code>query: </code> eingebettet, der Vektor mit allen <span data-wert="chunks.anzahl">346</span> Chunk-Vektoren multipliziert, und die zwölf höchsten Werte bleiben (<code>RETRIEVE_K=12</code>). Zwölf statt fünf, weil die nächste Stufe eine Auswahl braucht, aus der sie die richtigen fünf ziehen kann: <strong>Overfetch</strong>. Bei 346 Chunks ist die Suche exakt, jeder Vektor wird verglichen (<code>SimpleVectorStore</code> von LlamaIndex, eine Millisekunde). Bei Millionen Chunks ginge das nicht mehr; dann sortieren Verfahren wie HNSW (Malkov und Yashunin 2018) die Vektoren in einen Nachbarschaftsgraphen und finden Näherungslösungen in Millisekunden. Das Fallbeispiel braucht keinen solchen Index, und das ist eine bewusste Entscheidung: kein Datenbankserver, keine Cloud, ein JSON auf der Platte.</span>
+      <span lang="en">The first stage is the vector search from lab 05: the question is embedded with <code>query: </code>, the vector multiplied with all <span data-wert="chunks.anzahl">346</span> chunk vectors, and the twelve highest values remain (<code>RETRIEVE_K=12</code>). Twelve instead of five because the next stage needs a selection from which to draw the right five: <strong>overfetch</strong>. With 346 chunks the search is exact, every vector is compared (LlamaIndex's <code>SimpleVectorStore</code>, one millisecond). With millions of chunks that would no longer work; then methods such as HNSW (Malkov and Yashunin 2018) arrange the vectors into a neighbourhood graph and find approximate solutions in milliseconds. The case study needs no such index, and that is a deliberate decision: no database server, no cloud, one JSON on disk.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="speicher">
+    <h2><span lang="de">Vektorspeicher</span><span lang="en">Vector stores</span></h2>
+    <p>
+      <span lang="de">Der Index des Fallbeispiels liegt in <code>storage/</code>: <code>default__vector_store.json</code> mit den Vektoren, <code>docstore.json</code> mit den Texten und Metadaten, <code>index_store.json</code> mit der Struktur, dazu <code>.cache_key</code> mit dem Fingerprint (Lab 09). Für mehr Dokumente nennt die technische Dokumentation drei Alternativen, keine davon ist installiert. Stand der Dokumentationen: 19.09.2026.</span>
+      <span lang="en">The case study's index sits in <code>storage/</code>: <code>default__vector_store.json</code> with the vectors, <code>docstore.json</code> with texts and metadata, <code>index_store.json</code> with the structure, plus <code>.cache_key</code> with the fingerprint (lab 09). For more documents the technical documentation names three alternatives, none of which is installed. Documentation as of 19 Sept 2026.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Speicher</span><span lang="en">Store</span></th><th><span lang="de">Was er ist</span><span lang="en">What it is</span></th><th><span lang="de">Suche</span><span lang="en">Search</span></th><th><span lang="de">Passt, wenn</span><span lang="en">Fits when</span></th></tr></thead>
+      <tbody>
+        <tr><td>SimpleVectorStore <span lang="de">(Fallbeispiel)</span><span lang="en">(case study)</span></td><td><span lang="de">JSON-Dateien, im Prozess geladen</span><span lang="en">JSON files, loaded in-process</span></td><td><span lang="de">exakt, alle Vektoren</span><span lang="en">exact, all vectors</span></td><td><span lang="de">ein Dokument, wenige tausend Chunks, ein Rechner</span><span lang="en">one document, a few thousand chunks, one machine</span></td></tr>
+        <tr><td>PostgreSQL + pgvector</td><td><span lang="de">Erweiterung der relationalen Datenbank um einen Vektortyp</span><span lang="en">Extension of the relational database with a vector type</span></td><td><span lang="de">exakt oder HNSW/IVFFlat</span><span lang="en">exact or HNSW/IVFFlat</span></td><td><span lang="de">Vektoren neben Fachdaten, SQL-Filter, vorhandenes Postgres</span><span lang="en">vectors next to business data, SQL filters, existing Postgres</span></td></tr>
+        <tr><td>Qdrant</td><td><span lang="de">Eigener Vektordatenbank-Server</span><span lang="en">Dedicated vector database server</span></td><td>HNSW, <span lang="de">Filter über Payload</span><span lang="en">filters over payload</span></td><td><span lang="de">Millionen Chunks, Metadatenfilter, mehrere Anwendungen</span><span lang="en">millions of chunks, metadata filters, several applications</span></td></tr>
+        <tr><td>Chroma</td><td><span lang="de">Leichtgewichtige Datenbank für Dokumente und Embeddings</span><span lang="en">Lightweight database for documents and embeddings</span></td><td>HNSW</td><td><span lang="de">Prototypen, lokale Anwendungen</span><span lang="en">prototypes, local applications</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="section-block" id="hybrid">
+    <h2><span lang="de">Hybrid: der Fehlercode-Zuschlag</span><span lang="en">Hybrid: the error-code boost</span></h2>
+    <p>
+      <span lang="de">Ein Fehlercode ist eine seltene Zeichenfolge ohne Bedeutung im Vektorraum; die Vektorsuche verpasst die E:18-Zeile. Das Fallbeispiel ergänzt sie deshalb um eine zweite Quelle: <code>extract_error_codes()</code> zieht aus der Frage alle Codes in den Schreibweisen E:18, E18, „Fehler 18“ und „Fehlercode: 18“ und normalisiert sie; <code>_HybridRetriever</code> legt jeden Chunk, der denselben Code enthält, mit Score 1 vor die Vektortreffer. Für E:18 ist das genau ein Chunk. Die Wortgrenze im Muster sorgt dafür, dass E:180 nicht als E:18 gilt; der Prüfbericht hält fest, dass der Lookup vorher Teilzeichenfolgen traf.</span>
+      <span lang="en">An error code is a rare string without meaning in vector space; vector search misses the E:18 row. The case study therefore adds a second source: <code>extract_error_codes()</code> pulls all codes in the spellings E:18, E18, “Fehler 18” and “Fehlercode: 18” from the question and normalises them; <code>_HybridRetriever</code> places every chunk that contains the same code before the vector hits at score 1. For E:18 that is exactly one chunk. The word boundary in the pattern ensures that E:180 does not count as E:18; the audit report records that the lookup previously matched substrings.</span>
+    </p>
+    <pre class="code-block">_CODE_RE = re.compile(r"(?:\bE\s*:?\s*|\bfehler(?:code)?\s*:?\s*)(\d{1,3})\b", re.IGNORECASE)
+
+def extract_error_codes(query: str) -> set[str]:
+    codes = set()
+    for m in _CODE_RE.finditer(query or ""):
+        n = m.group(1)
+        codes.add(f"E:{n}")
+        codes.add(f"E{n}")
+    return codes</pre>
+    <p>
+      <span lang="de">Der Begriff <strong>Hybrid-Suche</strong> meint sonst meist die Kombination von Vektorsuche mit <strong>BM25</strong>, der klassischen Stichwortsuche (Robertson und Zaragoza 2009): Sie zählt exakte Wortübereinstimmungen, gewichtet seltene Wörter höher und lange Dokumente niedriger. Zwei Ranglisten werden dann mit <strong>Reciprocal Rank Fusion</strong> verschmolzen (Cormack et al. 2009): Jeder Treffer bekommt 1 ÷ (k + Rang) aus jeder Liste, k meist 60, und die Summen entscheiden; so lassen sich Scores verschiedener Skalen vereinen, ohne sie zu vergleichen. Das Fallbeispiel nutzt weder BM25 noch RRF; sein Zuschlag ist eine gezielte Regex für das eine Muster, das die Vektorsuche verlässlich verpasst. Die technische Dokumentation sagt das ausdrücklich.</span>
+      <span lang="en">The term <strong>hybrid search</strong> otherwise mostly means combining vector search with <strong>BM25</strong>, the classic keyword search (Robertson and Zaragoza 2009): it counts exact word matches, weights rare words higher and long documents lower. Two ranked lists are then merged with <strong>reciprocal rank fusion</strong> (Cormack et al. 2009): every hit receives 1 ÷ (k + rank) from every list, k usually 60, and the sums decide; this unifies scores of different scales without comparing them. The case study uses neither BM25 nor RRF; its boost is a targeted regex for the one pattern that vector search reliably misses. The technical documentation says so explicitly.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="reranker">
+    <h2><span lang="de">Reranker: der Cross-Encoder</span><span lang="en">Reranker: the cross-encoder</span></h2>
+    <p>
+      <span lang="de">Die dritte Stufe liest jedes Paar aus Frage und Kandidat gemeinsam durch ein Netz und gibt einen Score: ein <strong>Cross-Encoder</strong> (Nogueira und Cho 2019). Das ist genauer als der Vergleich zweier getrennt berechneter Vektoren, weil das Netz Frage und Passage Wort für Wort aufeinander beziehen kann, aber es kostet je Paar einen eigenen Durchlauf; deshalb läuft es nur über die zwölf Kandidaten, nicht über alle Chunks. Das Fallbeispiel nutzt <code>BAAI/bge-reranker-v2-m3</code> (mehrsprachig, 568 Millionen Parameter, Apache-2.0), eingebunden über LlamaIndex’ <code>SentenceTransformerRerank</code> mit <code>top_n=5</code>. Der Reranker liefert Logits; das Fallbeispiel setzt ausdrücklich eine Sigmoid-Funktion darauf, damit die Scores zwischen 0 und 1 liegen und die Schwelle nicht von Bibliotheksvorgaben abhängt. Für E:18 ergibt das <span data-wert="fragen.e18.rerankScore">0,562</span> für den richtigen Chunk und unter 0,002 für alle anderen: Der Cross-Encoder spreizt, wo der Kosinus alles zwischen 0,81 und 0,84 legt.</span>
+      <span lang="en">The third stage reads every pair of question and candidate together through a network and outputs a score: a <strong>cross-encoder</strong> (Nogueira and Cho 2019). This is more precise than comparing two separately computed vectors, because the network can relate question and passage word by word, but it costs a separate pass per pair; that is why it runs only over the twelve candidates, not over all chunks. The case study uses <code>BAAI/bge-reranker-v2-m3</code> (multilingual, 568 million parameters, Apache-2.0), integrated via LlamaIndex's <code>SentenceTransformerRerank</code> with <code>top_n=5</code>. The reranker outputs logits; the case study explicitly applies a sigmoid so that scores lie between 0 and 1 and the threshold does not depend on library defaults. For E:18 this yields <span data-wert="fragen.e18.rerankScore">0.562</span> for the right chunk and below 0.002 for all others: the cross-encoder spreads where the cosine puts everything between 0.81 and 0.84.</span>
+    </p>
+    <pre class="code-block">reranker = SentenceTransformerRerank(model="BAAI/bge-reranker-v2-m3", top_n=FINAL_K)
+# BGE liefert Logits. Ein explizites Sigmoid macht die Schwelle unabhaengig von Bibliotheksvorgaben.
+reranker._model.activation_fn = torch.nn.Sigmoid()</pre>
+    <div class="warn-box">
+      <p><strong><span lang="de">Im Browser vorberechnet.</span><span lang="en">Precomputed in the browser.</span></strong> <span lang="de">Der Reranker hat als ONNX-Datei 279 MB und läuft nicht in dieser Seite. Für die <span data-wert="fragen.anzahl">24</span> Katalogfragen wurden seine Scores mit der Python-Umgebung des Fallbeispiels berechnet (<code>tools/embed_fragen.py</code>); die zehn Evaluationsfragen stimmen mit dem Protokoll des Fallbeispiels auf vier Nachkommastellen überein. Für eigene Fragen zeigt der Stepper nur die Vektor- und die Hybridstufe live.</span><span lang="en">As an ONNX file the reranker has 279 MB and does not run in this page. For the <span data-wert="fragen.anzahl">24</span> catalogue questions its scores were computed with the case study's Python environment (<code>tools/embed_fragen.py</code>); the ten evaluation questions match the case study's log to four decimals. For your own questions the stepper shows only the vector and hybrid stages live.</span></p>
+    </div>
+  </section>
+
+  <section class="section-block" id="schwelle">
+    <h2><span lang="de">Schwelle und Boden</span><span lang="en">Threshold and floor</span></h2>
+    <p>
+      <span lang="de">Nach dem Reranker entscheidet <code>is_grounded()</code>: Liegt der beste Score unter <code>GUARDRAIL_MIN_SCORE=0.15</code>, gilt die Frage als nicht vom Handbuch gedeckt, und die Anwendung antwortet ohne Modellaufruf „Dazu finde ich in dieser Bedienungsanleitung leider keine Information“. <code>select_context_nodes()</code> setzt zusätzlich einen relativen Boden: Nur Kandidaten mit Score ≥ max(0,15; 0,5 × bester Score) kommen in den Kontext (<code>CONTEXT_SCORE_RATIO=0.5</code>). Dazu die Regel aus <code>server.py</code>: Jeder in der Frage genannte Fehlercode muss im Kontext vorkommen, sonst wird abgelehnt; E:180 darf sich die Bedeutung von E:18 nicht ausleihen. Der Code nennt die 0,15 einen Projektparameter, „keine kalibrierte Wahrheitswahrscheinlichkeit“: Sie wurde an den Scores der Evaluationsfragen (ab <span data-wert="fragen.keinWassereinlauf.score">0,119</span>) und der Fremdfragen (höchstens <span data-wert="fragen.negativMax.score">0,0274</span>) gewählt. Lab 08 zeigt den Preis: Eine der zehn Handbuchfragen liegt unter der Schwelle.</span>
+      <span lang="en">After the reranker, <code>is_grounded()</code> decides: if the best score lies below <code>GUARDRAIL_MIN_SCORE=0.15</code>, the question counts as not covered by the manual, and the application replies without a model call “Dazu finde ich in dieser Bedienungsanleitung leider keine Information”. <code>select_context_nodes()</code> additionally sets a relative floor: only candidates with score ≥ max(0.15; 0.5 × best score) enter the context (<code>CONTEXT_SCORE_RATIO=0.5</code>). Plus the rule from <code>server.py</code>: every error code named in the question must occur in the context, otherwise refuse; E:180 must not borrow the meaning of E:18. The code calls the 0.15 a project parameter, “no calibrated probability of truth”: it was chosen on the scores of the evaluation questions (from <span data-wert="fragen.keinWassereinlauf.score">0.119</span>) and the off-topic questions (at most <span data-wert="fragen.negativMax.score">0.0274</span>). Lab 08 shows the price: one of the ten manual questions lies below the threshold.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/retrieval-stufen-de.svg" alt="Sechs Stufen von der Frage zum Kontext: Embedding, Vektorsuche Top 12, Fehlercode-Zuschlag, Reranker mit Sigmoid-Score, Schwelle mit Ja- und Nein-Zweig, Kontext mit Verfahrensgruppen." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/retrieval-stufen-en.svg" alt="Six stages from question to context: embedding, vector search top 12, error-code boost, reranker with sigmoid score, threshold with yes and no branch, context with procedure groups." loading="lazy"></span>
+      <figcaption><span lang="de">Der Weg der E:18-Frage durch <code>Backend.retrieve()</code> in <code>server.py</code>.</span><span lang="en">The path of the E:18 question through <code>Backend.retrieve()</code> in <code>server.py</code>.</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="section-block" id="ablation">
+    <h2><span lang="de">Ablation: was jede Stufe bringt</span><span lang="en">Ablation: what every stage contributes</span></h2>
+    <p>
+      <span lang="de">Das Fallbeispiel hat die drei Varianten auf denselben zehn Fragen gemessen (<code>eval/run_eval.py</code>, Protokolle vom 19.09.2026). Ein Treffer heißt: Mindestens ein erwartetes Stichwort steht in den fünf Kandidaten; Hit@1 heißt: schon im ersten. MRR ist der mittlere Kehrwert des ersten Trefferrangs, Abdeckung der Anteil der erwarteten Stichwörter, die gefunden wurden. Die Zahlen messen die Suche, nicht die Richtigkeit der Antwort (Lab 08).</span>
+      <span lang="en">The case study measured the three variants on the same ten questions (<code>eval/run_eval.py</code>, logs of 19 Sept 2026). A hit means: at least one expected keyword appears in the five candidates; hit@1 means: already in the first. MRR is the mean reciprocal of the first hit's rank, coverage the share of expected keywords found. The numbers measure retrieval, not answer correctness (lab 08).</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Variante</span><span lang="en">Variant</span></th><th>Hit@5</th><th>Hit@1</th><th>MRR</th><th><span lang="de">Abdeckung</span><span lang="en">Coverage</span></th></tr></thead>
+      <tbody>
+        <tr><td><span lang="de">Vektor allein</span><span lang="en">Vector only</span></td><td><span data-wert="eval.vector.hit5">80</span> %</td><td><span data-wert="eval.vector.hit1">60</span> %</td><td><span data-wert="eval.vector.mrr">0,700</span></td><td><span data-wert="eval.vector.abdeckung">64,5</span> %</td></tr>
+        <tr><td><span lang="de">Hybrid ohne Reranker</span><span lang="en">Hybrid without reranker</span></td><td><span data-wert="eval.hybrid.hit5">90</span> %</td><td><span data-wert="eval.hybrid.hit1">70</span> %</td><td><span data-wert="eval.hybrid.mrr">0,800</span></td><td><span data-wert="eval.hybrid.abdeckung">82,0</span> %</td></tr>
+        <tr><td><span lang="de">Hybrid mit Reranker</span><span lang="en">Hybrid with reranker</span></td><td><span data-wert="eval.rerank.hit5">100</span> %</td><td><span data-wert="eval.rerank.hit1">100</span> %</td><td><span data-wert="eval.rerank.mrr">1,000</span></td><td><span data-wert="eval.rerank.abdeckung">93,5</span> %</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="ablation-balken" aria-hidden="true">
+      <div class="ab-zeile"><span class="ab-name"><span lang="de">Vektor</span><span lang="en">Vector</span></span><div class="balken"><i style="width:80%"></i></div><span class="ab-wert">80 %</span></div>
+      <div class="ab-zeile"><span class="ab-name">Hybrid</span><div class="balken"><i style="width:90%"></i></div><span class="ab-wert">90 %</span></div>
+      <div class="ab-zeile"><span class="ab-name">+ Reranker</span><div class="balken"><i style="width:100%"></i></div><span class="ab-wert">100 %</span></div>
+    </div>
+    <p>
+      <span lang="de">Die Stufen helfen verschiedenen Fragen. Der Fehlercode-Zuschlag hebt E:18 von „nicht gefunden“ auf Rang 1. Der Reranker hebt „Wasser läuft unter meiner Waschmaschine aus“ und „Die Waschlauge wird nicht abgepumpt“ von Rang 2 auf Rang 1 und findet für „Es läuft kein Wasser in die Maschine ein“ überhaupt erst einen Treffer, den Vektor- und Hybridstufe nicht in den ersten fünf hatten. Der Preis: rund 90 Sekunden für zehn Fragen mit Reranker auf der CPU gegenüber einer Sekunde ohne.</span>
+      <span lang="en">The stages help different questions. The error-code boost lifts E:18 from “not found” to rank 1. The reranker lifts “Wasser läuft unter meiner Waschmaschine aus” and “Die Waschlauge wird nicht abgepumpt” from rank 2 to rank 1 and, for “Es läuft kein Wasser in die Maschine ein”, finds a hit at all that the vector and hybrid stages did not have in the first five. The price: about 90 seconds for ten questions with reranker on the CPU versus one second without.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="stepper">
+    <h2><span lang="de">Der Such-Stepper</span><span lang="en">The search stepper</span></h2>
+    <p>
+      <span lang="de">Wählen Sie eine Katalogfrage und lesen Sie die Stufen von oben nach unten. Die Regler ändern Schwelle und Verhältnis live; Stufe 4 und 5 rechnen mit der Logik aus <code>pruefung.js</code>, die die Python-Funktionen zeichengenau nachbildet (ein Test prüft alle <span data-wert="fragen.anzahl">24</span> Fragen gegen die Python-Ergebnisse). Mit geladenem Modell tippen Sie eigene Fragen; dann laufen Stufe 1 und 2 in Ihrem Browser.</span>
+      <span lang="en">Choose a catalogue question and read the stages from top to bottom. The sliders change threshold and ratio live; stages 4 and 5 compute with the logic from <code>pruefung.js</code>, which reproduces the Python functions exactly (a test checks all <span data-wert="fragen.anzahl">24</span> questions against the Python results). With the model loaded you type your own questions; then stages 1 and 2 run in your browser.</span>
+    </p>
+    <div data-werkzeug="suche" data-parameter='{"frage":"fehler-e18"}'></div>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Sechs Übungen: E:18 durch die Stufen verfolgen, die Regex prüfen, die Pipeline ordnen, den Boden rechnen, vier Verfahren zuordnen und eine Ablehnung deuten.</span><span lang="en">Six exercises: follow E:18 through the stages, test the regex, order the pipeline, compute the floor, assign four methods and interpret a refusal.</span></p>
     <div data-uebung="R06-01"></div>
     <div data-uebung="R06-02"></div>
     <div data-uebung="R06-03"></div>
@@ -59,11 +185,28 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Top-k mit Overfetch: zwölf Kandidaten sammeln, damit die nächste Stufe fünf gute auswählen kann.</span><span lang="en">Top-k with overfetch: collect twelve candidates so that the next stage can select five good ones.</span></li>
+      <li><span lang="de">Hybrid sichert, was der Vektorraum verpasst: hier Fehlercodes per Regex; allgemein BM25 mit RRF.</span><span lang="en">Hybrid secures what vector space misses: here error codes via regex; in general BM25 with RRF.</span></li>
+      <li><span lang="de">Der Cross-Encoder liest Frage und Kandidat zusammen, spreizt die Scores und liefert die Zahl für die Schwelle.</span><span lang="en">The cross-encoder reads question and candidate together, spreads the scores and delivers the number for the threshold.</span></li>
+      <li><span lang="de">Schwelle 0,15 und Boden 0,5 × bester Score entscheiden, ob und mit wie viel Kontext geantwortet wird; gefragte Codes müssen im Kontext stehen.</span><span lang="en">Threshold 0.15 and floor 0.5 × best score decide whether and with how much context to answer; requested codes must be in the context.</span></li>
+      <li><span lang="de">Ablation: 80 → 90 → 100 Prozent Trefferquote; jede Stufe hilft anderen Fragen und kostet Zeit.</span><span lang="en">Ablation: 80 → 90 → 100 percent hit rate; every stage helps different questions and costs time.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Karpukhin, V. et al. (2020): Dense Passage Retrieval for Open-Domain Question Answering. EMNLP. <a href="https://arxiv.org/abs/2004.04906" rel="noopener">arXiv:2004.04906</a></li>
+      <li>Robertson, S., Zaragoza, H. (2009): The Probabilistic Relevance Framework: BM25 and Beyond. Foundations and Trends in Information Retrieval 3(4). <a href="https://doi.org/10.1561/1500000019" rel="noopener">doi:10.1561/1500000019</a></li>
+      <li>Cormack, G. V., Clarke, C. L. A., Buettcher, S. (2009): Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods. SIGIR. <a href="https://doi.org/10.1145/1571941.1572114" rel="noopener">doi:10.1145/1571941.1572114</a></li>
+      <li>Malkov, Y. A., Yashunin, D. A. (2018): Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs. <a href="https://arxiv.org/abs/1603.09320" rel="noopener">arXiv:1603.09320</a></li>
+      <li>Nogueira, R., Cho, K. (2019): Passage Re-ranking with BERT. <a href="https://arxiv.org/abs/1901.04085" rel="noopener">arXiv:1901.04085</a></li>
+      <li>Chen, J. et al. (2024): M3-Embedding. <a href="https://arxiv.org/abs/2402.03216" rel="noopener">arXiv:2402.03216</a>; Modellkarte <a href="https://huggingface.co/BAAI/bge-reranker-v2-m3" rel="noopener">BAAI/bge-reranker-v2-m3</a> (Sigmoid-Hinweis), abgerufen 19.09.2026</li>
+      <li>LlamaIndex: <a href="https://developers.llamaindex.ai/python/framework/module_guides/storing/vector_stores/" rel="noopener">Vector Stores</a>; pgvector <a href="https://github.com/pgvector/pgvector" rel="noopener">github.com/pgvector/pgvector</a>; Qdrant <a href="https://qdrant.tech/documentation/overview/" rel="noopener">qdrant.tech</a>; Chroma <a href="https://docs.trychroma.com/" rel="noopener">docs.trychroma.com</a>, abgerufen 19.09.2026</li>
+      <li><span lang="de">Fallbeispiel: <code>rag_engine.py</code> (_CODE_RE, extract_error_codes, make_retriever, get_reranker, select_context_nodes, is_grounded), <code>server.py</code> (Backend.retrieve), <code>docs/TECHNICAL.md</code> („weder BM25 noch RRF“), <code>docs/AUDIT.md</code> (Ablation, Negativtests), <code>docs/evaluation/*.json</code>, Stand 19.09.2026; Nachrechnung in <code>data/fragen.json</code>.</span><span lang="en">Case study: <code>rag_engine.py</code> (_CODE_RE, extract_error_codes, make_retriever, get_reranker, select_context_nodes, is_grounded), <code>server.py</code> (Backend.retrieve), <code>docs/TECHNICAL.md</code> (“neither BM25 nor RRF”), <code>docs/AUDIT.md</code> (ablation, negative tests), <code>docs/evaluation/*.json</code>, as of 19 Sept 2026; recomputation in <code>data/fragen.json</code>.</span></li>
+    </ul>
   </section>
 
 </main>
