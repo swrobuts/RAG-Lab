@@ -763,3 +763,52 @@ ul.checkliste li { border: 0; padding: 0.25rem 0; }
 .chunk-kopf { font-size: 0.75rem; color: var(--ink-soft); font-family: var(--mono); }
 .chunk pre { white-space: pre-wrap; font-size: 0.78rem; margin: 0.2rem 0 0; max-height: 160px; overflow: auto; font-family: var(--mono); }
 .ergebnis code { white-space: normal; }
+
+/* ============================================================== Terminal */
+/* Nachgebildete Kommandozeile (Lab 10): dunkler Schirm auf Umbra, Sandschrift. */
+:root { --term-bg: #2E2418; --term-fg: #EFE7D6; --term-dim: #B9AC94; --term-kopf: #3A2E20; --term-linie: #4A3B2A; }
+.terminal { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 1rem 0; background: var(--term-bg); }
+.terminal-kopf {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  padding: 0.55rem 0.9rem; background: var(--term-kopf); border-bottom: 1px solid var(--term-linie);
+  color: var(--term-dim); font-size: 0.78rem;
+}
+.terminal-kopf .ampel { display: inline-flex; gap: 0.32rem; flex: none; }
+.terminal-kopf .ampel i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+.terminal-kopf .ampel i:nth-child(1) { background: #FF5F57; }
+.terminal-kopf .ampel i:nth-child(2) { background: #FEBC2E; }
+.terminal-kopf .ampel i:nth-child(3) { background: #28C840; }
+.terminal-kopf .spacer { flex: 1; }
+.terminal-kopf .shell { font-family: var(--mono); color: var(--term-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.terminal-kopf .btn-mini {
+  border: 1px solid rgba(239, 231, 214, 0.3); border-radius: 5px; background: transparent;
+  color: var(--term-dim); font-family: var(--sans); font-size: 0.72rem; font-weight: 700;
+  padding: 0.16rem 0.5rem; cursor: pointer; min-height: 26px; min-width: 0;
+}
+.terminal-kopf .btn-mini:hover { color: var(--term-fg); background: rgba(239, 231, 214, 0.12); }
+.terminal-kopf .btn-mini.aktiv { background: var(--signal); border-color: var(--signal); color: #fff; }
+.terminal-kopf .lms-schalter { display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.72rem; color: var(--term-dim); cursor: pointer; }
+.terminal-kopf .lms-schalter input { accent-color: var(--signal); }
+.terminal-schirm {
+  font-family: var(--mono); font-size: 0.84rem; line-height: 1.5;
+  color: var(--term-fg); padding: 0.85rem 0.95rem;
+  min-height: 6rem; max-height: 24rem; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.terminal-schirm .eingabe-zeile { color: var(--term-fg); font-weight: 700; }
+.terminal-schirm .aus { color: var(--term-fg); }
+.terminal-schirm .dim { color: var(--term-dim); font-style: italic; }
+.terminal-schirm .fehler { color: #FFB39E; }
+.terminal-schirm .gut { color: #A8E0A0; }
+.terminal-eingabe { display: flex; align-items: baseline; gap: 0.5rem; border-top: 1px solid var(--term-linie); padding: 0.6rem 0.95rem; background: var(--term-kopf); }
+.terminal-eingabe .prompt { color: #E9B896; font-family: var(--mono); font-size: 0.84rem; flex: none; }
+.werkzeug .terminal-eingabe input, .terminal-eingabe input { flex: 1; width: auto; background: transparent; color: var(--term-fg); font-family: var(--mono); font-size: 0.84rem; border: 0; border-radius: 0; outline: none; padding: 0.15rem 0; min-width: 0; }
+.terminal-eingabe input::placeholder { color: #8A7D66; }
+.terminal-auftrag { border-top: 1px solid var(--term-linie); padding: 0.7rem 0.95rem; background: var(--term-kopf); color: var(--term-dim); font-size: 0.82rem; }
+.terminal-auftrag ol { margin: 0.4rem 0 0 1.15rem; }
+.terminal-auftrag li { margin-bottom: 0.2rem; }
+.terminal-auftrag li.erledigt { color: #A8E0A0; text-decoration: line-through; }
+.terminal-auftrag li.erledigt::marker { color: #A8E0A0; }
+.terminal-auftrag li.aktuell { color: var(--term-fg); font-weight: 600; }
+.terminal-auftrag li.aktuell::marker { color: var(--signal); }
+.terminal-auftrag strong { color: var(--term-fg); }
+.terminal-auftrag .gut { color: #A8E0A0; margin-top: 0.4rem; }
