@@ -422,7 +422,11 @@ function baueBox (uebung, ctx) {
       const teile = txt(uebung.text).split(/___(\d+)___/)
       teile.forEach((t, i) => {
         if (i % 2 === 0) pre.append(document.createTextNode(t))
-        else {
+        else if (felder[+t - 1]) {
+          // Dieselbe Luecke ein zweites Mal (z. B. schliessendes Tag): spiegelt die Eingabe, statt ein zweites Feld zu oeffnen.
+          const sp = el('span', 'luecke-spiegel', felder[+t - 1].value || '…'); const inp = felder[+t - 1]
+          inp.addEventListener('input', () => { sp.textContent = inp.value || '…' }); pre.append(sp)
+        } else {
           const inp = el('input'); inp.type = 'text'; inp.autocomplete = 'off'; inp.spellcheck = false; inp.dataset.nr = t
           inp.setAttribute('aria-label', `${txt(T.schritt)} ${t}`); inp.value = alt[+t - 1] || ''
           pre.append(inp); felder[+t - 1] = inp

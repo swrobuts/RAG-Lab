@@ -828,3 +828,4 @@ ul.quellen li { margin-bottom: 0.45rem; }
 .ab-zeile .balken { height: 14px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
 .ab-zeile .balken i { display: block; height: 100%; background: var(--signal); }
 .ab-wert { font-family: var(--mono); text-align: right; }
+.luecke-spiegel { display: inline-block; min-width: 4ch; padding: 0.1rem 0.4rem; border-bottom: 1px dashed var(--ink-soft); color: var(--ink-soft); font-family: var(--mono); font-size: 0.85rem; }

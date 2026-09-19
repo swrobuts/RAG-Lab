@@ -1,0 +1,22 @@
+sequenceDiagram
+  participant B as Browser (index.html)
+  participant F as Flask (server.py)
+  participant R as Retrieval (rag_engine.py)
+  participant L as LM Studio / OpenAI
+  B->>F: POST /api/ask_stream {frage, mode, provider}
+  F-->>B: event: status · "[[Handbuch wird durchsucht|Searching the manual]]"
+  F->>R: retrieve(frage)
+  R-->>F: [[Kontext, gedeckt, Quelle|context, grounded, source]]
+  F-->>B: event: meta · {reference, mode, provider}
+  alt [[nicht gedeckt|not grounded]]
+    F-->>B: event: result · [[Ablehnungstext|refusal text]]
+  else [[gedeckt|grounded]]
+    F->>L: chat.completions(messages, stream=true, temperature=0)
+    loop [[je Token|per token]]
+      L-->>F: delta
+      F-->>B: event: token · "…"
+    end
+    F->>F: parse_ai_response(text)
+    F-->>B: event: result · {tts_summary, results, sources, usage}
+  end
+  F-->>B: data: [DONE]

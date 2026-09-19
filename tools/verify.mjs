@@ -182,8 +182,9 @@ for (const lab of LABS) {
     if (u.typ === 'sortieren') meld(Array.isArray(u.elemente) && u.elemente.length >= 3 && u.elemente.every(e => zwei(e.text)), `${u.id}: Elemente`)
     if (u.typ === 'rechnen') meld(Array.isArray(u.felder) && u.felder.length > 0 && u.felder.every(f => zwei(f.name) && Number.isFinite(f.loesung) && Number.isFinite(f.toleranz ?? 0)), `${u.id}: Rechenfelder`)
     if (u.typ === 'luecken') {
-      const n = (s) => (String(s).match(/___\d+___/g) || []).length
-      meld(zwei(u.text) && n(u.text.de) === n(u.text.en) && n(u.text.de) === (u.luecken || []).length, `${u.id}: Lücken in beiden Sprachen = luecken.length`)
+      const n = (s) => new Set(String(s).match(/___\d+___/g) || []).size
+      const folge = (s) => [...new Set(String(s).match(/___(\d+)___/g) || [])].map(x => +x.replace(/_/g, '')).sort((a, b) => a - b).every((x, i) => x === i + 1)
+      meld(zwei(u.text) && n(u.text.de) === n(u.text.en) && n(u.text.de) === (u.luecken || []).length && folge(u.text.de), `${u.id}: Lücken 1..n in beiden Sprachen = luecken.length`)
       meld((u.luecken || []).every(l => (Array.isArray(l.loesung) && l.loesung.length) || l.muster), `${u.id}: jede Lücke hat Lösung oder Muster`)
     }
     if (u.typ === 'belegen') {
