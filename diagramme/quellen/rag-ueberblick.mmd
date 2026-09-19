@@ -1,0 +1,17 @@
+flowchart LR
+  subgraph V["[[Vorbereitung – einmal je Dokument|Preparation – once per document]]"]
+    direction TB
+    D["[[Handbuch als PDF|Manual as PDF]]<br/>48 [[Seiten|pages]]"] --> P["[[Parser → Markdown|Parser → Markdown]]"]
+    P --> C["Chunking<br/>346 Chunks"]
+    C --> E["Embedding<br/>384 [[Zahlen je Chunk|numbers per chunk]]"]
+    E --> S[("[[Vektorspeicher|Vector store]]")]
+  end
+  subgraph A["[[Anfrage – jedes Mal|Query – every time]]"]
+    direction TB
+    Q["[[Frage|Question]]<br/>„Was bedeutet E:18?“"] --> QE["Embedding"]
+    QE --> R["[[Suche + Reranking|Search + reranking]]"]
+    R --> K["[[Kontext: Handbuchauszüge|Context: manual excerpts]]"]
+    K --> L["[[Sprachmodell|Language model]]"]
+    L --> AW["[[belegte Antwort mit Seite|grounded answer with page]]"]
+  end
+  V ~~~ A

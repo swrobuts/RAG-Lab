@@ -1,1 +1,78 @@
-[]
+[
+  {
+    "id": "R02-01", "typ": "experiment", "werkzeug": "vergleich", "parameter": { "frage": "e18" },
+    "titel": { "de": "Dieselbe Frage, zwei Antworten", "en": "The same question, two answers" },
+    "aufgabe": { "de": "<p>Lesen Sie beide Antworten auf „Was bedeutet der Fehlercode E:18?“ und klappen Sie rechts die übergebenen Auszüge auf. Wechseln Sie danach zu „Was bedeutet E:180?“.</p>", "en": "<p>Read both answers to “Was bedeutet der Fehlercode E:18?” and unfold the passed excerpts on the right. Then switch to “Was bedeutet E:180?”.</p>" },
+    "fragen": [
+      { "frage": { "de": "Was fehlt der Antwort ohne Handbuch?", "en": "What is missing from the answer without the manual?" },
+        "optionen": [ { "de": "Der Bezug zu diesem Gerät: Sie nennt eine falsche Ursache (Wasserzufuhr) und keine Quelle.", "en": "The reference to this appliance: it names a wrong cause (water supply) and no source." }, { "de": "Nichts, sie ist nur kürzer.", "en": "Nothing, it is only shorter." }, { "de": "Die Höflichkeit; sie ist unfreundlich formuliert.", "en": "Politeness; it is phrased rudely." } ], "richtig": [0],
+        "erklaerung": { "de": "Ohne Handbuch rät das Modell aus dem, was es über Fehlercodes im Allgemeinen gelernt hat. Mit Handbuch nennt es Laugenpumpe und Ablaufschlauch und die Seiten 30 und 31.", "en": "Without the manual the model guesses from what it learned about error codes in general. With the manual it names the drain pump and drain hose and pages 30 and 31." } },
+      { "frage": { "de": "Was passiert bei „Was bedeutet E:180?“ mit Handbuch?", "en": "What happens with “Was bedeutet E:180?” with the manual?" },
+        "optionen": [ { "de": "Die Suche findet keinen Beleg für E:180, und die Anwendung lehnt ab, ohne das Modell aufzurufen.", "en": "Retrieval finds no evidence for E:180 and the application refuses without calling the model." }, { "de": "Das Modell übernimmt die Bedeutung von E:18, weil der Code ähnlich aussieht.", "en": "The model borrows the meaning of E:18 because the code looks similar." }, { "de": "Das Modell fragt nach dem Gerätetyp.", "en": "The model asks for the appliance type." } ], "richtig": [0],
+        "erklaerung": { "de": "Die Ablehnung dauert 0,4 Sekunden, weil kein Modell rechnet. Der Guardrail aus Lab 06 und 08 verhindert, dass ein ähnlicher Code seine Bedeutung ausleiht.", "en": "The refusal takes 0.4 seconds because no model computes. The guardrail from labs 06 and 08 prevents a similar code from lending its meaning." } }
+    ],
+    "rueckmeldung": { "de": "Zwei Antworten, dasselbe Modell. Der Unterschied liegt allein im Text, den das Modell zur Laufzeit bekommt.", "en": "Two answers, the same model. The difference lies solely in the text the model receives at query time." }
+  },
+  {
+    "id": "R02-02", "typ": "belegen",
+    "titel": { "de": "Belegt oder erfunden?", "en": "Supported or invented?" },
+    "aufgabe": { "de": "<p>Sechs Sätze aus den beiden Antworten zu E:18. Rechts steht der einzige Handbuchauszug, den das Modell beim RAG-Aufruf bekam. Markieren Sie jeden Satz: belegt durch den Auszug oder nicht belegt.</p>", "en": "<p>Six sentences from the two answers about E:18. On the right is the only manual excerpt the model received in the RAG call. Mark every sentence: supported by the excerpt or not supported.</p>" },
+    "saetze": [
+      { "text": { "de": "Der Fehlercode E:18 weist auf eine Verstopfung im Bereich der Laugenpumpe oder des Abflusssystems hin.", "en": "Error code E:18 indicates a blockage in the area of the drain pump or the drain system." }, "belegt": true },
+      { "text": { "de": "Häufig tritt er bei Waschmaschinen oder Geschirrspülern auf und weist auf ein Problem mit der Wasserzufuhr oder dem Wasserdruck hin.", "en": "It often occurs on washing machines or dishwashers and indicates a problem with the water supply or water pressure." }, "belegt": false },
+      { "text": { "de": "Laugenpumpe reinigen (siehe Seite 30).", "en": "Clean the drain pump (see page 30)." }, "belegt": true },
+      { "text": { "de": "Bei anderen Geräten kann er auch einen Defekt an einer Sensorik oder der Elektronik signalisieren.", "en": "On other appliances it can also signal a defect in a sensor or the electronics." }, "belegt": false },
+      { "text": { "de": "Ablaufschlauch am Siphon reinigen (siehe Seite 31).", "en": "Clean the drain hose at the siphon (see page 31)." }, "belegt": true },
+      { "text": { "de": "Wenn das Problem bestehen bleibt, sollten Sie einen Fachmann kontaktieren.", "en": "If the problem persists, you should contact a specialist." }, "belegt": false }
+    ],
+    "quellen": [ { "chunk": "c243" } ],
+    "hinweis": { "de": "Belegt heißt: Der Satz lässt sich Wort für Wort auf den Auszug zurückführen. Ein vernünftig klingender Rat ohne Stelle im Auszug ist nicht belegt.", "en": "Supported means: the sentence can be traced word by word to the excerpt. A sensible-sounding piece of advice without a place in the excerpt is not supported." },
+    "rueckmeldung": { "de": "Diese Prüfung ist die Kernkompetenz beim Abnehmen von RAG-Antworten. Lab 07 und Lab 08 vertiefen sie.", "en": "This check is the core skill when accepting RAG answers. Labs 07 and 08 deepen it." }
+  },
+  {
+    "id": "R02-03", "typ": "zuordnen",
+    "titel": { "de": "Welcher Ansatz passt?", "en": "Which approach fits?" },
+    "aufgabe": { "de": "<p>Ordnen Sie jede Anforderung dem Ansatz zu, der sie am sparsamsten erfüllt: Prompting (Anweisung im Prompt), Long Context (das ganze Dokument in den Prompt), Fine-Tuning (Parameter nachtrainieren) oder RAG (zur Laufzeit suchen und mitgeben).</p>", "en": "<p>Assign every requirement to the approach that meets it most economically: prompting (instruction in the prompt), long context (the whole document in the prompt), fine-tuning (retrain parameters) or RAG (search and supply at query time).</p>" },
+    "kategorien": [
+      { "id": "prompting", "name": { "de": "Prompting", "en": "Prompting" } },
+      { "id": "longcontext", "name": { "de": "Long Context", "en": "Long context" } },
+      { "id": "finetuning", "name": { "de": "Fine-Tuning", "en": "Fine-tuning" } },
+      { "id": "rag", "name": { "de": "RAG", "en": "RAG" } }
+    ],
+    "elemente": [
+      { "text": { "de": "Antworten sollen kürzer und in Stichpunkten sein.", "en": "Answers should be shorter and in bullet points." }, "ziel": "prompting" },
+      { "text": { "de": "Ein einzelnes 20-seitiges Dokument, einmalige Auswertung, keine Wiederholung.", "en": "A single 20-page document, one-off analysis, no repetition." }, "ziel": "longcontext" },
+      { "text": { "de": "Das Modell soll dauerhaft den Ton und die Formulierungen eines Hauses treffen, ohne neue Fakten.", "en": "The model should permanently hit the tone and phrasing of a company, without new facts." }, "ziel": "finetuning" },
+      { "text": { "de": "5 000 Handbücher, wöchentlich aktualisiert, jede Antwort mit Quelle und Seite.", "en": "5,000 manuals, updated weekly, every answer with source and page." }, "ziel": "rag" },
+      { "text": { "de": "Fehlercodes müssen wörtlich aus der jeweils aktuellen Anleitung stammen.", "en": "Error codes must come verbatim from the currently valid manual." }, "ziel": "rag" },
+      { "text": { "de": "Das Modell soll den Fachjargon eines Teams flüssig sprechen.", "en": "The model should speak a team's jargon fluently." }, "ziel": "finetuning" }
+    ],
+    "rueckmeldung": { "de": "Fine-Tuning ändert, wie das Modell spricht; RAG ändert, was es weiß, und zwar für jede Anfrage neu.", "en": "Fine-tuning changes how the model speaks; RAG changes what it knows, anew for every request." }
+  },
+  {
+    "id": "R02-04", "typ": "quiz",
+    "titel": { "de": "Was RAG ist", "en": "What RAG is" },
+    "aufgabe": { "de": "<p>Lewis et al. (2020) haben den Begriff geprägt. Was beschreibt ihren Aufbau richtig?</p>", "en": "<p>Lewis et al. (2020) coined the term. What describes their setup correctly?</p>" },
+    "fragen": [
+      { "frage": { "de": "Retrieval-Augmented Generation bedeutet …", "en": "Retrieval-augmented generation means …" },
+        "optionen": [ { "de": "Ein Retriever holt zu jeder Anfrage passende Passagen aus einem Dokumentenindex; ein Generator erzeugt die Antwort aus Frage und Passagen. Die Gewichte des Generators bleiben bei der Anfrage unverändert.", "en": "A retriever fetches matching passages from a document index for every request; a generator produces the answer from question and passages. The generator's weights stay unchanged at request time." }, { "de": "Das Modell wird für jede neue Frage kurz nachtrainiert.", "en": "The model is briefly retrained for every new question." }, { "de": "Das Modell durchsucht bei jeder Frage das Internet.", "en": "The model searches the internet for every question." } ], "richtig": [0],
+        "erklaerung": { "de": "Lewis et al. nennen das parametrisches Gedächtnis (die Gewichte) plus nicht-parametrisches Gedächtnis (ein Vektorindex, bei ihnen über Wikipedia). Im Fallbeispiel ist der Index das Handbuch.", "en": "Lewis et al. call this parametric memory (the weights) plus non-parametric memory (a vector index, in their case over Wikipedia). In the case study the index is the manual." } },
+      { "frage": { "de": "Warum ist RAG für neue Fakten geeigneter als unüberwachtes Fine-Tuning?", "en": "Why is RAG better suited to new facts than unsupervised fine-tuning?" },
+        "optionen": [ { "de": "Ovadia et al. (2023) zeigen, dass Modelle neue Fakten durch Fine-Tuning schlecht lernen, während RAG sie zur Laufzeit direkt sieht.", "en": "Ovadia et al. (2023) show that models learn new facts poorly through fine-tuning, while RAG sees them directly at query time." }, { "de": "Fine-Tuning ist verboten.", "en": "Fine-tuning is prohibited." }, { "de": "RAG braucht keine Dokumente.", "en": "RAG needs no documents." } ], "richtig": [0],
+        "erklaerung": { "de": "Ein Fakt, der im Kontextfenster steht, muss nicht gelernt werden. Dazu kommt: Ändert sich das Handbuch, ändert sich nur der Index.", "en": "A fact that sits in the context window does not need to be learned. Moreover: if the manual changes, only the index changes." } }
+    ],
+    "rueckmeldung": { "de": "Die Definition trägt bis Lab 10: Suchen, mitgeben, antworten, belegen.", "en": "The definition carries through to lab 10: search, supply, answer, cite." }
+  },
+  {
+    "id": "R02-05", "typ": "rechnen",
+    "titel": { "de": "Was kostet die Cloud?", "en": "What does the cloud cost?" },
+    "aufgabe": { "de": "<p>Im Live-Protokoll des Fallbeispiels brauchte die E:18-Frage über die OpenAI-API 355 Tokens Eingabe und 121 Tokens Ausgabe (gpt-4.1-mini). Die Standardpreise lagen am 19.09.2026 bei 0,40 USD je Million Eingabetokens und 1,60 USD je Million Ausgabetokens. Was kosten 1 000 solcher Anfragen, was kosten 100 000?</p>", "en": "<p>In the case study's live log, the E:18 question via the OpenAI API needed 355 input tokens and 121 output tokens (gpt-4.1-mini). The standard prices on 19 Sept 2026 were USD 0.40 per million input tokens and USD 1.60 per million output tokens. What do 1,000 such requests cost, what do 100,000?</p>" },
+    "felder": [
+      { "name": { "de": "1 000 Anfragen", "en": "1,000 requests" }, "loesung": 0.3356, "toleranz": 0.01, "einheit": "USD" },
+      { "name": { "de": "100 000 Anfragen", "en": "100,000 requests" }, "loesung": 33.56, "toleranz": 0.5, "einheit": "USD" }
+    ],
+    "loesungsweg": { "de": "1 000 × 355 = 355 000 Eingabetokens × 0,40 USD/Mio. = 0,142 USD; 1 000 × 121 = 121 000 Ausgabetokens × 1,60 USD/Mio. = 0,194 USD; zusammen 0,34 USD. Für 100 000 Anfragen das Hundertfache: 33,56 USD. Bei diesen Mengen entscheidet nicht der Preis für die lokale Lösung, sondern Datenschutz und Kontrolle.", "en": "1,000 × 355 = 355,000 input tokens × USD 0.40/M = USD 0.142; 1,000 × 121 = 121,000 output tokens × USD 1.60/M = USD 0.194; together USD 0.34. For 100,000 requests a hundred times that: USD 33.56. At these volumes the case for the local solution is not the price but privacy and control." },
+    "hinweis": { "de": "Kosten = Tokens ÷ 1 000 000 × Preis, getrennt für Eingabe und Ausgabe.", "en": "Cost = tokens ÷ 1,000,000 × price, separately for input and output." },
+    "rueckmeldung": { "de": "Kleine Zahlen je Anfrage, aber sie skalieren linear mit jeder Frage; ein lokales Modell kostet einmal Hardware und danach Strom.", "en": "Small numbers per request, but they scale linearly with every question; a local model costs hardware once and electricity afterwards." }
+  }
+]

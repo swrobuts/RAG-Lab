@@ -28,6 +28,11 @@
 
 <nav class="sidebar" aria-label="Lab-Navigation">
   <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#luecke"><span lang="de">Die Lücke</span><span lang="en">The gap</span></a>
+  <a class="sidebar-link" href="#idee"><span lang="de">Die Idee</span><span lang="en">The idea</span></a>
+  <a class="sidebar-link" href="#alternativen"><span lang="de">Alternativen</span><span lang="en">Alternatives</span></a>
+  <a class="sidebar-link" href="#lokal"><span lang="de">Warum lokal</span><span lang="en">Why local</span></a>
+  <a class="sidebar-link" href="#fallbeispiel"><span lang="de">Das Fallbeispiel</span><span lang="en">The case study</span></a>
   <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
   <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
   <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
@@ -40,15 +45,105 @@
     <span lang="en">Why RAG?</span>
   </h1>
   <p class="lab-intro">
-    <span lang="de">Dieses Lab entsteht gerade.</span>
-    <span lang="en">This lab is being built.</span>
+    <span lang="de">In Lab 01 hat gemma-4-12b die Frage nach <strong>E:18</strong> falsch beantwortet. Dieses Lab stellt dieselbe Frage noch einmal, diesmal mit dem passenden Handbuchauszug im Kontextfenster: Die Antwort nennt Laugenpumpe, Ablaufschlauch und die Seiten 30 und 31. Der Weg dorthin heißt Retrieval-Augmented Generation: zur Laufzeit suchen, das Gefundene mitgeben, belegt antworten. Das Lab grenzt RAG gegen Prompting, Long Context und Fine-Tuning ab und erklärt, warum das Fallbeispiel auf dem eigenen Rechner läuft.</span>
+    <span lang="en">In lab 01, gemma-4-12b answered the question about <strong>E:18</strong> wrongly. This lab asks the same question again, this time with the matching manual excerpt in the context window: the answer names drain pump, drain hose and pages 30 and 31. The path there is called retrieval-augmented generation: search at query time, supply what was found, answer with evidence. The lab sets RAG apart from prompting, long context and fine-tuning and explains why the case study runs on your own machine.</span>
   </p>
+  <div class="lernziele">
+    <span class="lernziel-chip"><span lang="de">Drei Lücken</span><span lang="en">Three gaps</span></span>
+    <span class="lernziel-chip">Retrieval · Generation</span>
+    <span class="lernziel-chip"><span lang="de">Prompting · Long Context · Fine-Tuning</span><span lang="en">Prompting · long context · fine-tuning</span></span>
+    <span class="lernziel-chip"><span lang="de">Lokal gegen Cloud</span><span lang="en">Local versus cloud</span></span>
+  </div>
 </div>
 
 <main class="main-content">
 
+  <section class="section-block" id="luecke">
+    <h2><span lang="de">Die Lücke zwischen Modell und Handbuch</span><span lang="en">The gap between model and manual</span></h2>
+    <p>
+      <span lang="de">Ein Sprachmodell hat drei Lücken, die kein Training schließt. Erstens den <strong>Wissensstand</strong>: Was nach dem Stichtag der Trainingsdaten geschrieben wurde, kennt es nicht. Zweitens das <strong>Firmenwissen</strong>: Ein Handbuch, ein Vertrag, ein internes Wiki waren nie im Trainingstext. Drittens die <strong>Belegbarkeit</strong>: Selbst eine richtige Antwort nennt keine Stelle, an der man sie prüfen könnte. Das Werkzeug zeigt, wie dieselbe Frage mit und ohne Handbuchauszug beantwortet wird; beide Antworten stammen von gemma-4-12b-it in LM Studio am 19.09.2026, die zweite brauchte <span data-wert="antworten.e18.tokens">398/154</span> Tokens und <span data-wert="antworten.e18.sekunden">26,4</span> Sekunden.</span>
+      <span lang="en">A language model has three gaps that no training closes. First, the <strong>knowledge cutoff</strong>: whatever was written after the training data's cutoff date is unknown to it. Second, <strong>company knowledge</strong>: a manual, a contract, an internal wiki were never in the training text. Third, <strong>verifiability</strong>: even a correct answer names no place where it could be checked. The tool shows how the same question is answered with and without the manual excerpt; both answers come from gemma-4-12b-it in LM Studio on 19 Sept 2026, the second one needed <span data-wert="antworten.e18.tokens">398/154</span> tokens and <span data-wert="antworten.e18.sekunden">26.4</span> seconds.</span>
+    </p>
+    <div data-werkzeug="vergleich" data-parameter='{"frage":"e18"}'></div>
+    <div class="tip-box">
+      <p><strong><span lang="de">Lesen Sie die Auszüge.</span><span lang="en">Read the excerpts.</span></strong> <span lang="de">Die RAG-Antwort enthält nur, was in dem einen übergebenen Auszug steht: die Tabellenzeile zu E:18 mit zwei Ursachen, zwei Abhilfen und zwei Seitenverweisen. Was nicht im Auszug steht, steht auch nicht in der Antwort; genau das prüft Übung R02-02.</span><span lang="en">The RAG answer contains only what is in the one excerpt passed: the table row for E:18 with two causes, two remedies and two page references. What is not in the excerpt is not in the answer either; that is exactly what exercise R02-02 checks.</span></p>
+    </div>
+  </section>
+
+  <section class="section-block" id="idee">
+    <h2><span lang="de">Die Idee: suchen, mitgeben, antworten</span><span lang="en">The idea: search, supply, answer</span></h2>
+    <p>
+      <span lang="de">Lewis et al. (2020) haben den Aufbau beschrieben und benannt: Ein <strong>Retriever</strong> holt zu jeder Frage passende Passagen aus einem Vektorindex, ein <strong>Generator</strong> erzeugt daraus die Antwort. Die Gewichte des Modells bleiben dabei unverändert; das Wissen liegt in einem Index, den man austauschen und aktualisieren kann. Sie nennen das parametrisches Gedächtnis (die Gewichte) plus nicht-parametrisches Gedächtnis (der Index). Gao et al. (2023) ordnen die Entwicklung seither in drei Stufen: <em>Naive RAG</em> (suchen und mitgeben), <em>Advanced RAG</em> (bessere Chunks, Reranking, Anfrageumformung) und <em>Modular RAG</em> (austauschbare Bausteine). Das Fallbeispiel ist Advanced RAG: Es nutzt Hybrid-Suche, einen Reranker und eine Relevanzschwelle.</span>
+      <span lang="en">Lewis et al. (2020) described and named the setup: a <strong>retriever</strong> fetches matching passages from a vector index for every question, a <strong>generator</strong> produces the answer from them. The model's weights stay unchanged; the knowledge lives in an index that can be swapped and updated. They call this parametric memory (the weights) plus non-parametric memory (the index). Gao et al. (2023) sort the development since then into three stages: <em>naive RAG</em> (search and supply), <em>advanced RAG</em> (better chunks, reranking, query rewriting) and <em>modular RAG</em> (interchangeable building blocks). The case study is advanced RAG: it uses hybrid search, a reranker and a relevance threshold.</span>
+    </p>
+    <figure class="diagramm">
+      <span lang="de"><img src="assets/diagramme/rag-ueberblick-de.svg" alt="Zwei Spalten: Vorbereitung einmal je Dokument (PDF, Parser, Chunking, Embedding, Vektorspeicher) und Anfrage jedes Mal (Frage, Embedding, Suche und Reranking, Kontext, Sprachmodell, belegte Antwort)." loading="lazy"></span>
+      <span lang="en"><img src="assets/diagramme/rag-ueberblick-en.svg" alt="Two columns: preparation once per document (PDF, parser, chunking, embedding, vector store) and query every time (question, embedding, search and reranking, context, language model, grounded answer)." loading="lazy"></span>
+      <figcaption><span lang="de">Links die Vorbereitung, die pro Dokument einmal läuft (Labs 03 bis 05); rechts die Anfrage, die bei jeder Frage läuft (Labs 05 bis 07). Die Suche vergleicht den Fragevektor mit den gespeicherten Chunk-Vektoren.</span><span lang="en">Left the preparation that runs once per document (labs 03 to 05); right the query that runs for every question (labs 05 to 07). The search compares the question vector with the stored chunk vectors.</span></figcaption>
+    </figure>
+    <div class="befehl">
+      <div class="befehl-kopf"><span class="befehl-name">RAG</span><span class="befehl-was"><span lang="de">Retrieval-Augmented Generation</span><span lang="en">Retrieval-augmented generation</span></span></div>
+      <div class="befehl-koerper">
+        <ul class="befehl-teile">
+          <li>Retrieval<span><span lang="de">Zur Frage passende Textstücke finden: Embedding, Vektorsuche, Schlüsselwörter, Reranking (Labs 05 und 06).</span><span lang="en">Find text pieces matching the question: embedding, vector search, keywords, reranking (labs 05 and 06).</span></span></li>
+          <li>Augmentation<span><span lang="de">Die Fundstücke in den Prompt legen, als Daten gekennzeichnet, innerhalb eines Budgets (Lab 07).</span><span lang="en">Place the findings into the prompt, marked as data, within a budget (lab 07).</span></span></li>
+          <li>Generation<span><span lang="de">Das Sprachmodell antwortet aus Frage und Fundstücken, in einem festen Format mit Quelle (Lab 07).</span><span lang="en">The language model answers from question and findings, in a fixed format with source (lab 07).</span></span></li>
+        </ul>
+        <div class="befehl-falle"><strong><span lang="de">Stolperfalle:</span><span lang="en">Pitfall:</span></strong> <span lang="de">RAG macht das Modell nicht klüger, sondern besser informiert. Findet die Suche das falsche Stück, antwortet das Modell flüssig aus dem falschen Stück. Deshalb misst Lab 08 zuerst die Suche.</span><span lang="en">RAG does not make the model smarter, only better informed. If retrieval finds the wrong piece, the model answers fluently from the wrong piece. That is why lab 08 measures retrieval first.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="alternativen">
+    <h2><span lang="de">Vier Wege, Wissen ins Modell zu bringen</span><span lang="en">Four ways to bring knowledge into the model</span></h2>
+    <p>
+      <span lang="de">RAG ist eine von vier Möglichkeiten. Die Tabelle stellt sie nach den Kriterien gegenüber, die in der Praxis entscheiden: Aktualität, Belegbarkeit, Kosten je Anfrage und Aufwand beim Einrichten.</span>
+      <span lang="en">RAG is one of four options. The table compares them by the criteria that decide in practice: freshness, verifiability, cost per request and set-up effort.</span>
+    </p>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th><span lang="de">Ansatz</span><span lang="en">Approach</span></th><th><span lang="de">Was passiert</span><span lang="en">What happens</span></th><th><span lang="de">Aktualität</span><span lang="en">Freshness</span></th><th><span lang="de">Beleg</span><span lang="en">Evidence</span></th><th><span lang="de">Kosten je Anfrage</span><span lang="en">Cost per request</span></th><th><span lang="de">Passt, wenn</span><span lang="en">Fits when</span></th></tr></thead>
+      <tbody>
+        <tr><td>Prompting</td><td><span lang="de">Anweisungen und Beispiele im Prompt</span><span lang="en">Instructions and examples in the prompt</span></td><td><span lang="de">kein neues Wissen</span><span lang="en">no new knowledge</span></td><td><span lang="de">kein Beleg</span><span lang="en">no evidence</span></td><td><span lang="de">gering</span><span lang="en">low</span></td><td><span lang="de">Form, Ton, Aufgabe ändern sich, nicht die Fakten</span><span lang="en">form, tone, task change, not the facts</span></td></tr>
+        <tr><td>Long Context</td><td><span lang="de">Das ganze Dokument in den Prompt</span><span lang="en">The whole document into the prompt</span></td><td><span lang="de">aktuell</span><span lang="en">fresh</span></td><td><span lang="de">nur, wenn das Modell zitiert</span><span lang="en">only if the model cites</span></td><td><span lang="de">hoch: jede Frage zahlt das ganze Dokument</span><span lang="en">high: every question pays for the whole document</span></td><td><span lang="de">ein Dokument, wenige Anfragen</span><span lang="en">one document, few requests</span></td></tr>
+        <tr><td>Fine-Tuning</td><td><span lang="de">Parameter mit eigenen Daten nachtrainieren</span><span lang="en">Retrain parameters with own data</span></td><td><span lang="de">Stand des Trainings</span><span lang="en">state at training time</span></td><td><span lang="de">kein Beleg</span><span lang="en">no evidence</span></td><td><span lang="de">gering, aber Training teuer</span><span lang="en">low, but training expensive</span></td><td><span lang="de">Stil, Format, Fachsprache; nicht für Fakten (Ovadia et al. 2023)</span><span lang="en">style, format, jargon; not for facts (Ovadia et al. 2023)</span></td></tr>
+        <tr><td>RAG</td><td><span lang="de">Zur Laufzeit suchen und mitgeben</span><span lang="en">Search and supply at query time</span></td><td><span lang="de">Stand des Index</span><span lang="en">state of the index</span></td><td><span lang="de">Quelle und Seite je Antwort</span><span lang="en">source and page per answer</span></td><td><span lang="de">mittel: nur die Fundstücke</span><span lang="en">medium: only the findings</span></td><td><span lang="de">viele Dokumente, häufige Änderungen, Nachweispflicht</span><span lang="en">many documents, frequent changes, duty to cite</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+      <span lang="de">Long Context klingt einfach: Das Handbuch hat <span data-wert="tokens.handbuch">23 925</span> Tokens und passt in das Fenster von gemma-4-12b. Aber jede Frage kostet dann das ganze Handbuch an Rechenzeit, und Liu et al. (2023) zeigen, dass Modelle relevante Stellen in der Mitte langer Kontexte schlechter finden als am Anfang oder Ende, auch Modelle mit ausdrücklich großem Fenster. RAG gibt dem Modell nur die fünf Stücke, die zur Frage passen, und stellt sie an den Anfang.</span>
+      <span lang="en">Long context sounds easy: the manual has <span data-wert="tokens.handbuch">23,925</span> tokens and fits into gemma-4-12b's window. But every question then costs the whole manual in compute, and Liu et al. (2023) show that models find relevant passages in the middle of long contexts worse than at the beginning or end, even models with an explicitly large window. RAG gives the model only the five pieces that match the question and puts them at the front.</span>
+    </p>
+  </section>
+
+  <section class="section-block" id="lokal">
+    <h2><span lang="de">Warum das Fallbeispiel lokal läuft</span><span lang="en">Why the case study runs locally</span></h2>
+    <p>
+      <span lang="de">Das Fallbeispiel schickt Frage und Handbuchauszüge wahlweise an LM Studio auf dem eigenen Rechner oder an die OpenAI-API. Für die lokale Variante sprechen drei Gründe. <strong>Datenschutz:</strong> Was das Modell lokal liest, verlässt den Rechner nicht; bei einem Cloud-Anbieter werden Frage und Auszüge übertragen, und der Anbieter wird zum Auftragsverarbeiter im Sinne der DSGVO, mit Vertrag, Prüfpflichten und Fragen zum Drittland. <strong>Kontrolle:</strong> Modell, Version und Verhalten ändern sich nur, wenn man selbst etwas ändert. <strong>Kosten:</strong> Die Cloud rechnet je Token ab; die Zahlen sind klein, aber sie wachsen mit jeder Frage, während ein lokales Modell einmal Hardware und danach Strom kostet. Der Rechner unten nutzt die im Live-Protokoll gemessenen Tokenzahlen und die Standardpreise von gpt-4.1-mini vom 19.09.2026.</span>
+      <span lang="en">The case study sends question and manual excerpts either to LM Studio on your own machine or to the OpenAI API. Three reasons speak for the local variant. <strong>Privacy:</strong> what the model reads locally never leaves the machine; with a cloud provider, question and excerpts are transmitted, and the provider becomes a processor under the GDPR, with contract, audit duties and third-country questions. <strong>Control:</strong> model, version and behaviour change only when you change something yourself. <strong>Cost:</strong> the cloud bills per token; the numbers are small, but they grow with every question, while a local model costs hardware once and electricity afterwards. The calculator below uses the token counts measured in the live log and the standard prices of gpt-4.1-mini as of 19 Sept 2026.</span>
+    </p>
+    <div data-werkzeug="kosten"></div>
+    <div class="warn-box">
+      <p><strong><span lang="de">Lokal ist nicht automatisch besser.</span><span lang="en">Local is not automatically better.</span></strong> <span lang="de">Das lokale Modell brauchte für die E:18-Antwort <span data-wert="antworten.e18.sekunden">26,4</span> Sekunden auf einem MacBook; die Cloud antwortet in wenigen Sekunden und mit größeren Modellen. Das Fallbeispiel hält deshalb beide Wege offen und lässt den Anbieter je Anfrage umschalten.</span><span lang="en">The local model needed <span data-wert="antworten.e18.sekunden">26.4</span> seconds for the E:18 answer on a MacBook; the cloud answers in a few seconds and with larger models. The case study therefore keeps both paths open and lets the provider be switched per request.</span></p>
+    </div>
+  </section>
+
+  <section class="section-block" id="fallbeispiel">
+    <h2><span lang="de">Das Fallbeispiel in fünf Sätzen</span><span lang="en">The case study in five sentences</span></h2>
+    <p>
+      <span lang="de">Der Waschmaschinen-Assistent beantwortet Fragen zur Gebrauchsanleitung einer Siemens-Waschmaschine, 48 Seiten als PDF. Ein Parser macht daraus Markdown mit <span data-wert="tokens.handbuchAbschnitte">187</span> Abschnitten, die Pipeline zerlegt sie in <span data-wert="chunks.anzahl">346</span> Chunks und berechnet je Chunk einen Vektor mit dem Modell <code>multilingual-e5-small</code>. Bei einer Frage holt die Suche zwölf Kandidaten, ergänzt exakt passende Fehlercodes, lässt den Reranker <code>bge-reranker-v2-m3</code> die besten fünf wählen und lehnt ab, wenn kein Kandidat eine Schwelle erreicht. Ein Flask-Server übergibt Frage und Auszüge an LM Studio oder OpenAI und streamt die Antwort in einem festen Format mit Quelle und Seite an den Browser. Alles liegt in einem öffentlichen Repository, das Lab 10 Schritt für Schritt nachbaut.</span>
+      <span lang="en">The washing-machine assistant answers questions about the user manual of a Siemens washing machine, 48 pages as PDF. A parser turns it into Markdown with <span data-wert="tokens.handbuchAbschnitte">187</span> sections, the pipeline splits them into <span data-wert="chunks.anzahl">346</span> chunks and computes one vector per chunk with the model <code>multilingual-e5-small</code>. For a question, the search fetches twelve candidates, adds exactly matching error codes, lets the reranker <code>bge-reranker-v2-m3</code> pick the best five and refuses if no candidate reaches a threshold. A Flask server passes question and excerpts to LM Studio or OpenAI and streams the answer in a fixed format with source and page to the browser. Everything lives in a public repository that lab 10 rebuilds step by step.</span>
+    </p>
+    <div class="challenge-box">
+      <h3><span lang="de">Die Labs auf dem Weg</span><span lang="en">The labs along the way</span></h3>
+      <p><span lang="de">03 macht aus dem PDF Text · 04 zerlegt ihn in Chunks · 05 rechnet Vektoren · 06 sucht und sortiert · 07 fragt das Modell · 08 misst · 09 erklärt den Betrieb · 10 baut alles nach.</span><span lang="en">03 turns the PDF into text · 04 splits it into chunks · 05 computes vectors · 06 searches and ranks · 07 asks the model · 08 measures · 09 explains operations · 10 rebuilds everything.</span></p>
+    </div>
+  </section>
+
   <section class="section-block" id="uebungen">
     <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <p><span lang="de">Fünf Übungen: zwei Antworten vergleichen, Sätze auf Belege prüfen, Anforderungen einem Ansatz zuordnen, die Definition festhalten und Cloud-Kosten rechnen.</span><span lang="en">Five exercises: compare two answers, check sentences for evidence, assign requirements to an approach, pin down the definition and compute cloud costs.</span></p>
     <div data-uebung="R02-01"></div>
     <div data-uebung="R02-02"></div>
     <div data-uebung="R02-03"></div>
@@ -58,11 +153,27 @@
 
   <section class="section-block" id="zusammenfassung">
     <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <ul>
+      <li><span lang="de">Drei Lücken: Wissensstand, Firmenwissen, Belegbarkeit. RAG schließt alle drei, indem es das Dokument zur Laufzeit mitgibt.</span><span lang="en">Three gaps: knowledge cutoff, company knowledge, verifiability. RAG closes all three by supplying the document at query time.</span></li>
+      <li><span lang="de">Retriever holt, Generator antwortet; die Gewichte bleiben unverändert (Lewis et al. 2020).</span><span lang="en">Retriever fetches, generator answers; the weights stay unchanged (Lewis et al. 2020).</span></li>
+      <li><span lang="de">Fine-Tuning ändert, wie das Modell spricht; RAG ändert, was es weiß. Long Context zahlt jede Frage mit dem ganzen Dokument.</span><span lang="en">Fine-tuning changes how the model speaks; RAG changes what it knows. Long context pays for the whole document with every question.</span></li>
+      <li><span lang="de">Lokal heißt: keine Übertragung, volle Kontrolle, Hardware statt Tokenpreis; dafür langsamer und kleiner als die Cloud.</span><span lang="en">Local means: no transmission, full control, hardware instead of token prices; but slower and smaller than the cloud.</span></li>
+      <li><span lang="de">Eine RAG-Antwort ist so gut wie ihre Fundstücke; belegt ist nur, was im Auszug steht.</span><span lang="en">A RAG answer is only as good as its findings; supported is only what is in the excerpt.</span></li>
+    </ul>
     <nav class="nav-bottom"></nav>
   </section>
 
   <section class="section-block" id="quellen">
     <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+    <ul class="quellen">
+      <li>Lewis, P. et al. (2020): Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. NeurIPS. <a href="https://arxiv.org/abs/2005.11401" rel="noopener">arXiv:2005.11401</a></li>
+      <li>Gao, Y. et al. (2023): Retrieval-Augmented Generation for Large Language Models: A Survey. <a href="https://arxiv.org/abs/2312.10997" rel="noopener">arXiv:2312.10997</a></li>
+      <li>Ovadia, O. et al. (2023): Fine-Tuning or Retrieval? Comparing Knowledge Injection in LLMs. <a href="https://arxiv.org/abs/2312.05934" rel="noopener">arXiv:2312.05934</a></li>
+      <li>Liu, N. F. et al. (2023): Lost in the Middle: How Language Models Use Long Contexts. <a href="https://arxiv.org/abs/2307.03172" rel="noopener">arXiv:2307.03172</a></li>
+      <li>OpenAI: API-Preisliste, Standardpreise gpt-4.1-mini (0,40 / 1,60 USD je 1 Mio. Tokens), <a href="https://developers.openai.com/api/docs/pricing" rel="noopener">developers.openai.com/api/docs/pricing</a>, abgerufen 19.09.2026</li>
+      <li><span lang="de">Verordnung (EU) 2016/679 (DSGVO), Art. 28 Auftragsverarbeiter, Art. 44 ff. Drittlandübermittlung.</span><span lang="en">Regulation (EU) 2016/679 (GDPR), Art. 28 processor, Art. 44 ff. third-country transfers.</span></li>
+      <li><span lang="de">Fallbeispiel: <a href="https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM" rel="noopener">swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM</a>, README, docs/TECHNICAL.md und docs/evaluation/LIVE.md (Tokenzahlen der OpenAI-Antworten), Stand 19.09.2026; aufgezeichnete Antworten in <code>data/antworten.json</code>.</span><span lang="en">Case study: <a href="https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM" rel="noopener">swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM</a>, README, docs/TECHNICAL.md and docs/evaluation/LIVE.md (token counts of the OpenAI answers), as of 19 Sept 2026; recorded answers in <code>data/antworten.json</code>.</span></li>
+    </ul>
   </section>
 
 </main>
