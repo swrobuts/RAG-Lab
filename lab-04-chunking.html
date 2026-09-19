@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 04 · Chunking · RAG-Lab</title>
+  <meta name="rag:titel-en" content="Lab 04 · Chunking · RAG-Lab" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/rag.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%232E2418'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23C4602A'>R</text></svg>" />
+</head>
+<body class="lab-page">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html" data-lab-link><span class="mark">RAG</span>-Lab</a>
+    <a class="header-back" href="index.html" data-lab-link>
+      <span lang="de">← Zur Übersicht</span><span lang="en">← Back to overview</span>
+    </a>
+  </div>
+  <div class="header-right">
+    <button class="lang-btn active" data-lang-btn="de" aria-pressed="true">DE</button>
+    <button class="lang-btn" data-lang-btn="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title"><span lang="de">Abschnitte</span><span lang="en">Sections</span></div>
+  <a class="sidebar-link" href="#uebungen"><span lang="de">Übungen</span><span lang="en">Exercises</span></a>
+  <a class="sidebar-link" href="#zusammenfassung"><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></a>
+  <a class="sidebar-link" href="#quellen"><span lang="de">Quellen</span><span lang="en">Sources</span></a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">04</div>
+  <h1 class="lab-title">
+    <span lang="de">Chunking</span>
+    <span lang="en">Chunking</span>
+  </h1>
+  <p class="lab-intro">
+    <span lang="de">Dieses Lab entsteht gerade.</span>
+    <span lang="en">This lab is being built.</span>
+  </p>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="uebungen">
+    <h2><span lang="de">Übungen</span><span lang="en">Exercises</span></h2>
+    <div data-uebung="R04-01"></div>
+    <div data-uebung="R04-02"></div>
+    <div data-uebung="R04-03"></div>
+    <div data-uebung="R04-04"></div>
+    <div data-uebung="R04-05"></div>
+    <div data-uebung="R04-06"></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2><span lang="de">Zusammenfassung</span><span lang="en">Summary</span></h2>
+    <nav class="nav-bottom"></nav>
+  </section>
+
+  <section class="section-block" id="quellen">
+    <h2><span lang="de">Quellen</span><span lang="en">Sources</span></h2>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <span lang="de">THWS Business School · RAG-Lab · Prof. Dr. Robert Butscher</span>
+  <span lang="en">THWS Business School · RAG-Lab · Prof. Dr. Robert Butscher</span>
+</footer>
+
+<script type="module">
+  import { starteLab } from './assets/rag.js'
+  starteLab({ lab: 'lab-04', basis: '.' })
+</script>
+</body>
+</html>

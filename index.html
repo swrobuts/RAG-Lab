@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG-Lab · Retrieval-Augmented Generation · THWS Business School</title>
+  <meta name="rag:titel-en" content="RAG-Lab · Retrieval-augmented generation · THWS Business School" />
+  <meta name="description" content="Interaktive Lernumgebung zu Retrieval-Augmented Generation und Sprachmodellen: zehn Labs von Token und Vektor bis zum eigenen lokalen Modell, das Embedding-Modell des Fallbeispiels läuft im Browser, jede Zahl ist gemessen." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/rag.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%232E2418'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23C4602A'>R</text></svg>" />
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">RAG</span>-Lab</a>
+    <span class="header-back">
+      <span lang="de">THWS Business School · Retrieval-Augmented Generation</span>
+      <span lang="en">THWS Business School · Retrieval-augmented generation</span>
+    </span>
+  </div>
+  <div class="header-right">
+    <button class="lang-btn active" data-lang-btn="de" aria-pressed="true">DE</button>
+    <button class="lang-btn" data-lang-btn="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">
+      <span lang="de">Lernumgebung · Retrieval-Augmented Generation</span>
+      <span lang="en">Learning environment · Retrieval-augmented generation</span>
+    </span>
+    <h1 class="hero-title">RAG</h1>
+    <p class="hero-subtitle">
+      <span lang="de">Antworten, die im Dokument stehen</span>
+      <span lang="en">Answers that are in the document</span>
+    </p>
+    <p class="hero-desc">
+      <span lang="de">Zehn Labs führen von Token und Vektor über Chunking, Embeddings, Retrieval und Generierung bis zu
+        Evaluation, Architektur und dem Nachbau eines lokalen Handbuchassistenten. Das Embedding-Modell des Fallbeispiels
+        läuft in diesem Browserfenster, und jede Zahl in den Labs stammt aus dessen Messprotokollen.</span>
+      <span lang="en">Ten labs lead from token and vector through chunking, embeddings, retrieval and generation to
+        evaluation, architecture and rebuilding a local manual assistant. The case study's embedding model runs in this
+        browser window, and every number in the labs comes from its measurement logs.</span>
+    </p>
+    <div class="hero-badges">
+      <span class="hero-badge"><span lang="de">Sprachmodelle</span><span lang="en">Language models</span></span>
+      <span class="hero-badge">Embeddings</span>
+      <span class="hero-badge">Retrieval · Reranking</span>
+      <span class="hero-badge">LM Studio · Ollama</span>
+      <span class="hero-badge"><span lang="de">Ohne Anmeldung</span><span lang="en">No sign-up</span></span>
+      <span class="hero-badge"><span lang="de">Ohne Installation</span><span lang="en">No installation</span></span>
+    </div>
+    <div class="cta-row">
+      <a class="btn solid" href="lab-01-sprachmodelle.html" data-lab-link>
+        <span lang="de">Mit Lab 01 beginnen</span><span lang="en">Start with lab 01</span>
+      </a>
+      <a class="btn" href="#labs">
+        <span lang="de">Alle Labs ansehen</span><span lang="en">See all labs</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat-item"><div class="stat-value">10</div><div class="stat-label">Labs</div></div>
+    <div class="stat-item"><div class="stat-value">55</div><div class="stat-label"><span lang="de">Übungen</span><span lang="en">Exercises</span></div></div>
+    <div class="stat-item"><div class="stat-value" data-wert="chunks.anzahl">346</div><div class="stat-label"><span lang="de">Handbuch-Chunks</span><span lang="en">Manual chunks</span></div></div>
+    <div class="stat-item"><div class="stat-value">1</div><div class="stat-label"><span lang="de">Modell im Browser</span><span lang="en">Model in the browser</span></div></div>
+  </div>
+</div>
+
+<main>
+
+<section class="section" id="labs">
+  <div class="section-head">
+    <span class="badge"><span lang="de">Die zehn Labs</span><span lang="en">The ten labs</span></span>
+    <div class="accent-line"></div>
+    <h2>
+      <span lang="de">Vom ersten Token zum eigenen Assistenten</span>
+      <span lang="en">From the first token to your own assistant</span>
+    </h2>
+    <p>
+      <span lang="de">Eine Frage läuft durch alle Labs: „Was bedeutet E:18?“ Die Waschmaschine zeigt diesen Code, das
+        Handbuch kennt die Antwort auf Seite 33, und ein Sprachmodell allein rät. Lab für Lab wird die Frage tokenisiert,
+        gesucht, belegt beantwortet, gemessen und ausgeliefert. Die Labs lassen sich der Reihe nach durcharbeiten,
+        funktionieren aber auch einzeln.</span>
+      <span lang="en">One question runs through every lab: “What does E:18 mean?” The washing machine shows this code, the
+        manual has the answer on page 33, and a language model on its own guesses. Lab by lab the question is tokenised,
+        searched, answered with evidence, measured and served. The labs can be worked through in sequence, but also stand
+        on their own.</span>
+    </p>
+  </div>
+  <div data-fortschritt></div>
+  <div class="labs-grid">
+    <a class="lab-card" href="lab-01-sprachmodelle.html" data-lab-link>
+      <div class="lab-num">01</div>
+      <h3><span lang="de">Sprachmodelle</span><span lang="en">Language models</span></h3>
+      <div class="sub">Token, next token, context window, temperature</div>
+      <div class="desc"><span lang="de">Was ein Token ist, wie das Modell das nächste vorhersagt, was Kontextfenster, Temperatur, Halluzination und Wissensstand bedeuten. Tokenizer und Temperatur-Regler laufen live.</span><span lang="en">What a token is, how the model predicts the next one, what context window, temperature, hallucination and knowledge cutoff mean. Tokenizer and temperature slider run live.</span></div>
+      <div class="meta">5 <span lang="de">Übungen</span><span lang="en">exercises</span> · 35 min</div>
+    </a>
+    <a class="lab-card" href="lab-02-warum-rag.html" data-lab-link>
+      <div class="lab-num">02</div>
+      <h3><span lang="de">Warum RAG?</span><span lang="en">Why RAG?</span></h3>
+      <div class="sub">Limits, alternatives, cost, privacy</div>
+      <div class="desc"><span lang="de">Dieselbe Frage einmal ohne und einmal mit Handbuch. RAG gegen Prompting, Long Context und Fine-Tuning, und warum das Fallbeispiel lokal läuft.</span><span lang="en">The same question once without and once with the manual. RAG against prompting, long context and fine-tuning, and why the case study runs locally.</span></div>
+      <div class="meta">5 <span lang="de">Übungen</span><span lang="en">exercises</span> · 30 min</div>
+    </a>
+    <a class="lab-card" href="lab-03-aufbereiten.html" data-lab-link>
+      <div class="lab-num">03</div>
+      <h3><span lang="de">Dokumente aufbereiten</span><span lang="en">Preparing documents</span></h3>
+      <div class="sub">PDF, Markdown, OCR, provenance</div>
+      <div class="desc"><span lang="de">PDF-Seite 33 neben dem Markdown: Was der Parser findet, was er verliert, und woher eine Antwort später ihre Seitenzahl hat.</span><span lang="en">PDF page 33 next to the Markdown: what the parser finds, what it loses, and where an answer later gets its page number from.</span></div>
+      <div class="meta">5 <span lang="de">Übungen</span><span lang="en">exercises</span> · 30 min</div>
+    </a>
+    <a class="lab-card" href="lab-04-chunking.html" data-lab-link>
+      <div class="lab-num">04</div>
+      <h3>Chunking</h3>
+      <div class="sub">Strategies, tokens, overlap, tables</div>
+      <div class="desc"><span lang="de">Regler für Größe und Überlappung am echten Handbuch. Wo die E:18-Zeile in einem 6-Kilobyte-Tabellenchunk untergeht und wie sie zum eigenen Chunk wird.</span><span lang="en">Sliders for size and overlap on the real manual. Where the E:18 row drowns in a 6-kilobyte table chunk and how it becomes a chunk of its own.</span></div>
+      <div class="meta">6 <span lang="de">Übungen</span><span lang="en">exercises</span> · 40 min</div>
+    </a>
+    <a class="lab-card" href="lab-05-embeddings.html" data-lab-link>
+      <div class="lab-num">05</div>
+      <h3>Embeddings</h3>
+      <div class="sub">Vectors, cosine, prefixes, models</div>
+      <div class="desc"><span lang="de">384 Zahlen je Text, Kosinusähnlichkeit zum Rechnen, das query:/passage:-Präfix als größter Fehler der Ausgangsversion, eine Karte aller Chunks.</span><span lang="en">384 numbers per text, cosine similarity to compute, the query:/passage: prefix as the biggest bug of the initial version, a map of all chunks.</span></div>
+      <div class="meta">6 <span lang="de">Übungen</span><span lang="en">exercises</span> · 45 min</div>
+    </a>
+    <a class="lab-card" href="lab-06-retrieval.html" data-lab-link>
+      <div class="lab-num">06</div>
+      <h3><span lang="de">Retrieval und Reranking</span><span lang="en">Retrieval and reranking</span></h3>
+      <div class="sub">Top-k, hybrid, cross-encoder, threshold</div>
+      <div class="desc"><span lang="de">Der Such-Stepper: zwölf Vektortreffer, der Fehlercode-Zuschlag, der Reranker, die Schwelle. Von 80 auf 100 Prozent Trefferquote in drei Stufen.</span><span lang="en">The search stepper: twelve vector hits, the error-code boost, the reranker, the threshold. From 80 to 100 percent hit rate in three stages.</span></div>
+      <div class="meta">6 <span lang="de">Übungen</span><span lang="en">exercises</span> · 45 min</div>
+    </a>
+    <a class="lab-card" href="lab-07-generierung.html" data-lab-link>
+      <div class="lab-num">07</div>
+      <h3><span lang="de">Prompt und Generierung</span><span lang="en">Prompt and generation</span></h3>
+      <div class="sub">System prompt, structured output, streaming</div>
+      <div class="desc"><span lang="de">Was das Modell wirklich sieht: der Systemprompt Satz für Satz, Kontext als Daten, drei Tags als Antwortformat. Eigenes Modell über LM Studio oder Ollama anschließen.</span><span lang="en">What the model really sees: the system prompt sentence by sentence, context as data, three tags as answer format. Connect your own model via LM Studio or Ollama.</span></div>
+      <div class="meta">6 <span lang="de">Übungen</span><span lang="en">exercises</span> · 45 min</div>
+    </a>
+    <a class="lab-card" href="lab-08-evaluation.html" data-lab-link>
+      <div class="lab-num">08</div>
+      <h3><span lang="de">Evaluation und Guardrails</span><span lang="en">Evaluation and guardrails</span></h3>
+      <div class="sub">Hit@k, MRR, negatives, ablation</div>
+      <div class="desc"><span lang="de">Zehn Fragen, vier Fremdfragen, drei Varianten. Erst selbst rechnen, dann aufdecken. Der Schwellen-Regler zeigt, wo eine echte Handbuchfrage zu Unrecht abgelehnt wird.</span><span lang="en">Ten questions, four off-topic questions, three variants. Compute first, then reveal. The threshold slider shows where a genuine manual question is wrongly rejected.</span></div>
+      <div class="meta">6 <span lang="de">Übungen</span><span lang="en">exercises</span> · 40 min</div>
+    </a>
+    <a class="lab-card" href="lab-09-architektur.html" data-lab-link>
+      <div class="lab-num">09</div>
+      <h3><span lang="de">Architektur, Betrieb, Sicherheit</span><span lang="en">Architecture, operations, security</span></h3>
+      <div class="sub">Components, API, cache, keys, cost</div>
+      <div class="desc"><span lang="de">Klickbares Architekturdiagramm, der SSE-Vertrag, der Cache-Fingerprint, der Schlüssel nur im Arbeitsspeicher, und was 200 Fragen am Tag in der Cloud kosten.</span><span lang="en">Clickable architecture diagram, the SSE contract, the cache fingerprint, the key that lives only in memory, and what 200 questions a day cost in the cloud.</span></div>
+      <div class="meta">5 <span lang="de">Übungen</span><span lang="en">exercises</span> · 35 min</div>
+    </a>
+    <a class="lab-card" href="lab-10-nachbauen.html" data-lab-link>
+      <div class="lab-num">10</div>
+      <h3><span lang="de">Nachbauen</span><span lang="en">Rebuilding it</span></h3>
+      <div class="sub">venv, LM Studio, first question, failure modes</div>
+      <div class="desc"><span lang="de">Das Fallbeispiel auf dem eigenen Rechner: Klonen, venv, Installation, Modell-ID, erste Frage. Im nachgebildeten Terminal, mit den echten Fehlerbildern und ihrer Abhilfe.</span><span lang="en">The case study on your own computer: clone, venv, installation, model ID, first question. In the simulated terminal, with the real failure modes and their fixes.</span></div>
+      <div class="meta">5 <span lang="de">Übungen</span><span lang="en">exercises</span> · 45 min</div>
+    </a>
+  </div>
+</section>
+
+<section class="section soft">
+  <div class="inner">
+    <div class="section-head">
+      <span class="badge dark"><span lang="de">Wie das hier funktioniert</span><span lang="en">How this works</span></span>
+      <div class="accent-line"></div>
+      <h2><span lang="de">Das Modell läuft bei Ihnen</span><span lang="en">The model runs on your machine</span></h2>
+    </div>
+    <div class="labs-grid">
+      <div class="concept-box">
+        <h3><span lang="de">Echtes Embedding-Modell im Browser</span><span lang="en">A real embedding model in the browser</span></h3>
+        <p><span lang="de">Auf Klick lädt die Seite <code>multilingual-e5-small</code>, dasselbe Modell, mit dem das Fallbeispiel
+          sein Handbuch durchsucht: 118 MB einmalig vom Hugging-Face-Hub, danach im Cache Ihres Browsers. Sie tippen eine
+          Frage, und die Seite rechnet den Vektor, die Kosinusähnlichkeit und die Treffer gegen 346 Handbuch-Chunks.</span>
+        <span lang="en">On click the page loads <code>multilingual-e5-small</code>, the same model the case study uses to search
+          its manual: 118 MB once from the Hugging Face Hub, then cached in your browser. You type a question and the page
+          computes the vector, the cosine similarity and the hits against 346 manual chunks.</span></p>
+      </div>
+      <div class="concept-box">
+        <h3><span lang="de">Gemessene Zahlen</span><span lang="en">Measured numbers</span></h3>
+        <p><span lang="de">Trefferquoten, Reranker-Scores, Tokenzahlen und Antwortzeiten stammen aus den Protokollen des
+          Fallbeispiels und werden mit dessen Python-Umgebung neu erzeugt. Ein Prüflauf vergleicht jede Zahl im Text mit
+          den Datendateien.</span>
+        <span lang="en">Hit rates, reranker scores, token counts and response times come from the case study's logs and are
+          regenerated with its Python environment. A check run compares every number in the text with the data files.</span></p>
+      </div>
+      <div class="concept-box">
+        <h3><span lang="de">Eigenes Modell anschließen</span><span lang="en">Connect your own model</span></h3>
+        <p><span lang="de">In Lab 07 schickt die Seite den echten RAG-Prompt an Ihr lokales LM Studio oder Ollama und zeigt die
+          Antwort im Stream. Ohne eigenen Server sehen Sie aufgezeichnete Antworten von gemma-4-12b.</span>
+        <span lang="en">In lab 07 the page sends the real RAG prompt to your local LM Studio or Ollama and shows the streamed
+          answer. Without your own server you see recorded answers from gemma-4-12b.</span></p>
+      </div>
+    </div>
+    <div class="tip-box">
+      <p><strong><span lang="de">Ihr Fortschritt bleibt lokal.</span><span lang="en">Your progress stays local.</span></strong>
+        <span lang="de">Gelöste Übungen, der eingetragene Modell-Endpunkt und die Terminalzustände liegen im Speicher Ihres
+          Browsers. Diese Angaben verlassen Ihr Gerät nicht; es gibt keine Auswertung und keine Übermittlung an die
+          Hochschule. Oben bei den Kacheln sehen Sie Ihren Stand und können ihn löschen, um von vorn zu beginnen.</span>
+        <span lang="en">Solved exercises, the model endpoint you entered and the terminal states are kept in your browser's
+          local storage. This information never leaves your device; there is no evaluation and no transmission to the
+          university. Above the tiles you see your progress and can delete it to start over.</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="probe">
+  <div class="section-head">
+    <span class="badge"><span lang="de">Zum Ausprobieren</span><span lang="en">Try it</span></span>
+    <div class="accent-line"></div>
+    <h2><span lang="de">Eine erste Suche</span><span lang="en">A first search</span></h2>
+    <p>
+      <span lang="de">Wählen Sie eine Frage und verfolgen Sie sie durch die fünf Stufen: Vektorsuche, Fehlercode-Zuschlag,
+        Reranker, Schwelle, Entscheidung. Schieben Sie die Schwelle nach oben, bis die Frage abgelehnt wird.</span>
+      <span lang="en">Pick a question and follow it through the five stages: vector search, error-code boost, reranker,
+        threshold, decision. Push the threshold up until the question is rejected.</span>
+    </p>
+  </div>
+  <div data-werkzeug="suche" data-parameter='{"frage":"fehler-e18"}'></div>
+</section>
+
+<section class="section soft">
+  <div class="inner">
+    <div class="section-head">
+      <span class="badge"><span lang="de">Erster Schritt</span><span lang="en">First step</span></span>
+      <div class="accent-line"></div>
+      <h2><span lang="de">Wenn Sie noch nie mit einem Sprachmodell gearbeitet haben</span><span lang="en">If you have never worked with a language model</span></h2>
+      <p>
+        <span lang="de">Fangen Sie mit Lab 01 an. Es erklärt, was ein Token ist, wie ein Modell das nächste wählt und warum
+          es auch dann antwortet, wenn es nichts weiß. Wer das kennt, steigt bei Lab 02 ein; wer nur das Fallbeispiel
+          nachbauen will, bei Lab 10.</span>
+        <span lang="en">Start with lab 01. It explains what a token is, how a model chooses the next one and why it answers
+          even when it knows nothing. If you know that, start at lab 02; if you only want to rebuild the case study, at lab 10.</span>
+      </p>
+    </div>
+    <div class="cta-row" style="justify-content:flex-start">
+      <a class="btn solid" href="lab-01-sprachmodelle.html" data-lab-link><span lang="de">Lab 01 öffnen</span><span lang="en">Open lab 01</span></a>
+      <a class="btn" href="lab-10-nachbauen.html" data-lab-link><span lang="de">Direkt zum Nachbau</span><span lang="en">Straight to rebuilding</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <span lang="de">THWS Business School · RAG-Lab · Prof. Dr. Robert Butscher · Modell im Browser mit <a href="https://huggingface.co/docs/transformers.js" rel="noopener">transformers.js</a></span>
+  <span lang="en">THWS Business School · RAG-Lab · Prof. Dr. Robert Butscher · Model in the browser with <a href="https://huggingface.co/docs/transformers.js" rel="noopener">transformers.js</a></span>
+</footer>
+
+<script type="module">
+  import { starteUebersicht } from './assets/rag.js'
+  starteUebersicht({ basis: '.' })
+</script>
+</body>
+</html>
