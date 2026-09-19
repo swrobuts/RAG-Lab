@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { neueWelt, fuehreAus, schrittErfuellt, zustandTrifft } from '../assets/terminal.js'
 const HIER = dirname(fileURLToPath(import.meta.url)); const ROOT = join(HIER, '..')
-const { LABS } = await import('../assets/rag.js').catch(async () => {
+const { LABS, UEBUNGEN_GESAMT } = await import('../assets/rag.js').catch(async () => {
   // rag.js importiert DOM-freie Module, braucht aber selbst kein DOM beim Laden.
   throw new Error('assets/rag.js nicht ladbar')
 })
@@ -121,6 +121,8 @@ const WERTE = {
   'antworten.e18nackt.tokens': () => { const e = an.eintraege.find(x => x.id === 'e18-nackt'); return `${e.usage.ein}/${e.usage.aus}` },
   'antworten.e18.sekunden': () => an.eintraege.find(x => x.id === 'e18-rag').sekunden,
   'antworten.modell': () => an.eintraege[0].modell,
+  'labs.anzahl': () => LABS.length,
+  'labs.uebungen': () => UEBUNGEN_GESAMT,
   'betrieb.fingerprint': () => bt.fingerprint.gespeichert,
   'betrieb.fingerprintKurz': () => bt.fingerprint.gespeichert.slice(0, 12) + '…' + bt.fingerprint.gespeichert.slice(-6),
   'betrieb.anderesModellKurz': () => bt.fingerprint.anderesModell.slice(0, 12) + '…',
@@ -179,7 +181,7 @@ function pruefeWerte (html, name) {
     const ist = m[2].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim()
     meld(soll != null && String(soll).trim() === ist, `${name}: Textmarker ${m[1]} zeichengleich`)
   }
-  for (const m of html.matchAll(/<(span|code)(?: class="[^"]*")? data-wert="([^"]+)">([\s\S]*?)<\/\1>/g)) {
+  for (const m of html.matchAll(/<(span|code|div)(?: class="[^"]*")? data-wert="([^"]+)">([\s\S]*?)<\/\1>/g)) {
     const key = m[2]; const text = m[3].replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(NBSP, '').trim()
     if (!WERTE[key]) { meld(false, `${name}: unbekannter Marker ${key}`); continue }
     let soll; try { soll = WERTE[key]() } catch (e) { meld(false, `${name}: ${key} nicht berechenbar (${e.message})`); continue }
