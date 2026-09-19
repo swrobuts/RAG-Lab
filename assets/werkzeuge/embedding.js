@@ -32,7 +32,7 @@ export function baue (wrap, p, ctx) {
     if (mitChunks && chunks.length) {
       const ol = el('ol')
       for (const t of topK(Array.from(va), chunks, 3)) { const c = chunks.find(x => x.id === t.id); ol.append(el('li', null, `${fmt(t.score, 3, lang)} · ${c.abschnitt || c.id}: ${c.text.replace(/\n/g, ' ').slice(0, 90)} …`)) }
-      erg.append(zwei(el('h4'), L.naechste, ctx), ol)
+      erg.append(zwei(el('h3'), L.naechste, ctx), ol)
     }
   }
   const zeigeKatalog = () => {

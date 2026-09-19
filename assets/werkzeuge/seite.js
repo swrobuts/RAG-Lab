@@ -11,7 +11,7 @@ export function baue (wrap, p, ctx) {
   const li = el('figure'); const img = el('img'); img.src = ctx.basis + '/assets/seite-33.png'; img.loading = 'lazy'
   img.alt = 'Seite 33 der Gebrauchsanleitung: Tabellen „Hinweise im Anzeigefeld“ und „Störungen, was tun?“'; img.setAttribute('data-alt-en', 'Page 33 of the manual: tables “Hinweise im Anzeigefeld” and “Störungen, was tun?”')
   li.append(img, zwei(el('figcaption', 'line-hilfe'), L.links, ctx))
-  const re = el('div'); re.append(zwei(el('h4'), L.rechts, ctx)); const pre = el('pre', 'code-block markdown'); re.append(pre); const erkl = el('div', 'tip-box'); erkl.hidden = true; re.append(erkl)
+  const re = el('div'); re.append(zwei(el('h3'), L.rechts, ctx)); const pre = el('pre', 'code-block markdown'); re.append(pre); const erkl = el('div', 'tip-box'); erkl.hidden = true; re.append(erkl)
   grid.append(li, re); wrap.append(grid); k.status(L.klick, '')
   ctx.daten('seite-33.md').then(md => {
     // Treffer auf dem Rohtext suchen (nicht auf dem maskierten HTML), dann Segmente maskieren und Treffer umhuellen.

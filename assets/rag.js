@@ -445,9 +445,9 @@ function baueBox (uebung, ctx) {
 
   /* ---- belegen ---- */
   if (uebung.typ === 'belegen') {
-    const wrap = el('div', 'belegen'); const q = el('div', 'belegen-quellen'); q.append(zwei(el('h4'), T.quelle))
+    const wrap = el('div', 'belegen'); const q = el('div', 'belegen-quellen'); q.append(zwei(el('h3'), T.quelle))
     const quellen = () => {
-      q.replaceChildren(zwei(el('h4'), T.quelle))
+      q.replaceChildren(zwei(el('h3'), T.quelle))
       for (const s of uebung.quellen) {
         const box = el('div', 'quelle')
         if (s.chunk) {

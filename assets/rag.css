@@ -668,6 +668,9 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 .zuordnen select, .rechnen input, .luecken input, .werkzeug select {
   font-family: var(--sans); font-size: 0.9rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line);
   border-radius: 6px; background: #fff; min-height: 36px; color: var(--ink);
+  /* Ein select ist so breit wie sein laengster Eintrag (Katalogfragen, Abschnittstitel);
+     ohne Obergrenze schiebt es auf dem Telefon die ganze Seite auf. */
+  max-width: 100%; box-sizing: border-box;
 }
 .sortieren { list-style: none; margin: 0; padding: 0; }
 .sortieren li { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 0.4rem; background: #fff; }
@@ -692,7 +695,7 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 .belegen-saetze li.falsch { border-left-color: var(--warn); background: var(--warn-bg); }
 .belegen-saetze .wahl { display: flex; gap: 1rem; margin-top: 0.3rem; font-size: 0.85rem; }
 .belegen-saetze .wahl label { display: inline-flex; gap: 0.3rem; align-items: center; cursor: pointer; }
-.belegen-quellen h4 { margin-bottom: 0.4rem; }
+.belegen-quellen h3 { margin-bottom: 0.4rem; font-size: 1rem; }
 .belegen-quellen .quelle { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.6rem; }
 .belegen-quellen pre { white-space: pre-wrap; font-size: 0.8rem; font-family: var(--mono); margin: 0; }
 .quelle-titel { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
@@ -704,6 +707,8 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 .checkliste .schritt-frage .frage-text { font-weight: 600; font-size: 0.88rem; }
 ul.checkliste { list-style: none; margin-left: 0; }
 ul.checkliste li { border: 0; padding: 0.25rem 0; }
+ul.checkliste label { display: flex; gap: 0.4rem; align-items: flex-start; font-size: inherit; cursor: pointer; }
+ul.checkliste label input { margin-top: 0.3em; flex: 0 0 auto; }
 
 /* ============================================================ Werkzeuge */
 .werkzeug { border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 1rem; margin: 1rem 0; }
@@ -717,7 +722,7 @@ ul.checkliste li { border: 0; padding: 0.25rem 0; }
   border-radius: 6px; width: 100%; color: var(--ink); background: #fff;
 }
 .werkzeug input[type=range] { width: 100%; accent-color: var(--signal); }
-.werkzeug h4 { margin: 0.9rem 0 0.35rem; font-size: 0.95rem; }
+.werkzeug h3 { margin: 0.9rem 0 0.35rem; font-size: 0.95rem; }
 .werkzeug .code-block { margin: 0.4rem 0; font-size: 0.8rem; white-space: pre-wrap; }
 .werkzeug label { display: block; font-size: 0.85rem; }
 .werkzeug .rechen-feld { display: grid; }
@@ -823,6 +828,7 @@ figure.diagramm img { display: block; max-width: 100%; height: auto; margin: 0 a
 figure.diagramm figcaption { font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.6rem; text-align: center; }
 blockquote.warn-box p, blockquote.concept-box p { margin: 0; font-style: italic; }
 ul.quellen { font-size: 0.88rem; }
+ul.quellen a, ul.quellen code { overflow-wrap: anywhere; }
 ul.quellen li { margin-bottom: 0.45rem; }
 .lab-intro strong { color: var(--accent); }
 

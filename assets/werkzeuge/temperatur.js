@@ -14,7 +14,7 @@ export function baue (wrap, p, ctx) {
   const lab = el('label'); const r = el('input'); r.type = 'range'; r.min = 0; r.max = 2; r.step = 0.05; r.value = p.temperatur ?? 1
   const out = el('output'); lab.append(zwei(el('span'), L.temp, ctx), ' ', out, r)
   const btn = zwei(el('button', 'btn-sm'), L.ziehen, ctx); btn.type = 'button'
-  const kopfz = zwei(el('h4'), L.wahrsch, ctx); const balken = el('div', 'verteilung'); const rest = el('p', 'line-hilfe'); const fort = el('div')
+  const kopfz = zwei(el('h3'), L.wahrsch, ctx); const balken = el('div', 'verteilung'); const rest = el('p', 'line-hilfe'); const fort = el('div')
   wrap.append(sel, promptBox, lab, btn, kopfz, balken, rest, fort)
   let d, aktuell, gezogen = null
   const zeige = () => {
@@ -29,7 +29,7 @@ export function baue (wrap, p, ctx) {
     const m = Math.max(...aktuell.tokens.map(t => t.logit))
     const top = aktuell.tokens.reduce((s, t) => s + Math.exp(t.logit - m), 0); const alle = Math.exp(aktuell.restLogsumexp - m)
     rest.textContent = txt(L.rest, lang).replace('{p}', fmt((1 - top / alle) * 100, 1, lang) + ' %').replace('{n}', ganz(d.vokabular, lang))
-    fort.replaceChildren(zwei(el('h4'), L.fort, ctx), ...Object.entries(aktuell.fortsetzungen).map(([t, s]) => {
+    fort.replaceChildren(zwei(el('h3'), L.fort, ctx), ...Object.entries(aktuell.fortsetzungen).map(([t, s]) => {
       const q = el('p'); q.append(el('strong', null, `T = ${t.replace('.', lang === 'de' ? ',' : '.')}: `), el('span', 'line-hilfe', aktuell.prompt + ' '), el('em', null, s.trim())); return q
     }))
   }

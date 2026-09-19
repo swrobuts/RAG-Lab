@@ -56,7 +56,7 @@ export function baue (wrap, p, ctx) {
     }
     const c = K.find(x => x.id === aktiv)
     if (!c) panel.replaceChildren(el('p', null, txt(L.wahl, lang)))
-    else panel.replaceChildren(el('h4', null, txt(c.name, lang)), el('p', null, c.datei), el('p', null, `${txt(L.aufgabe, lang)}: ${txt(c.aufgabe, lang)}`), el('p', null, `${txt(L.verbot, lang)}: ${txt(c.verbot, lang)}`))
+    else panel.replaceChildren(el('h3', null, txt(c.name, lang)), el('p', null, c.datei), el('p', null, `${txt(L.aufgabe, lang)}: ${txt(c.aufgabe, lang)}`), el('p', null, `${txt(L.verbot, lang)}: ${txt(c.verbot, lang)}`))
     wrap.dataset.aktiv = aktiv || ''
   }
   zeichne(); document.addEventListener('rag:sprache', zeichne); k.status(L.status, '')

@@ -52,7 +52,7 @@ export function baue (wrap, p, ctx) {
     md = t; abschnitte = chunkeMarkdown(md)
     const o0 = el('option'); o0.value = '*'; zwei(o0, L.ganz, ctx); sel.append(o0)
     const gesehen = new Set()
-    for (const a of abschnitte) if (a.ueberschrift && a.text.length > 60 && !gesehen.has(a.ueberschrift)) { gesehen.add(a.ueberschrift); const o = el('option', null, a.ueberschrift.slice(0, 70)); o.value = a.ueberschrift; sel.append(o) }
+    for (const a of abschnitte) if (a.ueberschrift && a.text.length > 60 && !gesehen.has(a.ueberschrift)) { gesehen.add(a.ueberschrift); const o = el('option', null, a.ueberschrift.slice(0, 70)); o.value = a.ueberschrift; o.dataset.quelle = 'handbuch'; sel.append(o) }
     sel.value = p.abschnitt || 'Hinweise im Anzeigefeld'; zeige()
   })
   for (const e of [sel, strat, rg, ro]) e.addEventListener('input', zeige)

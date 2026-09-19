@@ -13,14 +13,14 @@ export function baue (wrap, p, ctx) {
   const k = kopf(wrap, L.titel, ctx); const sel = el('select'); zwei(sel, L.frage, ctx, 'aria-label'); const grid = el('div', 'zwei-spalten'); wrap.append(sel, grid)
   let d
   const karte = (titel, e) => {
-    const box = el('div', 'concept-box'); box.append(zwei(el('h4'), titel, ctx)); if (!e) return box
+    const box = el('div', 'concept-box'); box.append(zwei(el('h3'), titel, ctx)); if (!e) return box
     const lang = ctx.lang()
     if (e.abgelehnt) { box.append(el('p', 'warn-box', txt(L.abgelehnt, lang)), el('p', null, e.antwort)) }
     else if (e.modus === 'rag') {
       const r = parseAntwort(e.antwort)
       if (r.ok) {
         box.append(el('p', null, r.summary)); if (r.intro) box.append(el('p', 'line-hilfe', r.intro))
-        const ul = el('ul', 'checkliste'); for (const s of r.schritte) { const li = el('li'); const cb = el('input'); cb.type = 'checkbox'; li.append(cb, ' ', el('span', null, s.replace(/\*\*/g, ''))); ul.append(li) } box.append(ul)
+        const ul = el('ul', 'checkliste'); for (const s of r.schritte) { const li = el('li'); const lab = el('label'); const cb = el('input'); cb.type = 'checkbox'; lab.append(cb, ' ', el('span', null, s.replace(/\*\*/g, ''))); li.append(lab); ul.append(li) } box.append(ul)
       } else box.append(el('p', 'warn-box', e.antwort))
       const det = el('details'); det.append(zwei(el('summary'), L.quellen, ctx))
       for (const q of e.quellen || []) det.append(el('pre', 'code-block', (q.abschnitt ? q.abschnitt + '\n' : '') + q.text)); box.append(det)

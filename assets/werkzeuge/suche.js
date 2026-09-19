@@ -36,7 +36,7 @@ export function baue (wrap, p, ctx) {
   let fragen = [], chunks = [], aktuell = null, live = false
   const text = (id) => chunks.find(c => c.id === id).text
   const liste = (titel, eintraege, hervor = new Set(), leer = null) => {
-    const box = el('div', 'stufe'); box.append(zwei(el('h4'), titel, ctx)); const ol = el('ol')
+    const box = el('div', 'stufe'); box.append(zwei(el('h3'), titel, ctx)); const ol = el('ol')
     for (const e of eintraege) {
       const c = chunks.find(x => x.id === e.id); const li = el('li'); if (hervor.has(e.id)) li.className = 'im-kontext'
       li.append(el('span', 'score', e.score == null ? '' : fmt(e.score, 4, ctx.lang())))
@@ -59,9 +59,9 @@ export function baue (wrap, p, ctx) {
       el('p', 'line-hilfe', `${txt(L.codes, lang)}: ${codes.length ? codes.join(', ') : txt(L.keine, lang)}`),
       liste(L.s2, hybrid), liste(L.s3, rerank.slice(0, 5), im))
     if (aktuell.ohneRerank) stufen.append(zwei(el('p', 'warn-box'), L.keinRerank, ctx))
-    const s4 = liste(L.s4, kontext, im, L.leer); s4.querySelector('h4').append(el('span', 'line-hilfe', ` · ${txt(L.boden, lang)} = max(${fmt(+rs.value, 3, lang)}; ${fmt(+rv.value, 2, lang)} × ${fmt(best, 4, lang)}) = ${fmt(boden, 4, lang)}`)); stufen.append(s4)
+    const s4 = liste(L.s4, kontext, im, L.leer); s4.querySelector('h3').append(el('span', 'line-hilfe', ` · ${txt(L.boden, lang)} = max(${fmt(+rs.value, 3, lang)}; ${fmt(+rv.value, 2, lang)} × ${fmt(best, 4, lang)}) = ${fmt(boden, 4, lang)}`)); stufen.append(s4)
     const ohneCode = codes.length && kontext.length && kontext[0].score >= +rs.value && !gedeckt
-    const g = el('div', gedeckt ? 'challenge-box' : 'warn-box'); g.append(zwei(el('h4'), L.s5, ctx), zwei(el('p'), gedeckt ? L.ja : (ohneCode ? L.neinCode : L.nein), ctx)); stufen.append(g)
+    const g = el('div', gedeckt ? 'challenge-box' : 'warn-box'); g.append(zwei(el('h3'), L.s5, ctx), zwei(el('p'), gedeckt ? L.ja : (ohneCode ? L.neinCode : L.nein), ctx)); stufen.append(g)
   }
   rs.addEventListener('input', zeige); rv.addEventListener('input', zeige); document.addEventListener('rag:sprache', zeige)
   const katalog = () => {

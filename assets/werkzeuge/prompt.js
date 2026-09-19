@@ -15,7 +15,7 @@ export function baue (wrap, p, ctx) {
   const k = kopf(wrap, L.titel, ctx); const sel = el('select'); zwei(sel, L.frage, ctx, 'aria-label')
   const sys = el('pre', 'code-block'); const usr = el('pre', 'code-block'); const balken = el('div', 'balken'); const bi = el('i'); balken.append(bi)
   const bm = el('p', 'line-hilfe'); const roh = el('pre', 'code-block'); const gep = el('div')
-  wrap.append(sel, zwei(el('h4'), L.system, ctx), sys, zwei(el('h4'), L.nutzer, ctx), usr, zwei(el('h4'), L.budget, ctx), balken, bm, zwei(el('h4'), L.antwort, ctx), roh, zwei(el('h4'), L.geparst, ctx), gep)
+  wrap.append(sel, zwei(el('h3'), L.system, ctx), sys, zwei(el('h3'), L.nutzer, ctx), usr, zwei(el('h3'), L.budget, ctx), balken, bm, zwei(el('h3'), L.antwort, ctx), roh, zwei(el('h3'), L.geparst, ctx), gep)
   let d
   const zeige = () => {
     const e = d.eintraege.find(x => x.id === sel.value); if (!e || !e.messages) return
@@ -28,7 +28,7 @@ export function baue (wrap, p, ctx) {
     const r = parseAntwort(e.antwort); gep.replaceChildren()
     if (r.ok) {
       gep.append(el('p', null, r.summary)); if (r.intro) gep.append(el('p', 'line-hilfe', r.intro))
-      const ul = el('ul', 'checkliste'); for (const s of r.schritte) { const li = el('li'); const cb = el('input'); cb.type = 'checkbox'; li.append(cb, ' ', s.replace(/\*\*/g, '')); ul.append(li) } gep.append(ul)
+      const ul = el('ul', 'checkliste'); for (const s of r.schritte) { const li = el('li'); const lab = el('label'); const cb = el('input'); cb.type = 'checkbox'; lab.append(cb, ' ', s.replace(/\*\*/g, '')); li.append(lab); ul.append(li) } gep.append(ul)
     } else gep.append(el('p', 'warn-box', txt(L.keinFormat, lang)))
   }
   ctx.daten('antworten.json').then(x => {

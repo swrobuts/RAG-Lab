@@ -74,8 +74,8 @@ export function baue (wrap, p, ctx) {
       const dauer = ((performance.now() - t0) / 1000).toFixed(1)
       meld.textContent = `${txt(L.fertig, lang)} · ${dauer} ${txt(L.dauer, lang)}${tErstes != null ? ` · ${txt(L.erstesToken, lang)} ${(tErstes / 1000).toFixed(1)} s` : ''}${usage ? ` · ${txt(L.tokens, lang)} ${ganz(usage.prompt_tokens, lang)}/${ganz(usage.completion_tokens, lang)}` : ''}${finish === 'length' ? ' · ' + txt(L.laenge, lang) : ''}`
       if (cb.checked) {
-        const pr = parseAntwort(text); gep.append(zwei(el('h4'), L.geparst, ctx))
-        if (pr.ok) { gep.append(el('p', null, pr.summary)); if (pr.intro) gep.append(el('p', 'line-hilfe', pr.intro)); const ul = el('ul', 'checkliste'); for (const s of pr.schritte) { const li = el('li'); const c = el('input'); c.type = 'checkbox'; li.append(c, ' ', s.replace(/\*\*/g, '')); ul.append(li) } gep.append(ul) }
+        const pr = parseAntwort(text); gep.append(zwei(el('h3'), L.geparst, ctx))
+        if (pr.ok) { gep.append(el('p', null, pr.summary)); if (pr.intro) gep.append(el('p', 'line-hilfe', pr.intro)); const ul = el('ul', 'checkliste'); for (const s of pr.schritte) { const li = el('li'); const lab = el('label'); const c = el('input'); c.type = 'checkbox'; lab.append(c, ' ', s.replace(/\*\*/g, '')); li.append(lab); ul.append(li) } gep.append(ul) }
         else gep.append(zwei(el('p', 'warn-box'), L.keinFormat, ctx))
       }
     } catch { meld.textContent = txt(L.keinServer, lang) } finally { bs.disabled = false }
