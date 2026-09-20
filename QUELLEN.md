@@ -75,7 +75,7 @@ Alle Quellen der zehn Labs, je Lab in der Reihenfolge der Seite. Abrufdatum der 
 - Manning, C. D., Raghavan, P., Schütze, H. (2008): Introduction to Information Retrieval, Kapitel 8 (Evaluation). Cambridge University Press. [nlp.stanford.edu/IR-book](https://nlp.stanford.edu/IR-book/)
 - Es, S., James, J., Espinosa-Anke, L., Schockaert, S. (2023): Ragas: Automated Evaluation of Retrieval Augmented Generation. [arXiv:2309.15217](https://arxiv.org/abs/2309.15217)
 - Saad-Falcon, J. et al. (2023): ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems. [arXiv:2311.09476](https://arxiv.org/abs/2311.09476)
-- Fallbeispiel: `eval/questions.json`, `eval/run_eval.py`, `docs/evaluation/vector.json`, `hybrid-no-rerank.json`, `hybrid-rerank.json`, `negative-checks.json`, `docs/AUDIT.md` (Reale Retrieval-Messung, Gegenbeispiele, Verbleibende Grenzen), `docs/evaluation/LIVE.md` (Hauptstadt-Frage), Stand 19.09.2026; Nachrechnung in `data/fragen.json` und `tools/pruefung.test.mjs`.
+- Fallbeispiel: `eval/questions.json`, `eval/run_eval.py`, `docs/evaluation/vector.json`, `hybrid-no-rerank.json`, `hybrid-rerank.json`, `negative-checks.json`, `pageindex-baseline.json`, `pageindex.json` (PageIndex vor und nach dem Umbau vom 20.09.2026, `eval/run_eval_pageindex.py`, `build_pageindex_summaries.py`), `docs/AUDIT.md` (Reale Retrieval-Messung, Gegenbeispiele, Verbleibende Grenzen), `docs/evaluation/LIVE.md` (Hauptstadt-Frage), Stand 20.09.2026; Nachrechnung in `data/fragen.json` und `tools/pruefung.test.mjs`.
 
 ## Lab 09 · Architektur, Betrieb, Sicherheit
 
@@ -85,7 +85,7 @@ Alle Quellen der zehn Labs, je Lab in der Reihenfolge der Seite. Abrufdatum der 
 - Python Software Foundation: hashlib – Secure hashes and message digests. [docs.python.org/3/library/hashlib.html](https://docs.python.org/3/library/hashlib.html); filelock – platform-independent file locking. [py-filelock.readthedocs.io](https://py-filelock.readthedocs.io/en/latest/) (19.09.2026)
 - LM Studio: System Requirements. [lmstudio.ai/docs/app/system-requirements](https://lmstudio.ai/docs/app/system-requirements) (19.09.2026)
 - OpenAI: API Pricing, gpt-4.1-mini Standard (0,40 / 1,60 USD je 1 Mio. Tokens). [openai.com/api/pricing](https://openai.com/api/pricing/) (abgerufen 19.09.2026; Preise ändern sich, Datum beachten)
-- Fallbeispiel: `server.py` (create_app, before_request, after_request, validate, SSE), `session_keys.py`, `rag_engine.py` (compute_cache_key, build_or_load_index), `storage/.cache_key`, `docs/TECHNICAL.md` (Architektur, Routen, Konfiguration, Schutz des API-Schlüssels, Grenzen), `docs/evaluation/LIVE.md` (Tokenzahlen) und `MAC-LIVE.md` (Cache-Fehler, Laufzeiten), Stand 19.09.2026; Nachrechnung in `data/betrieb.json` über `tools/betrieb.py`.
+- Fallbeispiel: `server.py` (create_app, before_request, after_request, validate, SSE), `session_keys.py`, `rag_engine.py` (compute_cache_key, build_or_load_index), `storage/.cache_key`, `docs/TECHNICAL.md` (Architektur, Routen, Konfiguration, Schutz des API-Schlüssels, Grenzen), `docs/evaluation/LIVE.md` (Tokenzahlen), `MAC-LIVE.md` (Cache-Fehler, Laufzeiten) und `pageindex.json` (PageIndex-Kosten), `pageindex_engine.py`, Stand 20.09.2026; Nachrechnung in `data/betrieb.json` über `tools/betrieb.py`.
 
 ## Lab 10 · Nachbauen
 
@@ -94,7 +94,7 @@ Alle Quellen der zehn Labs, je Lab in der Reihenfolge der Seite. Abrufdatum der 
 - LM Studio Docs: Download an LLM; OpenAI Compatibility API; lms server start (Flag --cors); System Requirements. [lmstudio.ai/docs](https://lmstudio.ai/docs/app/basics/download-model), […/openai-compat](https://lmstudio.ai/docs/developer/openai-compat), […/cli/server-start](https://lmstudio.ai/docs/cli/server-start) (19.09.2026)
 - Hugging Face: Manage huggingface_hub cache-system (HF_HOME, HF_HUB_CACHE, Snapshot-Symlinks). [huggingface.co/docs/huggingface_hub/guides/manage-cache](https://huggingface.co/docs/huggingface_hub/guides/manage-cache) (19.09.2026)
 - Git: git-clone Documentation. [git-scm.com/docs/git-clone](https://git-scm.com/docs/git-clone); Microsoft: about_Execution_Policies (PowerShell). [learn.microsoft.com](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies) (19.09.2026)
-- Fallbeispiel: `README.md` (Start, Lokales Modell auf dem Mac, Prüfung und Weiterentwicklung), `requirements.txt`, `profiles/local/.env.example`, `docs/2026-07-07-optimization-design.md` (Umsetzungsstand mit Messwerten), `docs/evaluation/MAC-LIVE.md` und `docs/AUDIT.md` (Fehlerbilder), `git log` (33 Commits), Stand 19.09.2026; Hashes und Phasenwerte in `data/betrieb.json`.
+- Fallbeispiel: `README.md` (Start, Lokales Modell auf dem Mac, Prüfung und Weiterentwicklung), `requirements.txt`, `profiles/local/.env.example`, `docs/2026-07-07-optimization-design.md` (Umsetzungsstand mit Messwerten), `docs/evaluation/MAC-LIVE.md` und `docs/AUDIT.md` (Fehlerbilder), `git log` (35 Commits), Stand 20.09.2026; Hashes und Phasenwerte in `data/betrieb.json`.
 
 ## Bibliotheken und Modelle
 

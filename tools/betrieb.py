@@ -2,7 +2,7 @@
 Groesse des Vektorspeichers, Schutzmassnahmen aus server.py, Tokenzahlen des Live-Protokolls.
 Liest nur; importiert compute_cache_key aus dem Fallbeispiel (lazy Imports dort, kein torch noetig)."""
 from __future__ import annotations
-import hashlib, json, re
+import datetime, hashlib, json, re
 from fall import FALL, pruefe_fall, schreibe
 
 pruefe_fall()
@@ -41,6 +41,12 @@ mac = (FALL / "docs/evaluation/MAC-LIVE.md").read_text(encoding="utf-8")
 laufzeit = re.search(r"E:23\?“: Antwort .*?Laufzeit etwa ([\d,]+) s", mac, re.S)
 ablehnung = re.search(r"E:999\?“: ausdrückliche Ablehnung .*?etwa ([\d,]+) s", mac, re.S)
 
+baum = json.loads((FALL / "pageindex_tree.json").read_text(encoding="utf-8"))
+pi_src = (FALL / "pageindex_engine.py").read_text(encoding="utf-8")
+pi_default = lambda name: int(re.search(rf'os\.getenv\("{name}", "(\d+)"\)', pi_src).group(1))
+pageindex = {"knoten": len(baum["structure"]), "batch": pi_default("PAGEINDEX_BATCH"), "maxNodes": pi_default("PAGEINDEX_MAX_NODES"),
+             "summaryZeichen": pi_default("PAGEINDEX_SUMMARY_CHARS"), "summaryModell": baum.get("summary_model"),
+             "summaryDatum": baum.get("summary_generated"), "quelle": "pageindex_tree.json, pageindex_engine.py"}
 design = (FALL / "docs/2026-07-07-optimization-design.md").read_text(encoding="utf-8")
 ph = re.search(r"Recall (\d+) %→(\d+) %, MRR ([\d.]+)→([\d.]+),\s+hit@1 (\d+) %→(\d+) %", design)
 import subprocess
@@ -52,7 +58,7 @@ schreibe("betrieb.json", {
                "mrrNach": float(ph.group(4)), "hit1Vor": int(ph.group(5)), "hit1Nach": int(ph.group(6)),
                "quelle": "docs/2026-07-07-optimization-design.md, Umsetzungsstand"},
     "commits": commits,
-    "datum": "2026-09-19",
+    "datum": datetime.date.today().isoformat(),
     "fingerprint": {
         "gespeichert": gespeichert, "nachgerechnet": nachgerechnet, "gleich": gespeichert == nachgerechnet,
         "zutaten": {"markdown": md.name, "markdownBytes": md.stat().st_size, "embedModel": rag_engine.DEFAULT_EMBED_MODEL,
@@ -66,6 +72,7 @@ schreibe("betrieb.json", {
                 "port": 3001, "host": "127.0.0.1", "lmStudio": "http://127.0.0.1:1234/v1", "retrieveK": rag_engine.RETRIEVE_K, "finalK": rag_engine.FINAL_K},
     "header": header,
     "cookie": {"name": "rag_session", "httpOnly": True, "sameSite": "Strict", "inhalt": ["sid", "csrf"]},
+    "pageindex": pageindex,
     "liveTokens": tokens,
     # Recherchierte Preise (keine Messung): OpenAI-Preisliste, Standardstufe, abgerufen am 19.09.2026
     "preise": {"modell": "gpt-4.1-mini", "einUsdJeMio": 0.40, "ausUsdJeMio": 1.60, "stand": "2026-09-19",

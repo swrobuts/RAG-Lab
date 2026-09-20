@@ -22,7 +22,7 @@ schreibe("chunks.json", {"modell": "intfloat/multilingual-e5-small", "dimension"
 shutil.copy(FALL / "siemens_wissen.md", DATA / "handbuch.md")
 shutil.copy(FALL / ".audit/reparsed-page33.md", DATA / "seite-33.md")
 (DATA / "eval").mkdir(exist_ok=True)
-for name in ("vector.json", "hybrid-no-rerank.json", "hybrid-rerank.json", "negative-checks.json"):
+for name in ("vector.json", "hybrid-no-rerank.json", "hybrid-rerank.json", "negative-checks.json", "pageindex-baseline.json", "pageindex.json"):
     shutil.copy(FALL / "docs/evaluation" / name, DATA / "eval" / name)
 shutil.copy(FALL / "eval/questions.json", DATA / "eval/questions.json")
-print("Handbuch, Seite 33, fünf Protokolle kopiert.")
+print("Handbuch, Seite 33, sieben Protokolle kopiert.")

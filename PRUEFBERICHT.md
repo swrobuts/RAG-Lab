@@ -93,3 +93,19 @@ Geändert:
 
 Keine weiteren Rahmensätze, Bildbeschreibungen, Wichtigkeitsbehauptungen oder Metaphern;
 die 20 Übungszahlen („Fünf/Sechs Übungen“) stimmen mit den Übungsdateien überein.
+
+## Nachtrag PageIndex (20.09.2026)
+
+Das Fallbeispiel hat am 20.09.2026 den PageIndex-Modus umgebaut (Commit `faa573f`:
+Fehlercode-Vorfilter, deutsche Stichwort-Kurzfassungen) und erstmals gemessen. Aufgenommen:
+
+- `data/eval/pageindex-baseline.json` und `pageindex.json` (kopiert), `data/betrieb.json`
+  neu erzeugt (35 Commits, Block `pageindex` mit Knotenzahl und Voreinstellungen).
+- Lab 08: neuer Abschnitt „Ohne Vektoren: PageIndex“ mit Tabelle vorher/nachher
+  (Hit@5, Hit@1, MRR, Abdeckung, Tokens und Aufrufe je Frage) und Einordnung der Kosten;
+  Lab 09: Architekturzeile PageIndex mit Tokens, Aufrufen und Sekunden; Lab 10:
+  Historie 35 Commits bis `faa573f`, Git-Graph mit elftem Commit (SVG neu erzeugt).
+- `tools/verify.mjs`: 25 neue Werte (`eval.pageindex.*`, `eval.pageindexAlt.*`,
+  `pageindex.*`) und zwei Strukturprüfungen der Protokolle; `npm run verify`
+  1036 Prüfungen ohne Befund, `tools/pruefung/texte.mjs` unverändert 8 Mustertreffer
+  (alle Bestand, keine im neuen Text), `npm test` grün.

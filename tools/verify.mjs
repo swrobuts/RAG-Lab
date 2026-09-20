@@ -53,13 +53,18 @@ const tk = daten('tokens.json')
 meld(!!tk && tk.beispiele.e18 && tk.zaehlungen.systemprompt > 0 && tk.zaehlungen.maxChunkTokens <= 440 && tk.vokabular > 0, 'tokens.json: Beispiele und Zählungen')
 const co = daten('chunks-ohne-praefix.json')
 meld(!!co && co.chunks.length === 346 && co.chunks.every(c => c.v.length === 384), 'chunks-ohne-praefix.json: 346 × 384')
-for (const n of ['handbuch.md', 'seite-33.md', 'eval/vector.json', 'eval/hybrid-no-rerank.json', 'eval/hybrid-rerank.json', 'eval/negative-checks.json', 'eval/questions.json']) meld(existsSync(join(ROOT, 'data', n)), `data/${n} vorhanden`)
+for (const n of ['handbuch.md', 'seite-33.md', 'eval/vector.json', 'eval/hybrid-no-rerank.json', 'eval/hybrid-rerank.json', 'eval/negative-checks.json', 'eval/questions.json', 'eval/pageindex-baseline.json', 'eval/pageindex.json']) meld(existsSync(join(ROOT, 'data', n)), `data/${n} vorhanden`)
 meld(existsSync(join(ROOT, 'assets/seite-33.png')), 'assets/seite-33.png vorhanden')
 
 /* --------------------------------------------------------- Zahlen im Text */
 // Jede Zahl aus dem Fallbeispiel steht im HTML als <span data-wert="schluessel">…</span>.
 // Hier steht, woher der Wert kommt; die Pruefung akzeptiert deutsche und englische Schreibweise.
 const um = daten('umgebung.json'); const ev = (n) => daten('eval/' + n); const bt = daten('betrieb.json')
+const pi = ev('pageindex.json'); const piAlt = ev('pageindex-baseline.json')
+meld(!!pi && !!piAlt && pi.results.length === 10 && piAlt.results.length === 10 && pi.mode === 'pageindex', 'pageindex.json und pageindex-baseline.json: je zehn Fragen')
+meld(!!pi && pi.results.filter(r => r.llm_calls === 0).length === 2 && pi.results.filter(r => r.llm_calls === 0).every(r => r.id.startsWith('fehler-')), 'pageindex.json: die zwei Fehlercode-Fragen ohne Auswahlaufruf')
+const piFrei = (d) => d.results.filter(r => r.llm_calls > 0)
+const mittel = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length
 meld(!!bt && bt.fingerprint.gleich && bt.liveTokens.length === 4, 'betrieb.json: Fingerprint nachgerechnet, vier Live-Tokenzeilen')
 const live = (frage) => (bt && bt.liveTokens.find(t => t.frage === frage)) || {}
 const kosten = () => { const e = live('Fehler E:18'); const p = bt.preise; const a = bt.annahmen; const je = (e.ein * p.einUsdJeMio + e.aus * p.ausUsdJeMio) / 1e6; return { je, monat: a.anfragenJeTag * a.tage * je, lokal: a.rechnerUsd / a.monate + a.stromUsdJeMonat } }
@@ -105,6 +110,31 @@ const WERTE = {
   'eval.rerank.hit1': () => ev('hybrid-rerank.json').keyword_hit_at_1 * 100,
   'eval.rerank.mrr': () => ev('hybrid-rerank.json').keyword_mrr,
   'eval.rerank.abdeckung': () => ev('hybrid-rerank.json').keyword_coverage * 100,
+  'eval.pageindexAlt.hit5': () => piAlt.keyword_hit_rate * 100,
+  'eval.pageindexAlt.hit1': () => piAlt.keyword_hit_at_1 * 100,
+  'eval.pageindexAlt.mrr': () => piAlt.keyword_mrr,
+  'eval.pageindexAlt.abdeckung': () => piAlt.keyword_coverage * 100,
+  'eval.pageindexAlt.nichtVorn': () => piAlt.results.filter(r => r.reciprocal_rank < 1).length,
+  'eval.pageindexAlt.aufrufe': () => Math.round(mittel(piAlt.results.map(r => r.llm_calls))),
+  'eval.pageindexAlt.tokens': () => Math.round(mittel(piAlt.results.map(r => r.prompt_chars / 4)) / 100) * 100,
+  'eval.pageindex.hit5': () => pi.keyword_hit_rate * 100,
+  'eval.pageindex.hit1': () => pi.keyword_hit_at_1 * 100,
+  'eval.pageindex.mrr': () => pi.keyword_mrr,
+  'eval.pageindex.abdeckung': () => pi.keyword_coverage * 100,
+  'eval.pageindex.nichtVorn': () => pi.results.filter(r => r.reciprocal_rank < 1).length,
+  'eval.pageindex.freiAnzahl': () => piFrei(pi).length,
+  'eval.pageindex.codeAnzahl': () => pi.results.length - piFrei(pi).length,
+  'eval.pageindex.codeAufrufe': () => pi.results.find(r => r.id === 'fehler-e18').llm_calls,
+  'eval.pageindex.aufrufeFrei': () => Math.round(mittel(piFrei(pi).map(r => r.llm_calls))),
+  'eval.pageindex.sekundenFrei': () => mittel(piFrei(pi).map(r => r.seconds)),
+  'eval.pageindex.tokensFrei': () => Math.round(mittel(piFrei(pi).map(r => r.prompt_chars / 4)) / 100) * 100,
+  'eval.pageindex.tokensJeSekunde': () => Math.round(mittel(piFrei(pi).map(r => r.prompt_chars / 4)) / mittel(piFrei(pi).map(r => r.seconds)) / 10) * 10,
+  'eval.pageindex.modell': () => pi.model,
+  'pageindex.knoten': () => bt.pageindex.knoten,
+  'pageindex.batch': () => bt.pageindex.batch,
+  'pageindex.maxNodes': () => bt.pageindex.maxNodes,
+  'pageindex.summaryZeichen': () => bt.pageindex.summaryZeichen,
+  'pageindex.summaryModell': () => bt.pageindex.summaryModell,
   'fragen.e18.rerankScore': () => frage('fehler-e18').obersterScore,
   'fragen.e18.rangVektor': () => rang(frage('fehler-e18'), 'vektor', e18Chunk.id),
   'fragen.e18.rangHybrid': () => rang(frage('fehler-e18'), 'hybrid', e18Chunk.id),
