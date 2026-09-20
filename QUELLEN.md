@@ -94,7 +94,7 @@ Alle Quellen der zehn Labs, je Lab in der Reihenfolge der Seite. Abrufdatum der 
 - LM Studio Docs: Download an LLM; OpenAI Compatibility API; lms server start (Flag --cors); System Requirements. [lmstudio.ai/docs](https://lmstudio.ai/docs/app/basics/download-model), […/openai-compat](https://lmstudio.ai/docs/developer/openai-compat), […/cli/server-start](https://lmstudio.ai/docs/cli/server-start) (19.09.2026)
 - Hugging Face: Manage huggingface_hub cache-system (HF_HOME, HF_HUB_CACHE, Snapshot-Symlinks). [huggingface.co/docs/huggingface_hub/guides/manage-cache](https://huggingface.co/docs/huggingface_hub/guides/manage-cache) (19.09.2026)
 - Git: git-clone Documentation. [git-scm.com/docs/git-clone](https://git-scm.com/docs/git-clone); Microsoft: about_Execution_Policies (PowerShell). [learn.microsoft.com](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies) (19.09.2026)
-- Fallbeispiel: `README.md` (Start, Lokales Modell auf dem Mac, Prüfung und Weiterentwicklung), `requirements.txt`, `profiles/local/.env.example`, `docs/2026-07-07-optimization-design.md` (Umsetzungsstand mit Messwerten), `docs/evaluation/MAC-LIVE.md` und `docs/AUDIT.md` (Fehlerbilder), `git log` (35 Commits), Stand 20.09.2026; Hashes und Phasenwerte in `data/betrieb.json`.
+- Fallbeispiel: `README.md` (Start, Lokales Modell auf dem Mac, Prüfung und Weiterentwicklung), `requirements.txt`, `profiles/local/.env.example`, `docs/2026-07-07-optimization-design.md` (Umsetzungsstand mit Messwerten), `docs/evaluation/MAC-LIVE.md` und `docs/AUDIT.md` (Fehlerbilder), `git log` (37 Commits), Stand 20.09.2026; Hashes und Phasenwerte in `data/betrieb.json`.
 
 ## Bibliotheken und Modelle
 

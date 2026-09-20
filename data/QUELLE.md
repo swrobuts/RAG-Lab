@@ -2,7 +2,7 @@
 
 Alle Dateien in diesem Ordner wurden mit den Skripten unter `tools/` aus dem Fallbeispiel
 [SiemensWashingMachineTroubleShooting_LocalLLM](https://github.com/swrobuts/SiemensWashingMachineTroubleShooting_LocalLLM)
-erzeugt oder daraus kopiert (Stand 19.09.2026, Commit `375ae9b`; `betrieb.json` und die PageIndex-Protokolle unter `eval/` vom 20.09.2026, Commit `faa573f`).
+erzeugt oder daraus kopiert (Stand 19.09.2026, Commit `375ae9b`; `betrieb.json` und die PageIndex-Protokolle unter `eval/` vom 20.09.2026, Commit `67834f2`; Code-Stand der Labs `faa573f`).
 
 | Datei | Herkunft | Skript |
 |---|---|---|

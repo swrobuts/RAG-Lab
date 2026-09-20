@@ -183,6 +183,7 @@ const WERTE = {
   'commits.anzahl': () => bt.commits.length,
   'commits.erster': () => bt.commits.at(-1).hash,
   'commits.letzter': () => bt.commits[0].hash,
+  'commits.pageindex': () => bt.commits.find(c => c.titel.startsWith('PageIndex:')).hash,
   'kosten.preisEin': () => bt.preise.einUsdJeMio,
   'kosten.preisAus': () => bt.preise.ausUsdJeMio,
   'kosten.jeAnfrageCent': () => kosten().je * 100,
